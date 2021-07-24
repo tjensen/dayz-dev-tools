@@ -1,10 +1,7 @@
 import dataclasses
 import typing
 
-
-class ContentReader(typing.Protocol):
-    def read(self, count: int) -> bytes:
-        ...
+from dayz import pbo_file_reader
 
 
 @dataclasses.dataclass
@@ -15,7 +12,7 @@ class PBOFile():
     reserved: int
     time_stamp: int
     data_size: int
-    content_reader: ContentReader
+    content_reader: pbo_file_reader.PBOFileReader
 
     def unpack(self, output_file: typing.BinaryIO) -> None:
         output_file.write(self.content_reader.read(self.data_size))

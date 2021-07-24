@@ -3,12 +3,13 @@ import unittest
 from unittest import mock
 
 from dayz import pbo_file
+from dayz import pbo_file_reader
 
 
 class TestPBOFile(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
-        self.mock_content_reader = mock.Mock()
+        self.mock_content_reader = mock.Mock(spec=pbo_file_reader.PBOFileReader)
         self.pbofile = pbo_file.PBOFile(
             b"FILENAME", b"ABCD", 12345, 0x11223344, 0x44332211, 4321, self.mock_content_reader)
 
