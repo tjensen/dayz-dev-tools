@@ -1,3 +1,4 @@
+import struct
 import typing
 
 
@@ -32,3 +33,15 @@ class PBOFileReader():
             result += byte
 
         return result
+
+    def readuint(self) -> int:
+        return typing.cast(int, struct.unpack("I", self.read(4))[0])
+
+    def tell(self) -> int:
+        return self.pos
+
+    def seek(self, offset: int) -> None:
+        self.pos = min(offset, self.size)
+
+    def subreader(self, offset: int, size: int) -> "PBOFileReader":
+        return PBOFileReader(self.content_file, self.offset + offset, min(size, self.size - offset))
