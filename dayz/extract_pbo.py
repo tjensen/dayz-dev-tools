@@ -10,7 +10,7 @@ from dayz import pbo_reader
 INVALID_FILENAME_RE = re.compile(b"[\t?*\x80-\xff]")
 
 OBFUSCATE_RE = re.compile(
-    b'^(?:(?://\\*\\*\\*|/\\*\r\n#pragma "[^"]+"\r\n\\*/)\r\n)?#include "([^"]+)"\r\n$')
+    b'^(?:(?://[^\\r\\n]*|/\\*(?:\\*(?!\\/)|[^*])*\\*/)\\r\\n)?#include "([^"]+)"\\r\\n$')
 
 
 def _invalid_filename(filename: bytes) -> bool:
