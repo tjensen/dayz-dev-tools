@@ -9,7 +9,7 @@ def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.Dict[bytes, b
     headers: typing.Dict[bytes, bytes] = {}
     if len(reader.readz()) == 0:
         # Skip the "Vers" property entry
-        reader.seek(reader.tell() + 24)
+        reader.seek(reader.tell() + 20)
 
         while True:
             key = reader.readz()
@@ -63,7 +63,7 @@ class PBOReader():
     def files(self) -> typing.List[pbo_file.PBOFile]:
         return self._files
 
-    def file(self, filename: bytes) -> typing.Optional[pbo_file.PBOFile]:
+    def file(self, filename: str) -> typing.Optional[pbo_file.PBOFile]:
         for f in self._files:
             if filename == f.normalized_filename():
                 return f

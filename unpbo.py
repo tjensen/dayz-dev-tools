@@ -35,6 +35,11 @@ def extract_pbo(reader: pbo_reader.PBOReader, files_to_extract: typing.List[byte
 
 def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
     if verbose:
+        print("Headers:")
+        print("--------")
+        for key, value in reader.headers().items():
+            print(f"{key.decode(errors='replace')} = {value.decode(errors='replace')}")
+        print()
         print(" Original  Type    Size        Date    Time   Name")
         print("---------  ----  ---------  ---------- -----  ----")
     else:

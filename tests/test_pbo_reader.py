@@ -45,7 +45,7 @@ class TestPBOReader(unittest.TestCase):
 
     def test_files_returns_list_of_files_when_pbo_has_headers(self) -> None:
         pbo_file = io.BytesIO(
-            b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+            b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"foo\0bar\0"
             b"fizz\0buzz\0"
             b"\0"
@@ -73,16 +73,12 @@ class TestPBOReader(unittest.TestCase):
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
 
-        matching_file = reader.file(b"unmatched")
+        matching_file = reader.file("unmatched")
 
         assert matching_file is None
 
     def test_file_returns_file_with_matching_filename(self) -> None:
         pbo_file = io.BytesIO(
-            b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
-            b"foo\0bar\0"
-            b"fizz\0buzz\0"
-            b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
             b"\0"
@@ -90,7 +86,7 @@ class TestPBOReader(unittest.TestCase):
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
 
-        matching_file = reader.file(b"f1")
+        matching_file = reader.file("f1")
 
         assert matching_file == reader.files()[0]
 
@@ -112,7 +108,7 @@ class TestPBOReader(unittest.TestCase):
 
     def test_headers_returns_dict_of_headers_when_pbo_has_headers(self) -> None:
         pbo_file = io.BytesIO(
-            b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+            b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"foo\0bar\0"
             b"fizz\0buzz\0"
             b"\0"
