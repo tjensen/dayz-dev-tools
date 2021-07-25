@@ -115,3 +115,15 @@ class TestMain(unittest.TestCase):
         self.mock_list_pbo.assert_called_once_with(self.mock_pboreader, verbose=True)
 
         self.mock_extract_pbo.assert_not_called()
+
+    def test_prints_uncaught_exceptions(self) -> None:
+        self.mock_extract_pbo.side_effect = Exception("error message")
+
+        mock_open = mock.mock_open()
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            unpbo.main([
+                "ignored",
+                "INPUT.pbo"
+            ])
+
+        mock_print.assert_called_once_with("ERROR: error message")
