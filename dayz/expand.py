@@ -1,5 +1,6 @@
 import math
 import struct
+import typing
 
 from dayz import pbo_file_reader
 
@@ -12,12 +13,9 @@ def _nolog(msg: str) -> None:
     pass
 
 
-def expand(reader: pbo_file_reader.PBOFileReader, *, _debug: bool = False) -> bytes:
-    if _debug:
-        debug = _log
-    else:
-        debug = _nolog
-
+def expand(
+    reader: pbo_file_reader.PBOFileReader, *, debug: typing.Callable[[str], None] = _nolog
+) -> bytes:
     result = b""
 
     while not reader.eof():
