@@ -90,12 +90,12 @@ class TestPBOReader(unittest.TestCase):
 
         assert matching_file == reader.files()[0]
 
-    def test_headers_returns_empty_dict_when_pbo_is_empty(self) -> None:
+    def test_headers_returns_empty_list_when_pbo_is_empty(self) -> None:
         reader = pbo_reader.PBOReader(io.BytesIO())
 
-        assert reader.headers() == {}
+        assert reader.headers() == []
 
-    def test_headers_returns_empty_dict_when_pbo_does_not_have_headers(self) -> None:
+    def test_headers_returns_empty_list_when_pbo_does_not_have_headers(self) -> None:
         pbo_file = io.BytesIO(
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
@@ -104,13 +104,14 @@ class TestPBOReader(unittest.TestCase):
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
 
-        assert reader.headers() == {}
+        assert reader.headers() == []
 
-    def test_headers_returns_dict_of_headers_when_pbo_has_headers(self) -> None:
+    def test_headers_returns_list_of_headers_when_pbo_has_headers(self) -> None:
         pbo_file = io.BytesIO(
             b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"foo\0bar\0"
             b"fizz\0buzz\0"
+            b"foo\0repeated keys are not ignored or overwritten\0"
             b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
@@ -121,4 +122,8 @@ class TestPBOReader(unittest.TestCase):
 
         headers = reader.headers()
 
-        assert headers == {b"foo": b"bar", b"fizz": b"buzz"}
+        assert headers == [
+            (b"foo", b"bar"),
+            (b"fizz", b"buzz"),
+            (b"foo", b"repeated keys are not ignored or overwritten")
+        ]

@@ -59,12 +59,7 @@ class TestMain(unittest.TestCase):
             mock_open.return_value.__enter__.return_value)
 
         self.mock_extract_pbo.assert_called_once_with(
-            self.mock_pboreader,
-            [
-                b"file/to/extract/1",
-                b"file/to/extract/2",
-                b"file/to/extract/3"
-            ])
+            self.mock_pboreader, ["file/to/extract/1", "file/to/extract/2", "file/to/extract/3"])
 
         self.mock_list_pbo.assert_not_called()
 
@@ -162,14 +157,14 @@ class TestExtractPbo(unittest.TestCase):
             unpbo.extract_pbo(
                 self.mock_pboreader,
                 [
-                    os.path.join(b"filename.ext"),
-                    os.path.join(b"dir1", b"filename.ext")
+                    os.path.join("filename.ext"),
+                    os.path.join("dir1", "filename.ext")
                 ])
 
         assert self.mock_pboreader.file.call_count == 2
         self.mock_pboreader.file.assert_has_calls([
-            mock.call(os.path.join(b"filename.ext")),
-            mock.call(os.path.join(b"dir1", b"filename.ext"))
+            mock.call(os.path.join("filename.ext")),
+            mock.call(os.path.join("dir1", "filename.ext"))
         ])
 
         assert mock_makedirs.call_count == 1
@@ -194,8 +189,8 @@ class TestExtractPbo(unittest.TestCase):
             unpbo.extract_pbo(
                 self.mock_pboreader,
                 [
-                    os.path.join(b"filename.ext"),
-                    os.path.join(b"dir1", b"filename.ext")
+                    os.path.join("filename.ext"),
+                    os.path.join("dir1", "filename.ext")
                 ])
 
         self.mock_pboreader.file.assert_called_once()
@@ -224,11 +219,11 @@ class TestListPbo(unittest.TestCase):
             pbo_file.PBOFile(
                 b"other-filename.png", b"\x88\x99\xaa\xbb", 7777, 0, self.timestamps[4], 6000)
         ]
-        self.mock_pboreader.headers.return_value = {
-            b"foo": b"bar",
-            b"other": b"header stuff",
-            b"\x88\x99\xaa": b"\xbb\xcc\xdd"
-        }
+        self.mock_pboreader.headers.return_value = [
+            (b"foo", b"bar"),
+            (b"other", b"header stuff"),
+            (b"\x88\x99\xaa", b"\xbb\xcc\xdd")
+        ]
 
     def create_mock_file(
             self, filename: bytes, original_size: int, data_size: int) -> pbo_file.PBOFile:

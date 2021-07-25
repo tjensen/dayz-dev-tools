@@ -18,7 +18,7 @@ def _extract_file(pbofile: pbo_file.PBOFile) -> None:
         pbofile.unpack(out_file)
 
 
-def extract_pbo(reader: pbo_reader.PBOReader, files_to_extract: typing.List[bytes]) -> None:
+def extract_pbo(reader: pbo_reader.PBOReader, files_to_extract: typing.List[str]) -> None:
     if len(files_to_extract) == 0:
         for file in reader.files():
             _extract_file(file)
@@ -28,7 +28,7 @@ def extract_pbo(reader: pbo_reader.PBOReader, files_to_extract: typing.List[byte
             pbofile = reader.file(file_to_extract)
 
             if pbofile is None:
-                raise Exception(f"File not found: {file_to_extract.decode(errors='replace')}")
+                raise Exception(f"File not found: {file_to_extract}")
 
             _extract_file(pbofile)
 
@@ -37,7 +37,7 @@ def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
     if verbose:
         print("Headers:")
         print("--------")
-        for key, value in reader.headers().items():
+        for key, value in reader.headers():
             print(f"{key.decode(errors='replace')} = {value.decode(errors='replace')}")
         print()
         print(" Original  Type    Size        Date    Time   Name")
@@ -71,7 +71,7 @@ def main(argv: typing.List[str]) -> None:
         if args.list:
             list_pbo(reader, verbose=args.verbose)
         else:
-            extract_pbo(reader, [f.encode() for f in args.files])
+            extract_pbo(reader, args.files)
 
 
 if __name__ == "__main__":

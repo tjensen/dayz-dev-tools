@@ -5,8 +5,8 @@ from dayz import pbo_file
 from dayz import pbo_file_reader
 
 
-def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.Dict[bytes, bytes]:
-    headers: typing.Dict[bytes, bytes] = {}
+def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.List[typing.Tuple[bytes, bytes]]:
+    headers: typing.List[typing.Tuple[bytes, bytes]] = []
     if len(reader.readz()) == 0:
         # Skip the "Vers" property entry
         reader.seek(reader.tell() + 20)
@@ -17,7 +17,7 @@ def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.Dict[bytes, b
                 break
 
             value = reader.readz()
-            headers[key] = value
+            headers.append((key, value))
     else:
         reader.seek(0)
 
@@ -70,5 +70,5 @@ class PBOReader():
 
         return None
 
-    def headers(self) -> typing.Dict[bytes, bytes]:
+    def headers(self) -> typing.List[typing.Tuple[bytes, bytes]]:
         return self._headers
