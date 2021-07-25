@@ -1,3 +1,4 @@
+import datetime
 import os
 import typing
 import unittest
@@ -76,7 +77,21 @@ class TestMain(unittest.TestCase):
                 "INPUT.pbo"
             ])
 
-        self.mock_list_pbo.assert_called_once_with(self.mock_pboreader)
+        self.mock_list_pbo.assert_called_once_with(self.mock_pboreader, verbose=False)
+
+        self.mock_extract_pbo.assert_not_called()
+
+    def test_lists_the_pbo_with_verbose_output_when_option_is_specified(self) -> None:
+        mock_open = mock.mock_open()
+        with mock.patch("builtins.open", mock_open):
+            unpbo.main([
+                "ignored",
+                "-l",
+                "-v",
+                "INPUT.pbo"
+            ])
+
+        self.mock_list_pbo.assert_called_once_with(self.mock_pboreader, verbose=True)
 
         self.mock_extract_pbo.assert_not_called()
 
@@ -191,35 +206,85 @@ class TestExtractPbo(unittest.TestCase):
 class TestListPbo(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
+        self.timestamps = [
+            1626130666,
+            1519283521,
+            1603105281,
+            1592848278,
+            1617284725
+        ]
+
         self.mock_pboreader = mock.Mock()
         self.mock_pboreader.files.return_value = [
-            mock.Mock(filename=b"dir1\\dir2\\filename.ext"),
-            mock.Mock(filename=b"dir1\\filename.ext"),
-            mock.Mock(filename=b"dir1\\dir2\\dir3\\filename.ext"),
-            mock.Mock(filename=b"filename.ext"),
-            mock.Mock(filename=b"other-filename.png")
+            pbo_file.PBOFile(b"dir1\\dir2\\filename.ext", b"", 10000, 0, self.timestamps[0], 9000),
+            pbo_file.PBOFile(b"dir1\\filename.ext", b"ABCD", 234, 0, self.timestamps[1], 200),
+            pbo_file.PBOFile(
+                b"dir1\\dir2\\dir3\\filename.ext", b"1234", 54321, 0, self.timestamps[2], 50000),
+            pbo_file.PBOFile(b"filename.ext", b"\0\0\0\0", 0, 0, self.timestamps[3], 10),
+            pbo_file.PBOFile(
+                b"other-filename.png", b"\x88\x99\xaa\xbb", 7777, 0, self.timestamps[4], 6000)
         ]
+
+    def create_mock_file(
+            self, filename: bytes, original_size: int, data_size: int) -> pbo_file.PBOFile:
+        return pbo_file.PBOFile(filename, b"", original_size, 0, 0, data_size)
+
+    def expected_call(self, size: int, timestamp: int, filename: str) -> typing.Any:
+        date_time = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M")
+        return mock.call(f"{size:9}  {date_time}  {filename}")
+
+    def expected_verbose_call(
+            self, original: int, type: str, size: int, timestamp: int, filename: str) -> typing.Any:
+        date_time = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M")
+        return mock.call(f"{original:9}  {type}  {size:9}  {date_time}  {filename}")
 
     def test_prints_the_filenames_of_files_in_the_pbo(self) -> None:
         with mock.patch("builtins.print") as mock_print:
-            unpbo.list_pbo(self.mock_pboreader)
+            unpbo.list_pbo(self.mock_pboreader, verbose=False)
 
-        assert mock_print.call_count == 5
+        assert mock_print.call_count == 7
 
         mock_print.assert_has_calls([
-            mock.call("dir1\\dir2\\filename.ext"),
-            mock.call("dir1\\filename.ext"),
-            mock.call("dir1\\dir2\\dir3\\filename.ext"),
-            mock.call("filename.ext"),
-            mock.call("other-filename.png")
+            mock.call(" Original     Date    Time   Name"),
+            mock.call("---------  ---------- -----  ----"),
+            self.expected_call(
+                10000, self.timestamps[0], os.path.join("dir1", "dir2", "filename.ext")),
+            self.expected_call(234, self.timestamps[1], os.path.join("dir1", "filename.ext")),
+            self.expected_call(
+                54321, self.timestamps[2], os.path.join("dir1", "dir2", "dir3", "filename.ext")),
+            self.expected_call(10, self.timestamps[3], "filename.ext"),
+            self.expected_call(7777, self.timestamps[4], "other-filename.png")
         ])
 
     def test_replaces_unknown_characters_in_filenames(self) -> None:
         self.mock_pboreader.files.return_value = [
-            mock.Mock(filename=b"dir1\\dir2\\file\x88name.wss")
+            pbo_file.PBOFile(
+                b"dir1\\dir2\\file\x88name.wss", b"", 12345, 0, self.timestamps[0], 10000)
         ]
 
         with mock.patch("builtins.print") as mock_print:
-            unpbo.list_pbo(self.mock_pboreader)
+            unpbo.list_pbo(self.mock_pboreader, verbose=False)
 
-        mock_print.assert_called_once_with("dir1\\dir2\\file\ufffdname.wss")
+        assert mock_print.call_args_list[2] == self.expected_call(
+            12345, self.timestamps[0], os.path.join("dir1", "dir2", "file\ufffdname.wss"))
+
+    def test_prints_with_verbose_output(self) -> None:
+        with mock.patch("builtins.print") as mock_print:
+            unpbo.list_pbo(self.mock_pboreader, verbose=True)
+
+        assert mock_print.call_count == 7
+
+        mock_print.assert_has_calls([
+            mock.call(" Original  Type    Size        Date    Time   Name"),
+            mock.call("---------  ----  ---------  ---------- -----  ----"),
+            self.expected_verbose_call(
+                10000, "    ", 9000, self.timestamps[0],
+                os.path.join("dir1", "dir2", "filename.ext")),
+            self.expected_verbose_call(
+                234, "ABCD", 200, self.timestamps[1], os.path.join("dir1", "filename.ext")),
+            self.expected_verbose_call(
+                54321, "1234", 50000, self.timestamps[2],
+                os.path.join("dir1", "dir2", "dir3", "filename.ext")),
+            self.expected_verbose_call(10, "    ", 10, self.timestamps[3], "filename.ext"),
+            self.expected_verbose_call(7777, "    ", 6000, self.timestamps[4], "other-filename.png")
+        ])

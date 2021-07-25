@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import os
 import sys
 import typing
@@ -32,14 +33,29 @@ def extract_pbo(reader: pbo_reader.PBOReader, files_to_extract: typing.List[byte
             _extract_file(pbofile)
 
 
-def list_pbo(reader: pbo_reader.PBOReader) -> None:
+def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
+    if verbose:
+        print(" Original  Type    Size        Date    Time   Name")
+        print("---------  ----  ---------  ---------- -----  ----")
+    else:
+        print(" Original     Date    Time   Name")
+        print("---------  ---------- -----  ----")
+
     for file in reader.files():
-        print(file.filename.decode(errors="replace"))
+        timestamp = datetime.datetime.fromtimestamp(file.time_stamp).strftime("%Y-%m-%d %H:%M")
+
+        if verbose:
+            print(
+                f"{file.unpacked_size():9}  {file.type()}  {file.data_size:9}  {timestamp}"
+                f"  {file.normalized_filename()}")
+        else:
+            print(f"{file.unpacked_size():9}  {timestamp}  {file.normalized_filename()}")
 
 
 def main(argv: typing.List[str]) -> None:
     parser = argparse.ArgumentParser(description="View or extract a PBO file")
     parser.add_argument("-l", "--list", action="store_true", help="List contents of the PBO")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("pbofile", help="The PBO file to read")
     parser.add_argument("files", nargs="*", help="Files to extract from the PBO")
     args = parser.parse_args(argv[1:])
@@ -48,7 +64,7 @@ def main(argv: typing.List[str]) -> None:
         reader = pbo_reader.PBOReader(pbo_file)
 
         if args.list:
-            list_pbo(reader)
+            list_pbo(reader, verbose=args.verbose)
         else:
             extract_pbo(reader, [f.encode() for f in args.files])
 

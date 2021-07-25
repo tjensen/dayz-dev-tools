@@ -21,8 +21,8 @@ class PBOFile():
 
         output_file.write(self.content_reader.read(self.data_size))
 
-    def normalized_filename(self) -> bytes:
-        return os.path.join(*self.split_filename())
+    def normalized_filename(self) -> str:
+        return os.path.join(*self.split_filename()).decode(errors="replace")
 
     def split_filename(self) -> typing.List[bytes]:
         def rec_split(s: bytes) -> typing.List[bytes]:
@@ -31,3 +31,15 @@ class PBOFile():
                 return [tail]
             return rec_split(rest) + [tail]
         return rec_split(self.filename)
+
+    def unpacked_size(self) -> int:
+        if self.original_size == 0:
+            return self.data_size
+
+        return self.original_size
+
+    def type(self) -> str:
+        return "".join([
+            c if ord(c) >= 32 and ord(c) < 127 else " "
+            for c in f"{self.mime_type.decode('ascii', errors='replace'):<4}"
+        ])
