@@ -46,8 +46,13 @@ def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
         print(" Original     Date    Time   Name")
         print("---------  ---------- -----  ----")
 
+    total_unpacked = 0
+    total_size = 0
+
     for file in reader.files():
         timestamp = datetime.datetime.fromtimestamp(file.time_stamp).strftime("%Y-%m-%d %H:%M")
+        total_unpacked += file.unpacked_size()
+        total_size += file.data_size
 
         if verbose:
             print(
@@ -55,6 +60,15 @@ def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
                 f"  {file.normalized_filename()}")
         else:
             print(f"{file.unpacked_size():9}  {timestamp}  {file.normalized_filename()}")
+
+    if verbose:
+        print("---------        ---------                    ---------")
+        print(
+            f"{total_unpacked:9}        {total_size:9}                    "
+            f"{len(reader.files())} Files")
+    else:
+        print("---------                    ---------")
+        print(f"{total_unpacked:9}                    {len(reader.files())} Files")
 
 
 def main(argv: typing.List[str]) -> None:

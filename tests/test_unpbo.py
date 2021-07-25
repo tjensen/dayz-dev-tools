@@ -242,7 +242,7 @@ class TestListPbo(unittest.TestCase):
         with mock.patch("builtins.print") as mock_print:
             unpbo.list_pbo(self.mock_pboreader, verbose=False)
 
-        assert mock_print.call_count == 7
+        assert mock_print.call_count == 9
 
         mock_print.assert_has_calls([
             mock.call(" Original     Date    Time   Name"),
@@ -253,14 +253,16 @@ class TestListPbo(unittest.TestCase):
             self.expected_call(
                 54321, self.timestamps[2], os.path.join("dir1", "dir2", "dir3", "filename.ext")),
             self.expected_call(10, self.timestamps[3], "filename.ext"),
-            self.expected_call(7777, self.timestamps[4], "other-filename.png")
+            self.expected_call(7777, self.timestamps[4], "other-filename.png"),
+            mock.call("---------                    ---------"),
+            mock.call("    72342                    5 Files")
         ])
 
     def test_prints_headers_and_extended_details_with_verbose_output(self) -> None:
         with mock.patch("builtins.print") as mock_print:
             unpbo.list_pbo(self.mock_pboreader, verbose=True)
 
-        assert mock_print.call_count == 13
+        assert mock_print.call_count == 15
 
         mock_print.assert_has_calls([
             mock.call("Headers:"),
@@ -280,5 +282,8 @@ class TestListPbo(unittest.TestCase):
                 54321, "1234", 50000, self.timestamps[2],
                 os.path.join("dir1", "dir2", "dir3", "filename.ext")),
             self.expected_verbose_call(10, "    ", 10, self.timestamps[3], "filename.ext"),
-            self.expected_verbose_call(7777, "    ", 6000, self.timestamps[4], "other-filename.png")
+            self.expected_verbose_call(
+                7777, "    ", 6000, self.timestamps[4], "other-filename.png"),
+            mock.call("---------        ---------                    ---------"),
+            mock.call("    72342            65210                    5 Files")
         ])
