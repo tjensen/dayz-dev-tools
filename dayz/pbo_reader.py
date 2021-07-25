@@ -1,4 +1,5 @@
 import io
+import ntpath
 import typing
 
 from dayz import pbo_file
@@ -28,7 +29,17 @@ def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.List[typing.T
     return headers
 
 
-def _read_file_entries(reader: pbo_file_reader.PBOFileReader) -> typing.List[pbo_file.PBOFile]:
+def _prefix(headers: typing.List[typing.Tuple[bytes, bytes]]) -> typing.Optional[bytes]:
+    for key, value in headers:
+        if key == b"prefix":
+            return value
+
+    return None
+
+
+def _read_file_entries(
+    reader: pbo_file_reader.PBOFileReader, prefix: typing.Optional[bytes]
+) -> typing.List[pbo_file.PBOFile]:
     entries: typing.List[pbo_file.PBOFile] = []
 
     while True:
@@ -36,6 +47,9 @@ def _read_file_entries(reader: pbo_file_reader.PBOFileReader) -> typing.List[pbo
 
         if len(filename) == 0:
             break
+
+        if prefix is not None:
+            filename = ntpath.join(prefix, filename)
 
         mime_type = reader.read(4)
         original_size = reader.readuint()
@@ -62,15 +76,19 @@ class PBOReader():
 
         reader = pbo_file_reader.PBOFileReader(self._file, 0, size)
         self._headers = _read_headers(reader)
-        self._files = _read_file_entries(reader)
+        self._files = _read_file_entries(reader, _prefix(self._headers))
 
     def files(self) -> typing.List[pbo_file.PBOFile]:
         return self._files
 
-    def file(self, filename: str) -> typing.Optional[pbo_file.PBOFile]:
+    def file(self, filename: typing.AnyStr) -> typing.Optional[pbo_file.PBOFile]:
         for f in self._files:
-            if filename == f.normalized_filename():
-                return f
+            if isinstance(filename, bytes):
+                if filename == f.filename:
+                    return f
+            else:
+                if filename == f.normalized_filename():
+                    return f
 
         return None
 

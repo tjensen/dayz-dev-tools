@@ -36,7 +36,7 @@ class TestExtractPbo(unittest.TestCase):
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False)
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=False)
 
         mock_print.assert_not_called()
 
@@ -80,7 +80,7 @@ class TestExtractPbo(unittest.TestCase):
                     os.path.join("filename.ext"),
                     os.path.join("dir1", "filename.ext")
                 ],
-                verbose=False)
+                verbose=False, deobfuscate=False)
 
         mock_print.assert_not_called()
 
@@ -114,7 +114,7 @@ class TestExtractPbo(unittest.TestCase):
                     os.path.join("filename.ext"),
                     os.path.join("dir1", "filename.ext")
                 ],
-                verbose=False)
+                verbose=False, deobfuscate=False)
 
         self.mock_pboreader.file.assert_called_once()
 
@@ -131,7 +131,7 @@ class TestExtractPbo(unittest.TestCase):
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True)
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True, deobfuscate=False)
 
         assert mock_print.call_count == 5
         mock_print.assert_has_calls([
@@ -156,10 +156,143 @@ class TestExtractPbo(unittest.TestCase):
                     os.path.join("filename.ext"),
                     os.path.join("dir1", "filename.ext")
                 ],
-                verbose=True)
+                verbose=True, deobfuscate=False)
 
         assert mock_print.call_count == 2
         mock_print.assert_has_calls([
             mock.call("Extracting filename.ext"),
             mock.call(f"Extracting {os.path.join('dir1', 'filename.ext')}")
         ])
+
+    def test_deobfuscates_all_obfuscated_files_when_requested(self) -> None:
+        mock_open = mock.mock_open()
+        mock_files = [
+            self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
+            self.create_mock_file(
+                b"obfuscated2",
+                b"/*\r\n#pragma \"whatever\"\r\n*/\r\n#include \"not-obfuscated2\"\r\n"),
+            self.create_mock_file(b"obfuscated3", b"#include \"not-obfuscated3\"\r\n"),
+            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
+            self.create_mock_file(b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2"),
+            self.create_mock_file(b"not-obfuscated3", b"NOT OBFUSCATED CONTENT 3")
+        ]
+        self.mock_pboreader.files.return_value = mock_files
+        self.mock_pboreader.file.side_effect = mock_files[3:]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+
+        mock_print.assert_not_called()
+
+        assert mock_open.call_count == 3
+        mock_open.assert_has_calls([
+            mock.call(b"obfuscated1", "wb"),
+            mock.call(b"obfuscated2", "wb"),
+            mock.call(b"obfuscated3", "wb")
+        ], any_order=True)
+
+        mock_open.return_value.__enter__.return_value.write.assert_has_calls([
+            mock.call(b"NOT OBFUSCATED CONTENT 1"),
+            mock.call(b"NOT OBFUSCATED CONTENT 2"),
+            mock.call(b"NOT OBFUSCATED CONTENT 3")
+        ])
+
+        assert self.mock_pboreader.file.call_count == 3
+        self.mock_pboreader.file.assert_has_calls([
+            mock.call(b"not-obfuscated1"),
+            mock.call(b"not-obfuscated2"),
+            mock.call(b"not-obfuscated3")
+        ])
+
+    def test_prints_skipped_files_when_deobfuscating(self) -> None:
+        mock_open = mock.mock_open()
+        mock_files = [
+            self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
+            self.create_mock_file(
+                b"obfuscated2",
+                b"/*\r\n#pragma \"whatever\"\r\n*/\r\n#include \"not-obfuscated2\"\r\n"),
+            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
+            self.create_mock_file(b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2")
+        ]
+        self.mock_pboreader.files.return_value = mock_files
+        self.mock_pboreader.file.side_effect = [
+            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
+            self.create_mock_file(b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True, deobfuscate=True)
+
+        assert mock_print.call_count == 4
+        mock_print.assert_has_calls([
+            mock.call("Extracting obfuscated1"),
+            mock.call("Extracting obfuscated2"),
+            mock.call("Skipping obfuscation file: not-obfuscated1"),
+            mock.call("Skipping obfuscation file: not-obfuscated2")
+        ])
+
+    def test_extracts_files_as_is_if_unobfuscated_file_cannot_be_found(self) -> None:
+        mock_open = mock.mock_open()
+        content = b"//***\r\n#include \"not-obfuscated1\"\r\n"
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"obfuscated1", content)
+        ]
+        self.mock_pboreader.file.return_value = None
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+
+        mock_print.assert_not_called()
+
+        mock_open.assert_called_once_with(b"obfuscated1", "wb")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(content)
+
+        self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated1")
+
+    def test_reports_missing_unobfuscated_file_when_verbose_enabled(self) -> None:
+        mock_open = mock.mock_open()
+        content = b"//***\r\n#include \"not-obfuscated1\"\r\n"
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"obfuscated1", content)
+        ]
+        self.mock_pboreader.file.return_value = None
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True, deobfuscate=True)
+
+        mock_print.assert_has_calls([
+            mock.call("Unable to deobfuscate obfuscated1")
+        ])
+
+        mock_open.assert_called_once_with(b"obfuscated1", "wb")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(content)
+
+        self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated1")
+
+    def test_skips_invalid_obfuscation_files(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"\t\t", b""),
+            self.create_mock_file(b"*.*", b""),
+            self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
+            self.create_mock_file(b"file?to-skip", b""),
+            self.create_mock_file(b"another-file-to*skip", b""),
+            self.create_mock_file(b"yet-another-file\tto-skip", b""),
+            self.create_mock_file(b"high-ascii-characters\xccare-also-skipped", b""),
+        ]
+        self.mock_pboreader.file.return_value = \
+            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1")
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+
+        mock_print.assert_not_called()
+
+        mock_open.assert_called_once_with(b"obfuscated1", "wb")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(
+            b"NOT OBFUSCATED CONTENT 1"),
+
+        self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated1")

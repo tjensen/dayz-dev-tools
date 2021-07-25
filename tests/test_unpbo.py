@@ -34,7 +34,8 @@ class TestMain(unittest.TestCase):
         self.mock_pboreader_class.assert_called_once_with(
             mock_open.return_value.__enter__.return_value)
 
-        self.mock_extract_pbo.assert_called_once_with(self.mock_pboreader, [], verbose=False)
+        self.mock_extract_pbo.assert_called_once_with(
+            self.mock_pboreader, [], verbose=False, deobfuscate=False)
 
         self.mock_list_pbo.assert_not_called()
 
@@ -56,7 +57,35 @@ class TestMain(unittest.TestCase):
 
         self.mock_extract_pbo.assert_called_once_with(
             self.mock_pboreader, ["file/to/extract/1", "file/to/extract/2", "file/to/extract/3"],
-            verbose=False)
+            verbose=False, deobfuscate=False)
+
+        self.mock_list_pbo.assert_not_called()
+
+    def test_extracts_files_verbosely_when_requested(self) -> None:
+        mock_open = mock.mock_open()
+        with mock.patch("builtins.open", mock_open):
+            unpbo.main([
+                "ignored",
+                "-v",
+                "path/to/filename.ext"
+            ])
+
+        self.mock_extract_pbo.assert_called_once_with(
+            self.mock_pboreader, [], verbose=True, deobfuscate=False)
+
+        self.mock_list_pbo.assert_not_called()
+
+    def test_deobfuscates_files_while_extracting_them_when_requested(self) -> None:
+        mock_open = mock.mock_open()
+        with mock.patch("builtins.open", mock_open):
+            unpbo.main([
+                "ignored",
+                "-d",
+                "path/to/filename.ext"
+            ])
+
+        self.mock_extract_pbo.assert_called_once_with(
+            self.mock_pboreader, [], verbose=False, deobfuscate=True)
 
         self.mock_list_pbo.assert_not_called()
 

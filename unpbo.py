@@ -10,6 +10,8 @@ from dayz import pbo_reader
 def main(argv: typing.List[str]) -> None:
     parser = argparse.ArgumentParser(description="View or extract a PBO file")
     parser.add_argument("-l", "--list", action="store_true", help="List contents of the PBO")
+    parser.add_argument(
+        "-d", "--deobfuscate", action="store_true", help="Attempt to deobfuscate extracted files")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("pbofile", help="The PBO file to read")
     parser.add_argument("files", nargs="*", help="Files to extract from the PBO")
@@ -21,7 +23,8 @@ def main(argv: typing.List[str]) -> None:
         if args.list:
             list_pbo.list_pbo(reader, verbose=args.verbose)
         else:
-            extract_pbo.extract_pbo(reader, args.files, verbose=args.verbose)
+            extract_pbo.extract_pbo(
+                reader, args.files, verbose=args.verbose, deobfuscate=args.deobfuscate)
 
 
 if __name__ == "__main__":
