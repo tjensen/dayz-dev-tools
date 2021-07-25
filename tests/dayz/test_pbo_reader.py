@@ -6,6 +6,11 @@ from dayz import pbo_reader
 
 class TestPBOReader(unittest.TestCase):
     def test_files_returns_empty_list_when_pbo_is_empty(self) -> None:
+        reader = pbo_reader.PBOReader(io.BytesIO(b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"))
+
+        assert reader.files() == []
+
+    def test_files_returns_empty_list_when_pbo_has_empty_file_list(self) -> None:
         reader = pbo_reader.PBOReader(io.BytesIO())
 
         assert reader.files() == []
@@ -14,7 +19,7 @@ class TestPBOReader(unittest.TestCase):
         pbo_file = io.BytesIO(
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -51,7 +56,7 @@ class TestPBOReader(unittest.TestCase):
             b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -68,7 +73,7 @@ class TestPBOReader(unittest.TestCase):
             b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -85,7 +90,7 @@ class TestPBOReader(unittest.TestCase):
             b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -98,7 +103,7 @@ class TestPBOReader(unittest.TestCase):
         pbo_file = io.BytesIO(
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -116,7 +121,7 @@ class TestPBOReader(unittest.TestCase):
         pbo_file = io.BytesIO(
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -132,7 +137,7 @@ class TestPBOReader(unittest.TestCase):
             b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
@@ -153,7 +158,7 @@ class TestPBOReader(unittest.TestCase):
             b"\0"
             b"f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
             b"f2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
-            b"\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"file1content"
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)

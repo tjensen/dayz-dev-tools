@@ -46,7 +46,7 @@ def _read_file_entries(reader: pbo_file_reader.PBOFileReader) -> typing.List[pbo
             pbo_file.PBOFile(
                 filename, mime_type, original_size, reserved, time_stamp, data_size))
 
-    offset = reader.tell()
+    offset = reader.tell() + 20
     for entry in entries:
         entry.content_reader = reader.subreader(offset, entry.data_size)
         offset += entry.data_size
