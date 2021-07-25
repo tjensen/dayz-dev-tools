@@ -76,7 +76,8 @@ class PBOReader():
 
         reader = pbo_file_reader.PBOFileReader(self._file, 0, size)
         self._headers = _read_headers(reader)
-        self._files = _read_file_entries(reader, _prefix(self._headers))
+        self._prefix = _prefix(self._headers)
+        self._files = _read_file_entries(reader, self._prefix)
 
     def files(self) -> typing.List[pbo_file.PBOFile]:
         return self._files
@@ -94,3 +95,6 @@ class PBOReader():
 
     def headers(self) -> typing.List[typing.Tuple[bytes, bytes]]:
         return self._headers
+
+    def prefix(self) -> typing.Optional[bytes]:
+        return self._prefix

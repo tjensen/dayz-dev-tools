@@ -11,6 +11,7 @@ class TestExtractPbo(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.mock_pboreader = mock.Mock()
+        self.mock_pboreader.prefix.return_value = None
 
         makedirs_patcher = mock.patch("os.makedirs")
         self.mock_makedirs = makedirs_patcher.start()
@@ -203,6 +204,23 @@ class TestExtractPbo(unittest.TestCase):
             mock.call(b"not-obfuscated2"),
             mock.call(b"not-obfuscated3")
         ])
+
+    def test_deobfuscates_obfuscated_files_when_target_file_does_not_have_prefix(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"obfuscated", b"#include \"not-obfuscated\"\r\n"),
+        ]
+        self.mock_pboreader.file.return_value = \
+            self.create_mock_file(b"PREFIX\\not-obfuscated", b"NOT OBFUSCATED CONTENT")
+        self.mock_pboreader.prefix.return_value = b"PREFIX"
+
+        with mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(
+            b"NOT OBFUSCATED CONTENT"),
+
+        self.mock_pboreader.file.assert_called_once_with(b"PREFIX\\not-obfuscated")
 
     def test_prints_skipped_files_when_deobfuscating(self) -> None:
         mock_open = mock.mock_open()

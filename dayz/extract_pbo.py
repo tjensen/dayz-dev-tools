@@ -26,6 +26,8 @@ def _extract_file(
             print(f"Skipping obfuscation file: {pbofile.normalized_filename()}")
         return
 
+    prefix = reader.prefix()
+
     parts = pbofile.split_filename()
 
     if len(parts) > 1:
@@ -41,7 +43,12 @@ def _extract_file(
             content = buffer.getvalue()
 
             if (match := OBFUSCATE_RE.match(content)) is not None:
-                unobfuscated = reader.file(match.group(1))
+                target_filename = match.group(1)
+
+                if prefix is not None and not target_filename.startswith(prefix + b"\\"):
+                    target_filename = prefix + b"\\" + target_filename
+
+                unobfuscated = reader.file(target_filename)
 
                 if unobfuscated is None:
                     if verbose:
