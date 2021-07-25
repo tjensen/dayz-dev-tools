@@ -43,5 +43,8 @@ class PBOFileReader():
     def seek(self, offset: int) -> None:
         self.pos = min(offset, self.size)
 
+    def eof(self) -> bool:
+        return self.pos == self.size
+
     def subreader(self, offset: int, size: int) -> "PBOFileReader":
         return PBOFileReader(self.content_file, self.offset + offset, min(size, self.size - offset))

@@ -50,6 +50,31 @@ class TestPBOFile(unittest.TestCase):
 
         self.mock_content_reader.read.assert_called_once_with(4321)
 
+    def test_unpack_writes_expanded_content_to_output_file_when_compressed(self) -> None:
+        self.pbofile.original_size = 8
+        self.pbofile.data_size = 13
+        self.pbofile.content_reader = pbo_file_reader.PBOFileReader(
+            io.BytesIO(b"\xffABCDEFGH\x24\x02\0\0"), 0, 13)
+        output = io.BytesIO()
+
+        self.pbofile.unpack(output)
+
+        assert output.getvalue() == b"ABCDEFGH"
+
+    def test_unpack_raises_if_checksum_of_expanded_content_does_not_match(self) -> None:
+        self.pbofile.original_size = 8
+        self.pbofile.data_size = 13
+        self.pbofile.content_reader = pbo_file_reader.PBOFileReader(
+            io.BytesIO(b"\xffABCDEFGH\x23\x02\0\0"), 0, 13)
+        output = io.BytesIO()
+
+        with self.assertRaises(Exception) as error:
+            self.pbofile.unpack(output)
+
+        assert str(error.exception) == "Checksum mismatch (0x224 != 0x223)"
+
+        assert len(output.getvalue()) == 0
+
     def test_normalized_filename_returns_filenames_with_os_style_paths(self) -> None:
         self.pbofile.filename = b"xxx\\yyy\\zzz.www"
 

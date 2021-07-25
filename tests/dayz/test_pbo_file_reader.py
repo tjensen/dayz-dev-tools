@@ -92,6 +92,14 @@ class TestPBOFileReader(unittest.TestCase):
 
         assert self.reader.tell() == 11
 
+    def test_eof_returns_false_if_current_position_is_not_at_the_end_of_content(self) -> None:
+        assert self.reader.eof() is False
+
+    def test_eof_returns_true_if_current_position_is_at_the_end_of_content(self) -> None:
+        self.reader.seek(11)
+
+        assert self.reader.eof() is True
+
     def test_subreader_returns_pbo_file_reader_for_part_of_file(self) -> None:
         with mock.patch("dayz.pbo_file_reader.PBOFileReader") as mock_pbo_file_reader_class:
             subreader = self.reader.subreader(3, 5)
