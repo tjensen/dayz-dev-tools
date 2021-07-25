@@ -35,7 +35,13 @@ class PBOFileReader():
         return result
 
     def readuint(self) -> int:
-        return typing.cast(int, struct.unpack("I", self.read(4))[0])
+        data = self.read(4)
+
+        if len(data) != 4:
+            raise Exception(
+                "Not enough bytes remaining for read; perhaps this is not a valid PBO file?")
+
+        return typing.cast(int, struct.unpack("I", data)[0])
 
     def tell(self) -> int:
         return self.pos

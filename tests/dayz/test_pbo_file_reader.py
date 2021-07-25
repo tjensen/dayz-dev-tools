@@ -75,6 +75,15 @@ class TestPBOFileReader(unittest.TestCase):
 
         assert result == 0x80706050
 
+    def test_readuint_raises_when_four_bytes_are_not_available(self) -> None:
+        self.reader.seek(10)
+
+        with self.assertRaises(Exception) as error:
+            self.reader.readuint()
+
+        assert str(error.exception) \
+            == "Not enough bytes remaining for read; perhaps this is not a valid PBO file?"
+
     def test_tell_returns_current_position_in_content(self) -> None:
         assert self.reader.tell() == 0
 
