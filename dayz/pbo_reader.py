@@ -8,8 +8,12 @@ from dayz import pbo_file_reader
 def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.List[typing.Tuple[bytes, bytes]]:
     headers: typing.List[typing.Tuple[bytes, bytes]] = []
     if len(reader.readz()) == 0:
-        # Skip the "Vers" property entry
-        reader.seek(reader.tell() + 20)
+        pos = reader.tell()
+        key = reader.readz()
+        if key == b"sreV":
+            reader.seek(pos + 20)
+        else:
+            reader.seek(pos)
 
         while True:
             key = reader.readz()
