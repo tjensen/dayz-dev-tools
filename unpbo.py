@@ -1,78 +1,10 @@
 import argparse
-import datetime
-import os
 import sys
 import typing
 
-from dayz import pbo_file
+from dayz import extract_pbo
+from dayz import list_pbo
 from dayz import pbo_reader
-
-
-def _extract_file(pbofile: pbo_file.PBOFile, verbose: bool) -> None:
-    parts = pbofile.split_filename()
-
-    if len(parts) > 1:
-        os.makedirs(os.path.join(*parts[:-1]), exist_ok=True)
-
-    with open(os.path.join(*parts), "wb") as out_file:
-        if verbose:
-            print(f"Extracting {pbofile.normalized_filename()}")
-        pbofile.unpack(out_file)
-
-
-def extract_pbo(
-    reader: pbo_reader.PBOReader, files_to_extract: typing.List[str], *, verbose: bool
-) -> None:
-    if len(files_to_extract) == 0:
-        for file in reader.files():
-            _extract_file(file, verbose)
-
-    else:
-        for file_to_extract in files_to_extract:
-            pbofile = reader.file(file_to_extract)
-
-            if pbofile is None:
-                raise Exception(f"File not found: {file_to_extract}")
-
-            _extract_file(pbofile, verbose)
-
-
-def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
-    if verbose:
-        print("Headers:")
-        print("--------")
-        for key, value in reader.headers():
-            print(f"{key.decode(errors='replace')} = {value.decode(errors='replace')}")
-        print()
-        print(" Original  Type    Size        Date    Time   Name")
-        print("---------  ----  ---------  ---------- -----  ----")
-    else:
-        print(" Original     Date    Time   Name")
-        print("---------  ---------- -----  ----")
-
-    total_unpacked = 0
-    total_size = 0
-
-    for file in reader.files():
-        timestamp = datetime.datetime.fromtimestamp(file.time_stamp).strftime("%Y-%m-%d %H:%M")
-        total_unpacked += file.unpacked_size()
-        total_size += file.data_size
-
-        if verbose:
-            print(
-                f"{file.unpacked_size():9}  {file.type()}  {file.data_size:9}  {timestamp}"
-                f"  {file.normalized_filename()}")
-        else:
-            print(f"{file.unpacked_size():9}  {timestamp}  {file.normalized_filename()}")
-
-    if verbose:
-        print("---------        ---------                    ---------")
-        print(
-            f"{total_unpacked:9}        {total_size:9}                    "
-            f"{len(reader.files())} Files")
-    else:
-        print("---------                    ---------")
-        print(f"{total_unpacked:9}                    {len(reader.files())} Files")
 
 
 def main(argv: typing.List[str]) -> None:
@@ -87,9 +19,9 @@ def main(argv: typing.List[str]) -> None:
         reader = pbo_reader.PBOReader(pbo_file)
 
         if args.list:
-            list_pbo(reader, verbose=args.verbose)
+            list_pbo.list_pbo(reader, verbose=args.verbose)
         else:
-            extract_pbo(reader, args.files, verbose=args.verbose)
+            extract_pbo.extract_pbo(reader, args.files, verbose=args.verbose)
 
 
 if __name__ == "__main__":
