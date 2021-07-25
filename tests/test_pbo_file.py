@@ -1,4 +1,5 @@
 import io
+import os
 import unittest
 from unittest import mock
 
@@ -48,3 +49,13 @@ class TestPBOFile(unittest.TestCase):
         assert output.getvalue() == b"ABCD1234"
 
         self.mock_content_reader.read.assert_called_once_with(4321)
+
+    def test_normalized_filename_returns_filenames_with_os_style_paths(self) -> None:
+        self.pbofile.filename = b"xxx\\yyy\\zzz.www"
+
+        assert self.pbofile.normalized_filename() == os.path.join(b"xxx", b"yyy", b"zzz.www")
+
+    def test_split_filename_returns_filename_split_on_path_separators(self) -> None:
+        self.pbofile.filename = b"xxx\\yyy\\zzz.www"
+
+        assert self.pbofile.split_filename() == [b"xxx", b"yyy", b"zzz.www"]

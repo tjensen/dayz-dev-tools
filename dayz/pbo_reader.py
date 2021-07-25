@@ -63,5 +63,12 @@ class PBOReader():
     def files(self) -> typing.List[pbo_file.PBOFile]:
         return self._files
 
+    def file(self, filename: bytes) -> typing.Optional[pbo_file.PBOFile]:
+        for f in self._files:
+            if filename == f.normalized_filename():
+                return f
+
+        return None
+
     def headers(self) -> typing.Dict[bytes, bytes]:
         return self._headers

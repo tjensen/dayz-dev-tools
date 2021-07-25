@@ -3,6 +3,7 @@ import typing
 import unittest
 from unittest import mock
 
+from dayz import pbo_file
 import unpbo
 
 
@@ -24,40 +25,49 @@ class TestMain(unittest.TestCase):
         self.mock_pboreader = self.mock_pboreader_class.return_value
 
     def test_parses_args_and_extracts_pbo(self) -> None:
-        filename = os.path.join("path", "to", "basename.pbo")
-
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
             unpbo.main([
                 "ignored",
-                filename
+                "path/to/filename.ext"
             ])
 
-        mock_open.assert_called_once_with(filename, "rb")
+        mock_open.assert_called_once_with("path/to/filename.ext", "rb")
 
         self.mock_pboreader_class.assert_called_once_with(
             mock_open.return_value.__enter__.return_value)
 
-        self.mock_extract_pbo.assert_called_once_with(self.mock_pboreader, "basename")
+        self.mock_extract_pbo.assert_called_once_with(self.mock_pboreader, [])
 
         self.mock_list_pbo.assert_not_called()
 
-    def test_extracts_to_specified_directory(self) -> None:
-        output_path = os.path.join("output", "dir")
-
+    def test_extracts_files_specified_on_command_line(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
             unpbo.main([
                 "ignored",
-                "INPUT.pbo",
-                output_path
+                "path/to/filename.ext",
+                "file/to/extract/1",
+                "file/to/extract/2",
+                "file/to/extract/3"
             ])
 
-        self.mock_extract_pbo.assert_called_once_with(self.mock_pboreader, output_path)
+        mock_open.assert_called_once_with("path/to/filename.ext", "rb")
+
+        self.mock_pboreader_class.assert_called_once_with(
+            mock_open.return_value.__enter__.return_value)
+
+        self.mock_extract_pbo.assert_called_once_with(
+            self.mock_pboreader,
+            [
+                b"file/to/extract/1",
+                b"file/to/extract/2",
+                b"file/to/extract/3"
+            ])
 
         self.mock_list_pbo.assert_not_called()
 
-    def test_lists_the_pbo_contents_when_specified(self) -> None:
+    def test_lists_the_pbo_contents_when_option_is_specified(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
             unpbo.main([
@@ -75,6 +85,19 @@ class TestExtractPbo(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.mock_pboreader = mock.Mock()
+
+    def create_mock_file(self, filename: bytes, contents: bytes) -> pbo_file.PBOFile:
+        def unpack(dest: typing.BinaryIO) -> None:
+            dest.write(contents)
+
+        mock_file = pbo_file.PBOFile(filename, b"", 0, 0, 0, 0)
+        mock.patch.object(mock_file, "unpack", side_effect=unpack).start()
+
+        return mock_file
+
+    @mock.patch("os.makedirs")
+    def test_extracts_all_files_in_the_pbo(self, mock_makedirs: mock.Mock) -> None:
+        mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
             self.create_mock_file(b"dir1\\dir2\\filename.ext", b"1111"),
             self.create_mock_file(b"dir1\\filename.ext", b"2222"),
@@ -83,40 +106,25 @@ class TestExtractPbo(unittest.TestCase):
             self.create_mock_file(b"other-filename.png", b"5555")
         ]
 
-    def create_mock_file(self, filename: bytes, contents: bytes) -> mock.Mock:
-        def unpack(dest: typing.BinaryIO) -> None:
-            dest.write(contents)
-
-        mock_file = mock.Mock(filename=filename)
-        mock_file.unpack.side_effect = unpack
-
-        return mock_file
-
-    @mock.patch("os.makedirs")
-    def test_extracts_all_files_in_the_pbo_to_destination_directory(
-        self, mock_makedirs: mock.Mock
-    ) -> None:
-        mock_open = mock.mock_open()
-
         with mock.patch("builtins.open", mock_open):
-            unpbo.extract_pbo(self.mock_pboreader, "dest")
+            unpbo.extract_pbo(self.mock_pboreader, [])
 
-        assert mock_makedirs.call_count == 5
+        self.mock_pboreader.files.assert_called_once_with()
+
+        assert mock_makedirs.call_count == 3
         mock_makedirs.assert_has_calls([
-            mock.call(os.path.join(b"dest", b"dir1", b"dir2"), exist_ok=True),
-            mock.call(os.path.join(b"dest", b"dir1"), exist_ok=True),
-            mock.call(os.path.join(b"dest", b"dir1", b"dir2", b"dir3"), exist_ok=True),
-            mock.call(os.path.join(b"dest", b""), exist_ok=True),
-            mock.call(os.path.join(b"dest", b""), exist_ok=True)
+            mock.call(os.path.join(b"dir1", b"dir2"), exist_ok=True),
+            mock.call(os.path.join(b"dir1"), exist_ok=True),
+            mock.call(os.path.join(b"dir1", b"dir2", b"dir3"), exist_ok=True)
         ])
 
         assert mock_open.call_count == 5
         mock_open.assert_has_calls([
-            mock.call(os.path.join(b"dest", b"dir1", b"dir2", b"filename.ext"), "wb"),
-            mock.call(os.path.join(b"dest", b"dir1", b"filename.ext"), "wb"),
-            mock.call(os.path.join(b"dest", b"dir1", b"dir2", b"dir3", b"filename.ext"), "wb"),
-            mock.call(os.path.join(b"dest", b"filename.ext"), "wb"),
-            mock.call(os.path.join(b"dest", b"other-filename.png"), "wb")
+            mock.call(os.path.join(b"dir1", b"dir2", b"filename.ext"), "wb"),
+            mock.call(os.path.join(b"dir1", b"filename.ext"), "wb"),
+            mock.call(os.path.join(b"dir1", b"dir2", b"dir3", b"filename.ext"), "wb"),
+            mock.call(os.path.join(b"filename.ext"), "wb"),
+            mock.call(os.path.join(b"other-filename.png"), "wb")
         ], any_order=True)
 
         mock_open.return_value.__enter__.return_value.write.assert_has_calls([
@@ -126,6 +134,58 @@ class TestExtractPbo(unittest.TestCase):
             mock.call(b"4444"),
             mock.call(b"5555")
         ])
+
+    @mock.patch("os.makedirs")
+    def test_extracts_specified_files_when_provided(self, mock_makedirs: mock.Mock) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.file.side_effect = [
+            self.create_mock_file(b"filename.ext", b"4444"),
+            self.create_mock_file(b"dir1\\filename.ext", b"2222")
+        ]
+
+        with mock.patch("builtins.open", mock_open):
+            unpbo.extract_pbo(
+                self.mock_pboreader,
+                [
+                    os.path.join(b"filename.ext"),
+                    os.path.join(b"dir1", b"filename.ext")
+                ])
+
+        assert self.mock_pboreader.file.call_count == 2
+        self.mock_pboreader.file.assert_has_calls([
+            mock.call(os.path.join(b"filename.ext")),
+            mock.call(os.path.join(b"dir1", b"filename.ext"))
+        ])
+
+        assert mock_makedirs.call_count == 1
+        mock_makedirs.assert_called_once_with(b"dir1", exist_ok=True)
+
+        assert mock_open.call_count == 2
+        mock_open.assert_has_calls([
+            mock.call(os.path.join(b"filename.ext"), "wb"),
+            mock.call(os.path.join(b"dir1", b"filename.ext"), "wb")
+        ], any_order=True)
+
+        mock_open.return_value.__enter__.return_value.write.assert_has_calls([
+            mock.call(b"4444"),
+            mock.call(b"2222")
+        ])
+
+    @mock.patch("os.makedirs")
+    def test_raises_if_specified_filename_does_not_exist(self, mock_makedirs: mock.Mock) -> None:
+        self.mock_pboreader.file.return_value = None
+
+        with self.assertRaises(Exception):
+            unpbo.extract_pbo(
+                self.mock_pboreader,
+                [
+                    os.path.join(b"filename.ext"),
+                    os.path.join(b"dir1", b"filename.ext")
+                ])
+
+        self.mock_pboreader.file.assert_called_once()
+
+        mock_makedirs.assert_not_called()
 
 
 class TestListPbo(unittest.TestCase):

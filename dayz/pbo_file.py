@@ -1,4 +1,6 @@
 import dataclasses
+import ntpath
+import os
 import typing
 
 from dayz import pbo_file_reader
@@ -18,3 +20,14 @@ class PBOFile():
         assert self.content_reader is not None
 
         output_file.write(self.content_reader.read(self.data_size))
+
+    def normalized_filename(self) -> bytes:
+        return os.path.join(*self.split_filename())
+
+    def split_filename(self) -> typing.List[bytes]:
+        def rec_split(s: bytes) -> typing.List[bytes]:
+            rest, tail = ntpath.split(s)
+            if len(rest) == 0:
+                return [tail]
+            return rec_split(rest) + [tail]
+        return rec_split(self.filename)
