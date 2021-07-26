@@ -7,7 +7,7 @@ with open(path.join(path.abspath(path.dirname(__file__)), "README.md"), "r", enc
 
 setuptools.setup(
     name="dayz-dev-tools",
-    version="1.0.0",
+    version="1.0.1",
     author="Tim Jensen",
     author_email="tim.l.jensen@gmail.com",
     description="Useful tools for DayZ mod developers.",
