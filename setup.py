@@ -20,9 +20,9 @@ setuptools.setup(
         "Tracker": "https://github.com/tjensen/dayz-dev-tools/issues"
     },
     keywords=["dayz", "tools", "pbo"],
-    packages=["dayz"],
+    packages=["dayz_dev_tools"],
     package_data={
-        "dayz": ["py.typed"]  # PEP 561
+        "dayz_dev_tools": ["py.typed"]  # PEP 561
     },
     zip_safe=False,  # Enables mypy to find the installed package
     classifiers=[
@@ -39,6 +39,6 @@ setuptools.setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "unpbo=dayz.unpbo:main"
+            "unpbo=dayz_dev_tools.unpbo:main"
         ]
     })

@@ -2,8 +2,8 @@ import io
 import ntpath
 import typing
 
-from dayz import pbo_file
-from dayz import pbo_file_reader
+from dayz_dev_tools import pbo_file
+from dayz_dev_tools import pbo_file_reader
 
 
 def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.List[typing.Tuple[bytes, bytes]]:

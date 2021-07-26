@@ -4,8 +4,8 @@ import typing
 import unittest
 from unittest import mock
 
-from dayz import list_pbo
-from dayz import pbo_file
+from dayz_dev_tools import list_pbo
+from dayz_dev_tools import pbo_file
 
 
 class TestListPbo(unittest.TestCase):

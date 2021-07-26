@@ -1,9 +1,15 @@
 import argparse
 from importlib import metadata
 
-from dayz import extract_pbo
-from dayz import list_pbo
-from dayz import pbo_reader
+from dayz_dev_tools import extract_pbo
+from dayz_dev_tools import list_pbo
+from dayz_dev_tools import pbo_reader
+
+
+try:
+    VERSION = metadata.version("dayz-dev-tools")
+except metadata.PackageNotFoundError:
+    VERSION = "local"
 
 
 def main() -> None:
@@ -14,8 +20,7 @@ def main() -> None:
     parser.add_argument(
         "-d", "--deobfuscate", action="store_true", help="Attempt to deobfuscate extracted files")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
-    parser.add_argument(
-        "-V", "--version", action="version", version=metadata.version("dayz-dev-tools"))
+    parser.add_argument("-V", "--version", action="version", version=VERSION)
     parser.add_argument("pbofile", help="The PBO file to read")
     parser.add_argument("files", nargs="*", help="Files to extract from the PBO")
     args = parser.parse_args()

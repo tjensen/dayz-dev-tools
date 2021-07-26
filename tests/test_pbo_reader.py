@@ -2,7 +2,7 @@ import io
 import os
 import unittest
 
-from dayz import pbo_reader
+from dayz_dev_tools import pbo_reader
 
 
 class TestPBOReader(unittest.TestCase):

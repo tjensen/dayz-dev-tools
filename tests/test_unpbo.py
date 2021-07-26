@@ -3,7 +3,7 @@ import typing
 import unittest
 from unittest import mock
 
-from dayz import unpbo
+from dayz_dev_tools import unpbo
 
 
 def main(argv: typing.List[str]) -> None:
@@ -14,15 +14,15 @@ def main(argv: typing.List[str]) -> None:
 class TestMain(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
-        extract_pbo_patcher = mock.patch("dayz.extract_pbo.extract_pbo")
+        extract_pbo_patcher = mock.patch("dayz_dev_tools.extract_pbo.extract_pbo")
         self.mock_extract_pbo = extract_pbo_patcher.start()
         self.addCleanup(extract_pbo_patcher.stop)
 
-        list_pbo_patcher = mock.patch("dayz.list_pbo.list_pbo")
+        list_pbo_patcher = mock.patch("dayz_dev_tools.list_pbo.list_pbo")
         self.mock_list_pbo = list_pbo_patcher.start()
         self.addCleanup(list_pbo_patcher.stop)
 
-        pboreader_patcher = mock.patch("dayz.pbo_reader.PBOReader")
+        pboreader_patcher = mock.patch("dayz_dev_tools.pbo_reader.PBOReader")
         self.mock_pboreader_class = pboreader_patcher.start()
         self.addCleanup(pboreader_patcher.stop)
 

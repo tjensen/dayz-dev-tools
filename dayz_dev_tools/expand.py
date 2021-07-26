@@ -2,7 +2,7 @@ import math
 import struct
 import typing
 
-from dayz import pbo_file_reader
+from dayz_dev_tools import pbo_file_reader
 
 
 def _log(msg: str) -> None:

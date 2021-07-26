@@ -3,8 +3,8 @@ import ntpath
 import os
 import typing
 
-from dayz import expand
-from dayz import pbo_file_reader
+from dayz_dev_tools import expand
+from dayz_dev_tools import pbo_file_reader
 
 
 @dataclasses.dataclass

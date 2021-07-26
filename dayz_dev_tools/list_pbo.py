@@ -1,6 +1,6 @@
 import datetime
 
-from dayz import pbo_reader
+from dayz_dev_tools import pbo_reader
 
 
 def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:

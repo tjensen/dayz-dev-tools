@@ -3,8 +3,8 @@ import typing
 import unittest
 from unittest import mock
 
-from dayz import extract_pbo
-from dayz import pbo_file
+from dayz_dev_tools import extract_pbo
+from dayz_dev_tools import pbo_file
 
 
 class TestExtractPbo(unittest.TestCase):

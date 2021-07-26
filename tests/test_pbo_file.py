@@ -3,8 +3,8 @@ import os
 import unittest
 from unittest import mock
 
-from dayz import pbo_file
-from dayz import pbo_file_reader
+from dayz_dev_tools import pbo_file
+from dayz_dev_tools import pbo_file_reader
 
 
 class TestPBOFile(unittest.TestCase):

@@ -2,7 +2,7 @@ import io
 import unittest
 from unittest import mock
 
-from dayz import pbo_file_reader
+from dayz_dev_tools import pbo_file_reader
 
 
 class TestPBOFileReader(unittest.TestCase):
@@ -110,7 +110,8 @@ class TestPBOFileReader(unittest.TestCase):
         assert self.reader.eof() is True
 
     def test_subreader_returns_pbo_file_reader_for_part_of_file(self) -> None:
-        with mock.patch("dayz.pbo_file_reader.PBOFileReader") as mock_pbo_file_reader_class:
+        with mock.patch("dayz_dev_tools.pbo_file_reader.PBOFileReader") \
+                as mock_pbo_file_reader_class:
             subreader = self.reader.subreader(3, 5)
 
         assert subreader == mock_pbo_file_reader_class.return_value
@@ -118,7 +119,8 @@ class TestPBOFileReader(unittest.TestCase):
         mock_pbo_file_reader_class.assert_called_once_with(self.content_file, 8, 5)
 
     def test_subreader_cannot_read_beyond_end_of_content(self) -> None:
-        with mock.patch("dayz.pbo_file_reader.PBOFileReader") as mock_pbo_file_reader_class:
+        with mock.patch("dayz_dev_tools.pbo_file_reader.PBOFileReader") \
+                as mock_pbo_file_reader_class:
             subreader = self.reader.subreader(3, 10)
 
         assert subreader == mock_pbo_file_reader_class.return_value

@@ -3,8 +3,8 @@ import os
 import re
 import typing
 
-from dayz import pbo_file
-from dayz import pbo_reader
+from dayz_dev_tools import pbo_file
+from dayz_dev_tools import pbo_reader
 
 
 INVALID_FILENAME_RE = re.compile(b"[\t?*\x80-\xff]")
