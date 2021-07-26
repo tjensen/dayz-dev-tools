@@ -20,6 +20,12 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r dev-requirements.txt
+    - name: Build sdist
+      run: |
+        python setup.py sdist
+    - name: Install package
+      run: |
+        python setup.py develop
     - name: Run tests
       run: |
         pytest -v
