@@ -36,3 +36,6 @@ def main() -> None:
                     reader, args.files, verbose=args.verbose, deobfuscate=args.deobfuscate)
     except Exception as error:
         print(f"ERROR: {error}")
+
+if __name__ == "__main__":
+    main()
