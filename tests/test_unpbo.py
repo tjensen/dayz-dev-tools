@@ -1,7 +1,14 @@
+import sys
+import typing
 import unittest
 from unittest import mock
 
-import unpbo
+from dayz import unpbo
+
+
+def main(argv: typing.List[str]) -> None:
+    with mock.patch.object(sys, "argv", argv):
+        unpbo.main()
 
 
 class TestMain(unittest.TestCase):
@@ -24,7 +31,7 @@ class TestMain(unittest.TestCase):
     def test_parses_args_and_extracts_pbo(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "path/to/filename.ext"
             ])
@@ -42,7 +49,7 @@ class TestMain(unittest.TestCase):
     def test_extracts_files_specified_on_command_line(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "path/to/filename.ext",
                 "file/to/extract/1",
@@ -64,7 +71,7 @@ class TestMain(unittest.TestCase):
     def test_extracts_files_verbosely_when_requested(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "-v",
                 "path/to/filename.ext"
@@ -78,7 +85,7 @@ class TestMain(unittest.TestCase):
     def test_deobfuscates_files_while_extracting_them_when_requested(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "-d",
                 "path/to/filename.ext"
@@ -92,7 +99,7 @@ class TestMain(unittest.TestCase):
     def test_lists_the_pbo_contents_when_option_is_specified(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "-l",
                 "INPUT.pbo"
@@ -105,7 +112,7 @@ class TestMain(unittest.TestCase):
     def test_lists_the_pbo_with_verbose_output_when_option_is_specified(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "-l",
                 "-v",
@@ -121,7 +128,7 @@ class TestMain(unittest.TestCase):
 
         mock_open = mock.mock_open()
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            unpbo.main([
+            main([
                 "ignored",
                 "INPUT.pbo"
             ])

@@ -1,13 +1,11 @@
 import argparse
-import sys
-import typing
 
 from dayz import extract_pbo
 from dayz import list_pbo
 from dayz import pbo_reader
 
 
-def main(argv: typing.List[str]) -> None:
+def main() -> None:
     parser = argparse.ArgumentParser(
         description="View or extract a PBO file",
         epilog="See also: https://community.bistudio.com/wiki/PBO_File_Format")
@@ -17,7 +15,7 @@ def main(argv: typing.List[str]) -> None:
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("pbofile", help="The PBO file to read")
     parser.add_argument("files", nargs="*", help="Files to extract from the PBO")
-    args = parser.parse_args(argv[1:])
+    args = parser.parse_args()
 
     try:
         with open(args.pbofile, "rb") as pbo_file:
@@ -30,7 +28,3 @@ def main(argv: typing.List[str]) -> None:
                     reader, args.files, verbose=args.verbose, deobfuscate=args.deobfuscate)
     except Exception as error:
         print(f"ERROR: {error}")
-
-
-if __name__ == "__main__":
-    main(sys.argv)
