@@ -1,5 +1,4 @@
 import math
-import struct
 
 from dayz_dev_tools import pbo_file_reader
 
@@ -17,7 +16,7 @@ def expand(reader: pbo_file_reader.PBOFileReader) -> bytes:
             if flagbits >> bit & 1 == 1:
                 result += reader.read(1)
             else:
-                pointer = struct.unpack("<H", reader.read(2))[0]
+                pointer = reader.readuword()
                 rpos = len(result) - ((pointer & 0xff) + ((pointer & 0xf000) >> 4))
                 rlen = ((pointer >> 8) & 0xf) + 3
 

@@ -11,6 +11,13 @@ class TestPBOFileReader(unittest.TestCase):
         self.content_file = io.BytesIO(b"0123456789abcdefXXX")
         self.reader = pbo_file_reader.PBOFileReader(self.content_file, 5, 11)
 
+    def test_insufficient_bytes_exception_has_descriptive_message(self) -> None:
+        with self.assertRaises(Exception) as error:
+            raise pbo_file_reader.InsufficientBytes()
+
+        assert str(error.exception) \
+            == "Not enough bytes remaining for read; perhaps this is not a valid PBO file?"
+
     def test_read_returns_bytes_read_from_the_content_offset(self) -> None:
         result = self.reader.read(10)
 
@@ -78,11 +85,21 @@ class TestPBOFileReader(unittest.TestCase):
     def test_readuint_raises_when_four_bytes_are_not_available(self) -> None:
         self.reader.seek(10)
 
-        with self.assertRaises(Exception) as error:
+        with self.assertRaises(pbo_file_reader.InsufficientBytes):
             self.reader.readuint()
 
-        assert str(error.exception) \
-            == "Not enough bytes remaining for read; perhaps this is not a valid PBO file?"
+    def test_readuword_returns_two_bytes_as_unsigned_word(self) -> None:
+        self.content_file.getbuffer()[5] = 0x55
+        self.content_file.getbuffer()[6] = 0x66
+        result = self.reader.readuword()
+
+        assert result == 0x6655
+
+    def test_readuword_raises_when_four_bytes_are_not_available(self) -> None:
+        self.reader.seek(10)
+
+        with self.assertRaises(pbo_file_reader.InsufficientBytes):
+            self.reader.readuword()
 
     def test_tell_returns_current_position_in_content(self) -> None:
         assert self.reader.tell() == 0

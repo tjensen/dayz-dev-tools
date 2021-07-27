@@ -2,6 +2,12 @@ import struct
 import typing
 
 
+class InsufficientBytes(Exception):
+    def __init__(self) -> None:
+        super().__init__(
+            "Not enough bytes remaining for read; perhaps this is not a valid PBO file?")
+
+
 class PBOFileReader():
     def __init__(self, content_file: typing.BinaryIO, offset: int, size: int) -> None:
         self.content_file = content_file
@@ -38,10 +44,17 @@ class PBOFileReader():
         data = self.read(4)
 
         if len(data) != 4:
-            raise Exception(
-                "Not enough bytes remaining for read; perhaps this is not a valid PBO file?")
+            raise InsufficientBytes()
 
-        return typing.cast(int, struct.unpack("I", data)[0])
+        return typing.cast(int, struct.unpack("<I", data)[0])
+
+    def readuword(self) -> int:
+        data = self.read(2)
+
+        if len(data) != 2:
+            raise InsufficientBytes()
+
+        return typing.cast(int, struct.unpack("<H", data)[0])
 
     def tell(self) -> int:
         return self.pos
