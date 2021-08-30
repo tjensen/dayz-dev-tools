@@ -3,8 +3,10 @@ import logging
 import types
 import typing
 
+from dayz_dev_tools import server_config
 
-class LaunchSettings():
+
+class LaunchSettings:
     _executable: str
     _workshop_path: str
     _bundle: typing.Optional[types.ModuleType] = None
@@ -12,17 +14,17 @@ class LaunchSettings():
     _server_mods: typing.List[str]
     _mission: typing.Optional[str] = None
 
-    def __init__(self, executable: str, workshop_path: str, bundle_path: str) -> None:
-        self._executable = executable
-        self._workshop_path = workshop_path
+    def __init__(self, config: server_config.ServerConfig) -> None:
+        self._executable = config.server_executable
+        self._workshop_path = config.workshop_directory
         self._mods = []
         self._server_mods = []
 
         try:
-            loader = importlib.machinery.SourceFileLoader("bundles", bundle_path)
+            loader = importlib.machinery.SourceFileLoader("bundles", config.bundle_path)
             self._bundle = loader.load_module()
         except FileNotFoundError:
-            logging.debug(f"Unable to load bundles at: {bundle_path}", exc_info=True)
+            logging.debug(f"Unable to load bundles at: {config.bundle_path}", exc_info=True)
 
     def executable(self) -> str:
         return self._executable

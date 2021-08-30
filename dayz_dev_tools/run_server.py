@@ -1,12 +1,10 @@
 import argparse
-import logging
 import os
 import subprocess
 import typing
 
-import toml
-
 from dayz_dev_tools import launch_settings
+from dayz_dev_tools import server_config
 
 
 def _resolve_mod(mod: str, workshop_directory: str) -> str:
@@ -44,23 +42,9 @@ def main() -> None:
         "bundles", nargs="*", metavar="BUNDLE", help="The name of a function in the bundles module")
     args = parser.parse_args()
 
-    try:
-        config = toml.load(args.config)
-    except FileNotFoundError:
-        logging.debug(f"Unable to read config file ({args.config})", exc_info=True)
-        config = {}
+    config = server_config.load(args.config)
 
-    config.setdefault("server", {})
-    config["server"].setdefault("executable", r".\DayZServer_x64.exe")
-    config["server"].setdefault("bundles", "bundles.py")
-    config.setdefault("workshop", {})
-    config["workshop"].setdefault(
-        "directory", r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
-
-    settings = launch_settings.LaunchSettings(
-        config["server"]["executable"],
-        config["workshop"]["directory"],
-        config["server"]["bundles"])
+    settings = launch_settings.LaunchSettings(config)
 
     for bundle in args.bundles:
         settings.load_bundle(bundle)

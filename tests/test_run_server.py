@@ -4,6 +4,7 @@ from unittest import mock
 
 from dayz_dev_tools import launch_settings
 from dayz_dev_tools import run_server
+from dayz_dev_tools import server_config
 
 from tests import helpers
 
@@ -15,9 +16,15 @@ class TestMain(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
 
-        toml_patcher = mock.patch("toml.load", autospec=True)
-        self.mock_toml_load = toml_patcher.start()
-        self.addCleanup(toml_patcher.stop)
+        self.server_config = server_config.ServerConfig(
+            server_executable="SERVER-EXECUTABLE",
+            workshop_directory="WORKSHOP-DIRECTORY",
+            bundle_path="BUNDLE-PATH")
+
+        load_patcher = mock.patch(
+            "dayz_dev_tools.server_config.load", return_value=self.server_config)
+        self.mock_server_config_load = load_patcher.start()
+        self.addCleanup(load_patcher.stop)
 
         settings_patcher = mock.patch(
             "dayz_dev_tools.launch_settings.LaunchSettings", autospec=True)
@@ -29,44 +36,33 @@ class TestMain(unittest.TestCase):
         self.addCleanup(run_server_patcher.stop)
 
     def test_parses_arguments_and_runs_server(self) -> None:
-        self.mock_toml_load.return_value = {
-            "server": {
-                "executable": "/path/to/server.exe",
-                "bundles": "/path/to/custom-bundles.py"
-            },
-            "workshop": {
-                "directory": "/path/to/workshop/dir"
-            }
-        }
+        mock_launch_settings = self.mock_launch_settings_class.return_value
 
+        main([
+            "ignored",
+            "--config", "CONFIG-FILE"
+        ])
+
+        self.mock_server_config_load.assert_called_once_with("CONFIG-FILE")
+
+        self.mock_launch_settings_class.assert_called_once_with(self.server_config)
+
+        self.mock_run_server.assert_called_once_with(mock_launch_settings)
+
+    def test_loads_default_config_filename_when_not_provided(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
         main([
             "ignored"
         ])
 
-        self.mock_toml_load.assert_called_once_with("server.toml")
+        self.mock_server_config_load.assert_called_once_with("server.toml")
 
-        self.mock_launch_settings_class.assert_called_once_with(
-            "/path/to/server.exe", "/path/to/workshop/dir", "/path/to/custom-bundles.py")
+        self.mock_launch_settings_class.assert_called_once_with(self.server_config)
 
         self.mock_run_server.assert_called_once_with(mock_launch_settings)
 
-    def test_uses_default_default_paths_when_not_specified_in_environment(self) -> None:
-        self.mock_toml_load.side_effect = FileNotFoundError
-
-        main([
-            "ignored"
-        ])
-
-        self.mock_launch_settings_class.assert_called_once_with(
-            r".\DayZServer_x64.exe",
-            r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
-            "bundles.py")
-
     def test_loads_bundles_when_specified_in_arguments(self) -> None:
-        self.mock_toml_load.return_value = {}
-
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
         main([
@@ -89,19 +85,24 @@ class TestRunServer(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
 
+        self.server_config = server_config.ServerConfig(
+            server_executable="server.exe",
+            workshop_directory="workshopdir",
+            bundle_path="dont-care")
+
         popen_patcher = mock.patch("subprocess.Popen", autospec=True)
         self.mock_popen = popen_patcher.start()
         self.addCleanup(popen_patcher.stop)
 
     def test_runs_executable_with_provided_launch_settings(self) -> None:
-        settings = launch_settings.LaunchSettings("server.exe", "workshopdir", "dont-care")
+        settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings)
 
         self.mock_popen.assert_called_once_with(["server.exe"])
 
     def test_runs_with_mod_parameter_when_mods_are_added(self) -> None:
-        settings = launch_settings.LaunchSettings("server.exe", "workshopdir", "dont-care")
+        settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_mod("some-mod")
         settings.add_mod(r"P:\path\to\mod")
         settings.add_mod("@Workshop Mod")
@@ -116,7 +117,7 @@ class TestRunServer(unittest.TestCase):
         ])
 
     def test_runs_with_servermod_parameter_when_server_mods_are_added(self) -> None:
-        settings = launch_settings.LaunchSettings("server.exe", "workshopdir", "dont-care")
+        settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_server_mod("some-mod")
         settings.add_server_mod(r"P:\path\to\mod")
         settings.add_server_mod("@Workshop Mod")
