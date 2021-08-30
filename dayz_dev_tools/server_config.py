@@ -7,8 +7,9 @@ import toml
 @dataclasses.dataclass
 class ServerConfig:
     server_executable: str
-    workshop_directory: str
+    server_config: str
     bundle_path: str
+    workshop_directory: str
 
 
 def load(filename: str) -> ServerConfig:
@@ -20,6 +21,7 @@ def load(filename: str) -> ServerConfig:
 
     config.setdefault("server", {})
     config["server"].setdefault("executable", r".\DayZServer_x64.exe")
+    config["server"].setdefault("config", "serverDZ.cfg")
     config["server"].setdefault("bundles", "bundles.py")
     config.setdefault("workshop", {})
     config["workshop"].setdefault(
@@ -27,5 +29,6 @@ def load(filename: str) -> ServerConfig:
 
     return ServerConfig(
         server_executable=config["server"]["executable"],
+        server_config=config["server"]["config"],
         workshop_directory=config["workshop"]["directory"],
         bundle_path=config["server"]["bundles"])

@@ -21,22 +21,25 @@ class TestLoad(unittest.TestCase):
 
         assert config == server_config.ServerConfig(
             server_executable=r".\DayZServer_x64.exe",
-            workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
-            bundle_path="bundles.py")
+            server_config="serverDZ.cfg",
+            bundle_path="bundles.py",
+            workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
 
     def test_returns_defaults_for_attributes_not_set_in_config_file(self) -> None:
         config = server_config.load(self.config_file.name)
 
         assert config == server_config.ServerConfig(
             server_executable=r".\DayZServer_x64.exe",
-            workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
-            bundle_path="bundles.py")
+            server_config="serverDZ.cfg",
+            bundle_path="bundles.py",
+            workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
 
     def test_returns_config_file_settings(self) -> None:
         with open(self.config_file.name, "w") as f:
             f.write("""\
 [server]
 executable = "EXECUTABLE"
+config = "CONFIG-FILE"
 bundles = "BUNDLES"
 
 [workshop]
@@ -47,5 +50,6 @@ directory = "WORKSHOP-DIRECTORY"
 
         assert config == server_config.ServerConfig(
             server_executable="EXECUTABLE",
-            workshop_directory="WORKSHOP-DIRECTORY",
-            bundle_path="BUNDLES")
+            server_config="CONFIG-FILE",
+            bundle_path="BUNDLES",
+            workshop_directory="WORKSHOP-DIRECTORY")

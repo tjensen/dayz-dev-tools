@@ -18,6 +18,7 @@ class TestMain(unittest.TestCase):
 
         self.server_config = server_config.ServerConfig(
             server_executable="SERVER-EXECUTABLE",
+            server_config="SERVER-CONFIG",
             workshop_directory="WORKSHOP-DIRECTORY",
             bundle_path="BUNDLE-PATH")
 
@@ -87,6 +88,7 @@ class TestRunServer(unittest.TestCase):
 
         self.server_config = server_config.ServerConfig(
             server_executable="server.exe",
+            server_config="config.cfg",
             workshop_directory="workshopdir",
             bundle_path="dont-care")
 
@@ -99,7 +101,7 @@ class TestRunServer(unittest.TestCase):
 
         run_server.run_server(settings)
 
-        self.mock_popen.assert_called_once_with(["server.exe"])
+        self.mock_popen.assert_called_once_with(["server.exe", "-config=config.cfg"])
 
     def test_runs_with_mod_parameter_when_mods_are_added(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
@@ -113,6 +115,7 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_popen.assert_called_once_with([
             "server.exe",
+            "-config=config.cfg",
             f"-mod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
         ])
 
@@ -128,5 +131,6 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_popen.assert_called_once_with([
             "server.exe",
+            "-config=config.cfg",
             f"-servermod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
         ])

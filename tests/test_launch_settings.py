@@ -15,6 +15,7 @@ class TestLaunchSettings(unittest.TestCase):
 
         self.config = server_config.ServerConfig(
             server_executable="server.exe",
+            server_config="config.cfg",
             workshop_directory="workshop/dir",
             bundle_path=BUNDLE_PATH)
 
@@ -29,6 +30,18 @@ class TestLaunchSettings(unittest.TestCase):
         settings.set_executable("overridden.bat")
 
         assert settings.executable() == "overridden.bat"
+
+    def test_config_returns_specified_config_file(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        assert settings.config() == "config.cfg"
+
+    def test_config_returns_config_overridden_using_set_config(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        settings.set_config("other.cfg")
+
+        assert settings.config() == "other.cfg"
 
     def test_workshop_directory_returns_specified_workshop_path(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)

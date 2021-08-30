@@ -21,7 +21,10 @@ def _mod_parameter(option: str, mods: typing.List[str], workshop_directory: str)
 
 
 def run_server(settings: launch_settings.LaunchSettings) -> None:
-    args = [settings.executable()]
+    args = [
+        settings.executable(),
+        f"-config={settings.config()}"
+    ]
 
     if len(settings.mods()) > 0:
         args.append(_mod_parameter("mod", settings.mods(), settings.workshop_directory()))
