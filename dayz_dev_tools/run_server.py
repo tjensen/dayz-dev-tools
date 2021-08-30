@@ -26,6 +26,9 @@ def run_server(settings: launch_settings.LaunchSettings) -> None:
         f"-config={settings.config()}"
     ]
 
+    if settings.profile() is not None:
+        args.append(f"-profiles={settings.profile()}")
+
     if len(settings.mods()) > 0:
         args.append(_mod_parameter("mod", settings.mods(), settings.workshop_directory()))
 

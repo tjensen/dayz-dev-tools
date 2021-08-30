@@ -22,6 +22,7 @@ class TestLoad(unittest.TestCase):
         assert config == server_config.ServerConfig(
             server_executable=r".\DayZServer_x64.exe",
             server_config="serverDZ.cfg",
+            server_profile=None,
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
 
@@ -31,6 +32,7 @@ class TestLoad(unittest.TestCase):
         assert config == server_config.ServerConfig(
             server_executable=r".\DayZServer_x64.exe",
             server_config="serverDZ.cfg",
+            server_profile=None,
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
 
@@ -40,6 +42,7 @@ class TestLoad(unittest.TestCase):
 [server]
 executable = "EXECUTABLE"
 config = "CONFIG-FILE"
+profile = "PROFILE"
 bundles = "BUNDLES"
 
 [workshop]
@@ -51,5 +54,6 @@ directory = "WORKSHOP-DIRECTORY"
         assert config == server_config.ServerConfig(
             server_executable="EXECUTABLE",
             server_config="CONFIG-FILE",
+            server_profile="PROFILE",
             bundle_path="BUNDLES",
             workshop_directory="WORKSHOP-DIRECTORY")

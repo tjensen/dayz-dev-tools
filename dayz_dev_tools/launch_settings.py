@@ -9,6 +9,7 @@ from dayz_dev_tools import server_config
 class LaunchSettings:
     _executable: str
     _config: str
+    _profile: typing.Optional[str] = None
     _workshop_path: str
     _bundle: typing.Optional[types.ModuleType] = None
     _mods: typing.List[str]
@@ -18,6 +19,7 @@ class LaunchSettings:
     def __init__(self, config: server_config.ServerConfig) -> None:
         self._executable = config.server_executable
         self._config = config.server_config
+        self._profile = config.server_profile
         self._workshop_path = config.workshop_directory
         self._mods = []
         self._server_mods = []
@@ -39,6 +41,12 @@ class LaunchSettings:
 
     def set_config(self, path: str) -> None:
         self._config = path
+
+    def profile(self) -> typing.Optional[str]:
+        return self._profile
+
+    def set_profile(self, path: str) -> None:
+        self._profile = path
 
     def workshop_directory(self) -> str:
         return self._workshop_path

@@ -43,6 +43,18 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.config() == "other.cfg"
 
+    def test_profile_returns_specified_profile_directory(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        assert settings.profile() is None
+
+    def test_profile_returns_profile_overridden_using_set_profile(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        settings.set_profile("PROFILE")
+
+        assert settings.profile() == "PROFILE"
+
     def test_workshop_directory_returns_specified_workshop_path(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 

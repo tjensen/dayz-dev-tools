@@ -1,5 +1,6 @@
 import dataclasses
 import logging
+import typing
 
 import toml
 
@@ -10,6 +11,7 @@ class ServerConfig:
     server_config: str
     bundle_path: str
     workshop_directory: str
+    server_profile: typing.Optional[str] = None
 
 
 def load(filename: str) -> ServerConfig:
@@ -30,5 +32,6 @@ def load(filename: str) -> ServerConfig:
     return ServerConfig(
         server_executable=config["server"]["executable"],
         server_config=config["server"]["config"],
+        server_profile=config["server"].get("profile"),
         workshop_directory=config["workshop"]["directory"],
         bundle_path=config["server"]["bundles"])
