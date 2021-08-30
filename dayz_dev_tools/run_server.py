@@ -3,6 +3,7 @@ import os
 import subprocess
 import typing
 
+from dayz_dev_tools import keys
 from dayz_dev_tools import launch_settings
 from dayz_dev_tools import server_config
 
@@ -14,8 +15,15 @@ def _resolve_mod(mod: str, workshop_directory: str) -> str:
         return mod
 
 
+def _copy_keys(mod_dirs: typing.List[str], keys_dir: str) -> None:
+    for mod_dir in mod_dirs:
+        keys.copy_keys(os.path.join(mod_dir, "keys"), keys_dir)
+
+
 def _mod_parameter(option: str, mods: typing.List[str], workshop_directory: str) -> str:
     mods = [_resolve_mod(mod, workshop_directory) for mod in mods]
+
+    _copy_keys(mods, "keys")
 
     return f"-{option}={';'.join(mods)}"
 

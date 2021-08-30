@@ -96,6 +96,10 @@ class TestRunServer(unittest.TestCase):
         self.mock_popen = popen_patcher.start()
         self.addCleanup(popen_patcher.stop)
 
+        copy_keys_patcher = mock.patch("dayz_dev_tools.keys.copy_keys")
+        self.mock_copy_keys = copy_keys_patcher.start()
+        self.addCleanup(copy_keys_patcher.stop)
+
     def test_runs_executable_with_provided_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
 
@@ -113,7 +117,7 @@ class TestRunServer(unittest.TestCase):
             "server.exe", "-config=config.cfg", "-profiles=PROFILE"
         ])
 
-    def test_runs_with_mod_parameter_when_mods_are_added(self) -> None:
+    def test_copies_keys_and_runs_with_mod_parameter_when_mods_are_added(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_mod("some-mod")
         settings.add_mod(r"P:\path\to\mod")
@@ -123,13 +127,19 @@ class TestRunServer(unittest.TestCase):
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
 
+        self.mock_copy_keys.assert_has_calls([
+            mock.call(os.path.join("some-mod", "keys"), "keys"),
+            mock.call(os.path.join(r"P:\path\to\mod", "keys"), "keys"),
+            mock.call(os.path.join(expected_workshop_mod_path, "keys"), "keys")
+        ])
+
         self.mock_popen.assert_called_once_with([
             "server.exe",
             "-config=config.cfg",
             f"-mod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
         ])
 
-    def test_runs_with_servermod_parameter_when_server_mods_are_added(self) -> None:
+    def test_copies_keys_and_runs_with_servermod_parameter_when_server_mods_are_added(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_server_mod("some-mod")
         settings.add_server_mod(r"P:\path\to\mod")
@@ -138,6 +148,12 @@ class TestRunServer(unittest.TestCase):
         run_server.run_server(settings)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
+
+        self.mock_copy_keys.assert_has_calls([
+            mock.call(os.path.join("some-mod", "keys"), "keys"),
+            mock.call(os.path.join(r"P:\path\to\mod", "keys"), "keys"),
+            mock.call(os.path.join(expected_workshop_mod_path, "keys"), "keys")
+        ])
 
         self.mock_popen.assert_called_once_with([
             "server.exe",
