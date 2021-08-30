@@ -37,6 +37,9 @@ setuptools.setup(
         "Typing :: Typed"
     ],
     python_requires=">=3.8",
+    install_requires=[
+        "toml"
+    ],
     entry_points={
         "console_scripts": [
             "unpbo=dayz_dev_tools.unpbo:main"
