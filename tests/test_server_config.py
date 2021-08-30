@@ -26,6 +26,13 @@ class TestLoad(unittest.TestCase):
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
 
+    def test_raises_for_other_errors(self) -> None:
+        with open(self.config_file.name, "w") as f:
+            f.write("invalid toml file")
+
+        with self.assertRaises(Exception):
+            server_config.load(self.config_file.name)
+
     def test_returns_defaults_for_attributes_not_set_in_config_file(self) -> None:
         config = server_config.load(self.config_file.name)
 

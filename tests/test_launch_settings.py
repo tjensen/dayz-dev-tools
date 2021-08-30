@@ -128,3 +128,10 @@ class TestLaunchSettings(unittest.TestCase):
 
         with self.assertRaises(Exception):
             settings.load_bundle("missing")
+
+    def test_constructor_raises_if_bundle_exists_but_loading_fails(self) -> None:
+        self.config.bundle_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "bad_bundle.py")
+
+        with self.assertRaises(Exception):
+            launch_settings.LaunchSettings(self.config)
