@@ -72,6 +72,11 @@ def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
 
 
 def main() -> None:
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S%z",
+        level=logging.INFO)
+
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--no-wait", action="store_true", help="Do not wait for server to finish running")

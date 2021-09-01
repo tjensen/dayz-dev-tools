@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 from unittest import mock
@@ -23,6 +24,10 @@ class TestMain(unittest.TestCase):
             bundle_path="BUNDLE-PATH",
             bundles={})
 
+        basic_config_patcher = mock.patch("logging.basicConfig")
+        self.mock_basic_config = basic_config_patcher.start()
+        self.addCleanup(basic_config_patcher.stop)
+
         load_patcher = mock.patch(
             "dayz_dev_tools.server_config.load", return_value=self.server_config)
         self.mock_server_config_load = load_patcher.start()
@@ -43,6 +48,11 @@ class TestMain(unittest.TestCase):
         main([
             "ignored"
         ])
+
+        self.mock_basic_config.assert_called_once_with(
+            format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S%z",
+            level=logging.INFO)
 
         self.mock_server_config_load.assert_called_once_with("server.toml")
 
