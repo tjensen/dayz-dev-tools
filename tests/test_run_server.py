@@ -247,3 +247,32 @@ class TestRunServer(unittest.TestCase):
         self.mock_stream.assert_not_called()
 
         self.mock_popen.return_value.__enter__.return_value.wait.assert_called_once_with()
+
+    def test_streams_script_log_from_profile_in_localappdata_if_profile_is_none(self) -> None:
+        self.mock_newest.return_value = "script_previous.log"
+        self.mock_wait_for_new.return_value = "script_new.log"
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+
+        with mock.patch.dict(os.environ, {"LOCALAPPDATA": "localappdir"}):
+            run_server.run_server(settings, wait=True)
+
+        expected_dir = os.path.join("localappdir", "DayZ")
+
+        self.mock_newest.assert_called_once_with(expected_dir)
+
+        self.mock_wait_for_new.assert_called_once_with(expected_dir, "script_previous.log")
+
+    def test_streams_script_log_from_current_dir_if_profile_is_none_and_localappdata_is_unset(
+            self) -> None:
+        self.mock_newest.return_value = "script_previous.log"
+        self.mock_wait_for_new.return_value = "script_new.log"
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+
+        with mock.patch.dict(os.environ, {}, clear=True):
+            run_server.run_server(settings, wait=True)
+
+        self.mock_newest.assert_called_once_with(".")
+
+        self.mock_wait_for_new.assert_called_once_with(".", "script_previous.log")

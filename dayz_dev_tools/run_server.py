@@ -54,7 +54,12 @@ def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
 
     if wait:
         profile = settings.profile()
-        assert profile is not None  # FIXME
+        if profile is None:
+            if "LOCALAPPDATA" in os.environ:
+                profile = os.path.join(os.environ["LOCALAPPDATA"], "DayZ")
+            else:
+                logging.debug("Server profile directory is unknown!")
+                profile = "."
 
         previous_log_name = script_logs.newest(profile)
 
