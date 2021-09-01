@@ -37,21 +37,7 @@ class TestMain(unittest.TestCase):
         self.mock_run_server = run_server_patcher.start()
         self.addCleanup(run_server_patcher.stop)
 
-    def test_parses_arguments_and_runs_server(self) -> None:
-        mock_launch_settings = self.mock_launch_settings_class.return_value
-
-        main([
-            "ignored",
-            "--config", "CONFIG-FILE"
-        ])
-
-        self.mock_server_config_load.assert_called_once_with("CONFIG-FILE")
-
-        self.mock_launch_settings_class.assert_called_once_with(self.server_config)
-
-        self.mock_run_server.assert_called_once_with(mock_launch_settings)
-
-    def test_loads_default_config_filename_when_not_provided(self) -> None:
+    def test_load_default_config_and_runs_server(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
         main([
@@ -62,7 +48,25 @@ class TestMain(unittest.TestCase):
 
         self.mock_launch_settings_class.assert_called_once_with(self.server_config)
 
-        self.mock_run_server.assert_called_once_with(mock_launch_settings)
+        self.mock_run_server.assert_called_once_with(mock_launch_settings, wait=True)
+
+    def test_loads_config_filename_from_arguments_when_provided(self) -> None:
+        main([
+            "ignored",
+            "--config", "CONFIG-FILE"
+        ])
+
+        self.mock_server_config_load.assert_called_once_with("CONFIG-FILE")
+
+    def test_runs_server_without_waiting_when_specified_in_arguments(self) -> None:
+        mock_launch_settings = self.mock_launch_settings_class.return_value
+
+        main([
+            "ignored",
+            "--no-wait"
+        ])
+
+        self.mock_run_server.assert_called_once_with(mock_launch_settings, wait=False)
 
     def test_loads_bundles_when_specified_in_arguments(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
@@ -98,22 +102,34 @@ class TestRunServer(unittest.TestCase):
         self.mock_popen = popen_patcher.start()
         self.addCleanup(popen_patcher.stop)
 
+        self.mock_popen.return_value.pid = 42
+
         copy_keys_patcher = mock.patch("dayz_dev_tools.keys.copy_keys")
         self.mock_copy_keys = copy_keys_patcher.start()
         self.addCleanup(copy_keys_patcher.stop)
 
+        newest_patcher = mock.patch("dayz_dev_tools.script_logs.newest")
+        self.mock_newest = newest_patcher.start()
+        self.addCleanup(newest_patcher.stop)
+
+        sleep_patcher = mock.patch("time.sleep")
+        self.mock_sleep = sleep_patcher.start()
+        self.addCleanup(sleep_patcher.stop)
+
     def test_runs_executable_with_provided_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings)
+        run_server.run_server(settings, wait=False)
 
         self.mock_popen.assert_called_once_with(["server.exe", "-config=config.cfg"])
+
+        self.mock_newest.assert_not_called()
 
     def test_runs_executable_with_profiles_parameter_when_profile_is_not_none(self) -> None:
         self.server_config.server_profile = "PROFILE"
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings)
+        run_server.run_server(settings, wait=False)
 
         self.mock_popen.assert_called_once_with([
             "server.exe", "-config=config.cfg", "-profiles=PROFILE"
@@ -123,7 +139,7 @@ class TestRunServer(unittest.TestCase):
         self.server_config.mission = "MISSION"
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings)
+        run_server.run_server(settings, wait=False)
 
         self.mock_popen.assert_called_once_with([
             "server.exe", "-config=config.cfg", "-mission=MISSION"
@@ -135,7 +151,7 @@ class TestRunServer(unittest.TestCase):
         settings.add_mod(r"P:\path\to\mod")
         settings.add_mod("@Workshop Mod")
 
-        run_server.run_server(settings)
+        run_server.run_server(settings, wait=False)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
 
@@ -157,7 +173,7 @@ class TestRunServer(unittest.TestCase):
         settings.add_server_mod(r"P:\path\to\mod")
         settings.add_server_mod("@Workshop Mod")
 
-        run_server.run_server(settings)
+        run_server.run_server(settings, wait=False)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
 
@@ -172,3 +188,22 @@ class TestRunServer(unittest.TestCase):
             "-config=config.cfg",
             f"-servermod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
         ])
+
+    def test_waits_for_new_script_log_and_streams_it_when_wait_is_true(self) -> None:
+        self.mock_newest.side_effect = [
+            "script_previous.log",
+            "script_previous.log",
+            "script_previous.log",
+            "script_new.log"
+        ]
+
+        self.server_config.server_profile = "profile/dir"
+        settings = launch_settings.LaunchSettings(self.server_config)
+
+        run_server.run_server(settings, wait=True)
+
+        assert self.mock_newest.call_count == 4
+        self.mock_newest.assert_called_with("profile/dir")
+
+        assert self.mock_sleep.call_count == 2
+        self.mock_sleep.assert_called_with(1)

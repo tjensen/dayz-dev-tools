@@ -1,10 +1,13 @@
 import argparse
+import logging
 import os
 import subprocess
+import time
 import typing
 
 from dayz_dev_tools import keys
 from dayz_dev_tools import launch_settings
+from dayz_dev_tools import script_logs
 from dayz_dev_tools import server_config
 
 
@@ -28,7 +31,7 @@ def _mod_parameter(option: str, mods: typing.List[str], workshop_directory: str)
     return f"-{option}={';'.join(mods)}"
 
 
-def run_server(settings: launch_settings.LaunchSettings) -> None:
+def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
     args = [
         settings.executable(),
         f"-config={settings.config()}"
@@ -47,12 +50,31 @@ def run_server(settings: launch_settings.LaunchSettings) -> None:
         args.append(
             _mod_parameter("servermod", settings.server_mods(), settings.workshop_directory()))
 
-    with subprocess.Popen(args):
-        pass
+    logging.info(f"Running server with: {args}")
+
+    if wait:
+        profile = settings.profile()
+        assert profile is not None
+
+        previous_log_name = script_logs.newest(profile)
+
+        with subprocess.Popen(args) as proc:
+            logging.info("Server started with PID {proc.pid}; waiting for new script log...")
+            while (script_logs.newest(profile)) == previous_log_name:
+                time.sleep(1)
+
+            logging.info("Streaming script log:")
+
+    else:
+        proc = subprocess.Popen(args)
+
+        logging.info(f"Server started with PID {proc.pid}")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--no-wait", action="store_true", help="Do not wait for server to finish running")
     parser.add_argument(
         "-c", "--config", default="server.toml", help="Read configuration from this file")
     parser.add_argument(
@@ -66,7 +88,7 @@ def main() -> None:
     for bundle in args.bundles:
         settings.load_bundle(bundle)
 
-    run_server(settings)
+    run_server(settings, wait=not args.no_wait)
 
 
 if __name__ == "__main__":
