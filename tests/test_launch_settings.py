@@ -108,7 +108,7 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.server_mods() == ["MOD1", "MOD2", "MOD3"]
 
-    def test_mission_returns_none_by_default(self) -> None:
+    def test_mission_returns_specified_mission_directory(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
         assert settings.mission() is None

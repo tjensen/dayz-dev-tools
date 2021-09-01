@@ -15,7 +15,7 @@ class LaunchSettings:
     _bundle_module: typing.Optional[types.ModuleType] = None
     _mods: typing.List[str]
     _server_mods: typing.List[str]
-    _mission: typing.Optional[str] = None
+    _mission: typing.Optional[str]
     _bundles: typing.Dict[str, server_config.BundleConfig]
 
     def __init__(self, config: server_config.ServerConfig) -> None:
@@ -25,6 +25,7 @@ class LaunchSettings:
         self._workshop_path = config.workshop_directory
         self._mods = []
         self._server_mods = []
+        self._mission = config.mission
         self._bundles = config.bundles
 
         try:

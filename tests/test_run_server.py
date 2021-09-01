@@ -119,6 +119,16 @@ class TestRunServer(unittest.TestCase):
             "server.exe", "-config=config.cfg", "-profiles=PROFILE"
         ])
 
+    def test_runs_executable_with_mission_parameter_when_mission_is_not_none(self) -> None:
+        self.server_config.mission = "MISSION"
+        settings = launch_settings.LaunchSettings(self.server_config)
+
+        run_server.run_server(settings)
+
+        self.mock_popen.assert_called_once_with([
+            "server.exe", "-config=config.cfg", "-mission=MISSION"
+        ])
+
     def test_copies_keys_and_runs_with_mod_parameter_when_mods_are_added(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_mod("some-mod")

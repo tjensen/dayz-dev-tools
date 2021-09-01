@@ -24,6 +24,7 @@ class ServerConfig:
     workshop_directory: str
     bundles: typing.Dict[str, BundleConfig]
     server_profile: typing.Optional[str] = None
+    mission: typing.Optional[str] = None
 
 
 def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
@@ -52,6 +53,7 @@ def load(filename: str) -> ServerConfig:
         server_executable=config["server"]["executable"],
         server_config=config["server"]["config"],
         server_profile=config["server"].get("profile"),
+        mission=config["server"].get("mission"),
         workshop_directory=config["workshop"]["directory"],
         bundle_path=config["server"]["bundles"],
         bundles={
