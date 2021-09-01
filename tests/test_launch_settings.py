@@ -17,7 +17,20 @@ class TestLaunchSettings(unittest.TestCase):
             server_executable="server.exe",
             server_config="config.cfg",
             workshop_directory="workshop/dir",
-            bundle_path=BUNDLE_PATH)
+            bundle_path=BUNDLE_PATH,
+            bundles={
+                "override_all": server_config.BundleConfig(
+                    executable="OVERRIDDEN-EXE",
+                    config="OVERRIDDEN-CFG",
+                    profile="OVERRIDDEN-PROFILE",
+                    workshop="OVERRIDDEN-WORKSHOP",
+                    mods=["mod1", "mod2", "mod3"],
+                    server_mods=["mod4", "mod5", "mod6"],
+                    mission="OVERRIDDEN-MISSION"),
+                "override_some": server_config.BundleConfig(
+                    mods=["mod7", "mod8"],
+                    server_mods=["mod9"])
+            })
 
     def test_executable_returns_specified_executable(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
@@ -107,6 +120,32 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.mission() == "MISSION"
 
+    def test_load_bundle_loads_bundle_from_config_when_present_in_config(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        settings.load_bundle("override_all")
+
+        assert settings.executable() == "OVERRIDDEN-EXE"
+        assert settings.config() == "OVERRIDDEN-CFG"
+        assert settings.profile() == "OVERRIDDEN-PROFILE"
+        assert settings.workshop_directory() == "OVERRIDDEN-WORKSHOP"
+        assert settings.mods() == ["mod1", "mod2", "mod3"]
+        assert settings.server_mods() == ["mod4", "mod5", "mod6"]
+        assert settings.mission() == "OVERRIDDEN-MISSION"
+
+    def test_load_bundle_from_config_only_sets_settings_in_config(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        settings.load_bundle("override_some")
+
+        assert settings.executable() == "server.exe"
+        assert settings.config() == "config.cfg"
+        assert settings.profile() is None
+        assert settings.workshop_directory() == "workshop/dir"
+        assert settings.mods() == ["mod7", "mod8"]
+        assert settings.server_mods() == ["mod9"]
+        assert settings.mission() is None
+
     def test_load_bundle_calls_bundle_function_by_name_in_bundle_module(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
@@ -114,6 +153,16 @@ class TestLaunchSettings(unittest.TestCase):
             settings.load_bundle("bundle1")
 
         mock_bundle1.assert_called_once_with(settings)
+
+    def test_load_bundle_does_not_call_function_in_module_if_bundle_name_is_in_config(self) -> None:
+        self.config.bundles["bundle1"] = self.config.bundles["override_all"]
+
+        settings = launch_settings.LaunchSettings(self.config)
+
+        with mock.patch("bundles.bundle1") as mock_bundle1:
+            settings.load_bundle("bundle1")
+
+        mock_bundle1.assert_not_called()
 
     def test_load_bundle_raises_if_bundle_path_is_invalid(self) -> None:
         self.config.bundle_path = "invalid"

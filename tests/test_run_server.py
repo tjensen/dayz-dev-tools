@@ -20,7 +20,8 @@ class TestMain(unittest.TestCase):
             server_executable="SERVER-EXECUTABLE",
             server_config="SERVER-CONFIG",
             workshop_directory="WORKSHOP-DIRECTORY",
-            bundle_path="BUNDLE-PATH")
+            bundle_path="BUNDLE-PATH",
+            bundles={})
 
         load_patcher = mock.patch(
             "dayz_dev_tools.server_config.load", return_value=self.server_config)
@@ -90,7 +91,8 @@ class TestRunServer(unittest.TestCase):
             server_executable="server.exe",
             server_config="config.cfg",
             workshop_directory="workshopdir",
-            bundle_path="dont-care")
+            bundle_path="dont-care",
+            bundles={})
 
         popen_patcher = mock.patch("subprocess.Popen", autospec=True)
         self.mock_popen = popen_patcher.start()
