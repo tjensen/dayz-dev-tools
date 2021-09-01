@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 import subprocess
-import time
+import sys
 import typing
 
 from dayz_dev_tools import keys
@@ -54,16 +54,24 @@ def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
 
     if wait:
         profile = settings.profile()
-        assert profile is not None
+        assert profile is not None  # FIXME
 
         previous_log_name = script_logs.newest(profile)
 
         with subprocess.Popen(args) as proc:
-            logging.info("Server started with PID {proc.pid}; waiting for new script log...")
-            while (script_logs.newest(profile)) == previous_log_name:
-                time.sleep(1)
+            logging.info(f"Server started with PID {proc.pid}; waiting for new script log...")
+            new_log_name = script_logs.wait_for_new(profile, previous_log_name)
 
-            logging.info("Streaming script log:")
+            if new_log_name is None:
+                logging.info("No script log found")
+            else:
+                logging.info("Streaming script log:")
+                with open(new_log_name, "r") as log:
+                    script_logs.stream(sys.stdout, log, lambda: proc.poll() is None)
+
+            status = proc.wait()
+
+            logging.info(f"Server finished with status {status}")
 
     else:
         proc = subprocess.Popen(args)

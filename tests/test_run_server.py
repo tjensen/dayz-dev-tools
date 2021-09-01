@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import unittest
 from unittest import mock
 
@@ -122,9 +123,17 @@ class TestRunServer(unittest.TestCase):
         self.mock_newest = newest_patcher.start()
         self.addCleanup(newest_patcher.stop)
 
-        sleep_patcher = mock.patch("time.sleep")
-        self.mock_sleep = sleep_patcher.start()
-        self.addCleanup(sleep_patcher.stop)
+        wait_for_new_patcher = mock.patch("dayz_dev_tools.script_logs.wait_for_new")
+        self.mock_wait_for_new = wait_for_new_patcher.start()
+        self.addCleanup(wait_for_new_patcher.stop)
+
+        open_patcher = mock.patch("builtins.open", mock.mock_open())
+        self.mock_open = open_patcher.start()
+        self.addCleanup(open_patcher.stop)
+
+        stream_patcher = mock.patch("dayz_dev_tools.script_logs.stream")
+        self.mock_stream = stream_patcher.start()
+        self.addCleanup(stream_patcher.stop)
 
     def test_runs_executable_with_provided_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
@@ -134,6 +143,8 @@ class TestRunServer(unittest.TestCase):
         self.mock_popen.assert_called_once_with(["server.exe", "-config=config.cfg"])
 
         self.mock_newest.assert_not_called()
+
+        self.mock_popen.return_value.wait.assert_not_called()
 
     def test_runs_executable_with_profiles_parameter_when_profile_is_not_none(self) -> None:
         self.server_config.server_profile = "PROFILE"
@@ -200,20 +211,39 @@ class TestRunServer(unittest.TestCase):
         ])
 
     def test_waits_for_new_script_log_and_streams_it_when_wait_is_true(self) -> None:
-        self.mock_newest.side_effect = [
-            "script_previous.log",
-            "script_previous.log",
-            "script_previous.log",
-            "script_new.log"
-        ]
+        self.mock_newest.return_value = "script_previous.log"
+        self.mock_wait_for_new.return_value = "script_new.log"
 
         self.server_config.server_profile = "profile/dir"
         settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings, wait=True)
 
-        assert self.mock_newest.call_count == 4
-        self.mock_newest.assert_called_with("profile/dir")
+        self.mock_newest.assert_called_once_with("profile/dir")
 
-        assert self.mock_sleep.call_count == 2
-        self.mock_sleep.assert_called_with(1)
+        self.mock_wait_for_new.assert_called_once_with("profile/dir", "script_previous.log")
+
+        self.mock_open.assert_called_once_with("script_new.log", "r")
+
+        self.mock_stream.assert_called_once_with(sys.stdout, self.mock_open.return_value, mock.ANY)
+
+        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_once_with()
+
+        self.mock_popen.return_value.__enter__.return_value.poll.side_effect = [None, None, 123]
+
+        assert self.mock_stream.call_args[0][2]()
+        assert self.mock_stream.call_args[0][2]()
+        assert not self.mock_stream.call_args[0][2]()
+
+    def test_does_not_stream_script_log_if_no_new_script_log_is_created(self) -> None:
+        self.mock_wait_for_new.return_value = None
+
+        self.server_config.server_profile = "profile/dir"
+        settings = launch_settings.LaunchSettings(self.server_config)
+
+        run_server.run_server(settings, wait=True)
+
+        self.mock_open.assert_not_called()
+        self.mock_stream.assert_not_called()
+
+        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_once_with()
