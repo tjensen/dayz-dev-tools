@@ -85,19 +85,21 @@ def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
 
 
 def main() -> None:
-    logging.basicConfig(
-        format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S%z",
-        level=logging.INFO)
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--no-wait", action="store_true", help="Do not wait for server to finish running")
     parser.add_argument(
         "-c", "--config", default="server.toml", help="Read configuration from this file")
     parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug logs")
+    parser.add_argument(
         "bundles", nargs="*", metavar="BUNDLE", help="The name of a function in the bundles module")
     args = parser.parse_args()
+
+    logging.basicConfig(
+        format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S%z",
+        level=logging.DEBUG if args.debug else logging.INFO)
 
     config = server_config.load(args.config)
 

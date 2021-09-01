@@ -79,6 +79,17 @@ class TestMain(unittest.TestCase):
 
         self.mock_run_server.assert_called_once_with(mock_launch_settings, wait=False)
 
+    def test_sets_log_level_to_debug_when_debug_option_is_specified(self) -> None:
+        main([
+            "ignored",
+            "--debug"
+        ])
+
+        self.mock_basic_config.assert_called_once_with(
+            format=mock.ANY,
+            datefmt=mock.ANY,
+            level=logging.DEBUG)
+
     def test_loads_bundles_when_specified_in_arguments(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
