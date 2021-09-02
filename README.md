@@ -76,7 +76,7 @@ flexibility than config file bundles.
 #### Configuration
 
 The `run-server` command can be configured using a config file, named
-`server.toml` by default.
+`server.toml` by default. Most settings are in the `server` table of the file.
 
 ##### Server Executable
 
@@ -140,7 +140,7 @@ below.
 
 By default, `run-server` will load mods prefixed with `@` from
 the `C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop` directory.
-To override this directory, set the `workshop_directory` key:
+To override this directory, set the `directory` key in the `workshop` table:
 
 ```toml
 [workshop]
