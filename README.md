@@ -60,7 +60,7 @@ Bundles defined in the config file generally look like:
 ```toml
 [bundle.mybundle]
 mods = '@CF;@MasPuertas;P:\MyModPack'
-mission = "mpmissions/dayzoffline.enoch"
+mission = 'mpmissions\dayzoffline.enoch'
 ```
 
 To load a bundle, specify it on the command line as a positional argument. For
@@ -119,7 +119,7 @@ mission directory, set the `mission` key:
 
 ```toml
 [server]
-mission = "mpmissions/dayzoffline.enoch"
+mission = 'mpmissions\dayzoffline.enoch'
 ```
 
 #### Bundles Python Module
@@ -130,7 +130,7 @@ key:
 
 ```toml
 [server]
-bundles = "path/to/module.py"
+bundles = 'path\to\module.py'
 ```
 
 Bundles can also be loaded from the `run-server` config file, as described
@@ -144,7 +144,7 @@ To override this directory, set the `directory` key in the `workshop` table:
 
 ```toml
 [workshop]
-directory = "E:/DayZ/Workshop"
+directory = 'E:\DayZ\Workshop'
 ```
 
 #### Bundles
@@ -172,14 +172,14 @@ is done by setting the `executable` key:
 
 ```toml
 [bundle.example]
-executable = "path/to/server.exe"
+executable = 'path\to\server.exe'
 ```
 
 In Python, this is done by calling the `set_executable` method:
 
 ```python
 def example(settings):
-    settings.set_executable("path/to/server.exe")
+    settings.set_executable(r"path\to\server.exe")
 ```
 
 ##### Server Configuration
@@ -189,14 +189,14 @@ file, this is done by setting the `config` key:
 
 ```toml
 [bundle.example]
-config = "path/to/config.cfg"
+config = 'path\to\config.cfg'
 ```
 
 In Python, this is done by calling the `set_config` method:
 
 ```python
 def example(settings):
-    settings.set_config("path/to/config.cfg")
+    settings.set_config(r"path\to\config.cfg")
 ```
 
 ##### Server Profile
@@ -206,14 +206,14 @@ this is done by setting the `profile` key:
 
 ```toml
 [bundle.example]
-profile = "path/to/profile"
+profile = 'path\to\profile'
 ```
 
 In Python, this is done by calling the `set_profile` method:
 
 ```python
 def example(settings):
-    settings.set_profile("path/to/profile")
+    settings.set_profile(r"path\to\profile")
 ```
 
 ##### DayZ Mission
@@ -223,14 +223,14 @@ done by setting the `mission` key:
 
 ```toml
 [bundle.example]
-mission = "path/to/mission"
+mission = 'path\to\mission'
 ```
 
 In Python, this is done by calling the `set_mission` method:
 
 ```python
 def example(settings):
-    settings.set_mission("path/to/mission")
+    settings.set_mission(r"path\to\mission")
 ```
 
 ##### DayZ Workshop Directory
@@ -240,14 +240,14 @@ done by setting the `workshop` key:
 
 ```toml
 [bundle.example]
-workshop = "path/to/workshop"
+workshop = 'path\to\workshop'
 ```
 
 In Python, this is done by calling the `set_workshop_directory` method:
 
 ```python
 def example(settings):
-    settings.set_workshop_directory("path/to/workshop")
+    settings.set_workshop_directory(r"path\to\workshop")
 ```
 
 ##### Mods
