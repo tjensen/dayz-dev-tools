@@ -51,7 +51,7 @@ class TestMain(unittest.TestCase):
         ])
 
         self.mock_basic_config.assert_called_once_with(
-            format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
+            format="%(asctime)s %(levelname)s:%(message)s",
             datefmt="%Y-%m-%d %H:%M:%S%z",
             level=logging.INFO)
 
@@ -86,8 +86,8 @@ class TestMain(unittest.TestCase):
         ])
 
         self.mock_basic_config.assert_called_once_with(
-            format=mock.ANY,
-            datefmt=mock.ANY,
+            format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S%z",
             level=logging.DEBUG)
 
     def test_loads_bundles_when_specified_in_arguments(self) -> None:
@@ -107,6 +107,16 @@ class TestMain(unittest.TestCase):
             mock.call("bundle2"),
             mock.call("bundle3")
         ])
+
+    def test_raises_systemexit_on_error(self) -> None:
+        self.mock_run_server.side_effect = Exception("run_server error")
+
+        with self.assertRaises(SystemExit) as error:
+            main([
+                "ignored"
+            ])
+
+        assert error.exception.code == 1
 
 
 class TestRunServer(unittest.TestCase):

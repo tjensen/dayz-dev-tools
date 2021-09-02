@@ -103,19 +103,30 @@ def main() -> None:
         " the bundles module, to be loaded in order to add mods or modify other server settings")
     args = parser.parse_args()
 
-    logging.basicConfig(
-        format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S%z",
-        level=logging.DEBUG if args.debug else logging.INFO)
+    if args.debug:
+        logging.basicConfig(
+            format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S%z",
+            level=logging.DEBUG)
+    else:
+        logging.basicConfig(
+            format="%(asctime)s %(levelname)s:%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S%z",
+            level=logging.INFO)
 
-    config = server_config.load(args.config)
+    try:
+        config = server_config.load(args.config)
 
-    settings = launch_settings.LaunchSettings(config)
+        settings = launch_settings.LaunchSettings(config)
 
-    for bundle in args.bundles:
-        settings.load_bundle(bundle)
+        for bundle in args.bundles:
+            settings.load_bundle(bundle)
 
-    run_server(settings, wait=not args.no_wait)
+        run_server(settings, wait=not args.no_wait)
+    except Exception as error:
+        logging.debug("Uncaught exception in main", exc_info=True)
+        logging.info(f"ERROR: {error}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
