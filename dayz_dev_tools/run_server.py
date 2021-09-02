@@ -128,7 +128,7 @@ def main() -> None:
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
-        logging.info(f"ERROR: {error}")
+        logging.error(str(error))
         sys.exit(1)
 
 
