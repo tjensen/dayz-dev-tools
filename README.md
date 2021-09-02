@@ -59,7 +59,7 @@ Bundles defined in the config file generally look like:
 
 ```toml
 [bundle.mybundle]
-mods = "@CF;@MasPuertas;P:/MyModPack"
+mods = '@CF;@MasPuertas;P:\MyModPack'
 mission = "mpmissions/dayzoffline.enoch"
 ```
 
@@ -259,10 +259,10 @@ without `@` prefixes are treated as paths. For example:
 
 ```toml
 [bundle.example1]
-mods = "@Mod1;@Mod2;P:/LocalModDir
+mods = '@Mod1;@Mod2;P:\LocalModDir'
 
 [bundle.example2]
-mods = ["@Mod1", "@Mod2", "P:/LocalModDir"]
+mods = [ '@Mod1', '@Mod2', 'P:\LocalModDir' ]
 ```
 
 In Python, this is done by calling the `add_mod` method:
@@ -271,7 +271,7 @@ In Python, this is done by calling the `add_mod` method:
 def example(settings):
     settings.add_mod("@Mod1")
     settings.add_mod("@Mod2")
-    settings.add_mod("P:/LocalModDir")
+    settings.add_mod(r"P:\LocalModDir")
 ```
 
 ##### Server Mods
@@ -283,10 +283,10 @@ directory. Mod names without `@` prefixes are treated as paths. For example:
 
 ```toml
 [bundle.example1]
-server_mods = "@Mod1;@Mod2;P:/LocalModDir
+server_mods = '@Mod1;@Mod2;P:\LocalModDir'
 
 [bundle.example2]
-server_mods = ["@Mod1", "@Mod2", "P:/LocalModDir"]
+server_mods = [ '@Mod1', '@Mod2', 'P:\LocalModDir' ]
 ```
 
 In Python, this is done by calling the `add_server_mod` method:
@@ -295,5 +295,5 @@ In Python, this is done by calling the `add_server_mod` method:
 def example(settings):
     settings.add_server_mod("@Mod1")
     settings.add_server_mod("@Mod2")
-    settings.add_server_mod("P:/LocalModDir")
+    settings.add_server_mod(r"P:\LocalModDir")
 ```
