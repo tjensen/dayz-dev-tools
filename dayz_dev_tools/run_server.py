@@ -76,7 +76,7 @@ def run_server(
                 logging.info("No script log found")
             else:
                 logging.info("Streaming script log:")
-                with open(new_log_name, "r") as log:
+                with open(new_log_name, "r", errors="surrogateescape") as log:
                     script_logs.stream(sys.stdout, log, lambda: proc.poll() is None)
 
             status = proc.wait()

@@ -280,7 +280,7 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_wait_for_new.assert_called_once_with("profile/dir", "script_previous.log")
 
-        self.mock_open.assert_called_once_with("script_new.log", "r")
+        self.mock_open.assert_called_once_with("script_new.log", "r", errors="surrogateescape")
 
         self.mock_stream.assert_called_once_with(sys.stdout, self.mock_open.return_value, mock.ANY)
 
