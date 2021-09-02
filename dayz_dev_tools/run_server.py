@@ -11,6 +11,9 @@ from dayz_dev_tools import script_logs
 from dayz_dev_tools import server_config
 
 
+DEFAULT_CONFIG_FILE = "server.toml"
+
+
 def _resolve_mod(mod: str, workshop_directory: str) -> str:
     if mod.startswith("@"):
         return os.path.join(workshop_directory, mod)
@@ -87,13 +90,17 @@ def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--no-wait", action="store_true", help="Do not wait for server to finish running")
+        "-c", "--config", default=DEFAULT_CONFIG_FILE,
+        help=f"read configuration from this file (default: {DEFAULT_CONFIG_FILE})")
     parser.add_argument(
-        "-c", "--config", default="server.toml", help="Read configuration from this file")
+        "-d", "--debug", action="store_true", help="enable debug logs")
     parser.add_argument(
-        "-d", "--debug", action="store_true", help="Enable debug logs")
+        "--no-wait", action="store_true",
+        help="do not wait for server to finish running before exiting")
     parser.add_argument(
-        "bundles", nargs="*", metavar="BUNDLE", help="The name of a function in the bundles module")
+        "bundles", nargs="*", metavar="BUNDLE",
+        help="the name of a bundle, defined either in the configuration file or as a function in"
+        " the bundles module, to be loaded in order to add mods or modify other server settings")
     args = parser.parse_args()
 
     logging.basicConfig(
