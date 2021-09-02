@@ -149,7 +149,7 @@ class TestLaunchSettings(unittest.TestCase):
     def test_load_bundle_calls_bundle_function_by_name_in_bundle_module(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
-        with mock.patch("bundles.bundle1") as mock_bundle1:
+        with mock.patch("__dayz_server_bundles__.bundle1") as mock_bundle1:
             settings.load_bundle("bundle1")
 
         mock_bundle1.assert_called_once_with(settings)
@@ -159,7 +159,7 @@ class TestLaunchSettings(unittest.TestCase):
 
         settings = launch_settings.LaunchSettings(self.config)
 
-        with mock.patch("bundles.bundle1") as mock_bundle1:
+        with mock.patch("__dayz_server_bundles__.bundle1") as mock_bundle1:
             settings.load_bundle("bundle1")
 
         mock_bundle1.assert_not_called()

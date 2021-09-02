@@ -29,7 +29,8 @@ class LaunchSettings:
         self._bundles = config.bundles
 
         try:
-            loader = importlib.machinery.SourceFileLoader("bundles", config.bundle_path)
+            loader = importlib.machinery.SourceFileLoader(
+                "__dayz_server_bundles__", config.bundle_path)
             self._bundle_module = loader.load_module()
         except FileNotFoundError as error:
             logging.debug(f"Unable to load bundles at {config.bundle_path}: {error}")
