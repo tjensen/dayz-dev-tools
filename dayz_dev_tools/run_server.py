@@ -34,7 +34,9 @@ def _mod_parameter(option: str, mods: typing.List[str], workshop_directory: str)
     return f"-{option}={';'.join(mods)}"
 
 
-def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
+def run_server(
+    settings: launch_settings.LaunchSettings, *, localappdata: typing.Optional[str], wait: bool
+) -> None:
     args = [
         settings.executable(),
         f"-config={settings.config()}"
@@ -58,11 +60,11 @@ def run_server(settings: launch_settings.LaunchSettings, *, wait: bool) -> None:
     if wait:
         profile = settings.profile()
         if profile is None:
-            if "LOCALAPPDATA" in os.environ:
-                profile = os.path.join(os.environ["LOCALAPPDATA"], "DayZ")
-            else:
+            if localappdata is None:
                 logging.debug("Server profile directory is unknown!")
                 profile = "."
+            else:
+                profile = os.path.join(localappdata, "DayZ")
 
         previous_log_name = script_logs.newest(profile)
 
@@ -122,7 +124,8 @@ def main() -> None:
         for bundle in args.bundles:
             settings.load_bundle(bundle)
 
-        run_server(settings, wait=not args.no_wait)
+        run_server(settings, localappdata=os.environ.get("LOCALAPPDATA"), wait=not args.no_wait)
+
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
         logging.info(f"ERROR: {error}")

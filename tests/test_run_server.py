@@ -43,12 +43,16 @@ class TestMain(unittest.TestCase):
         self.mock_run_server = run_server_patcher.start()
         self.addCleanup(run_server_patcher.stop)
 
-    def test_load_default_config_and_runs_server(self) -> None:
+    def test_loads_default_config_and_runs_server(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
-        main([
-            "ignored"
-        ])
+        main(
+            [
+                "ignored"
+            ],
+            {
+            }
+        )
 
         self.mock_basic_config.assert_called_once_with(
             format="%(asctime)s %(levelname)s:%(message)s",
@@ -59,31 +63,57 @@ class TestMain(unittest.TestCase):
 
         self.mock_launch_settings_class.assert_called_once_with(self.server_config)
 
-        self.mock_run_server.assert_called_once_with(mock_launch_settings, wait=True)
+        self.mock_run_server.assert_called_once_with(
+            mock_launch_settings, localappdata=None, wait=True)
+
+    def test_passes_localappdata_when_set_in_environment(self) -> None:
+        mock_launch_settings = self.mock_launch_settings_class.return_value
+
+        main(
+            [
+                "ignored"
+            ],
+            {
+                "LOCALAPPDATA": "local/app/data",
+            }
+        )
+
+        self.mock_run_server.assert_called_once_with(
+            mock_launch_settings, localappdata="local/app/data", wait=True)
 
     def test_loads_config_filename_from_arguments_when_provided(self) -> None:
-        main([
-            "ignored",
-            "--config", "CONFIG-FILE"
-        ])
+        main(
+            [
+                "ignored",
+                "--config", "CONFIG-FILE"
+            ],
+            {}
+        )
 
         self.mock_server_config_load.assert_called_once_with("CONFIG-FILE")
 
     def test_runs_server_without_waiting_when_specified_in_arguments(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
-        main([
-            "ignored",
-            "--no-wait"
-        ])
+        main(
+            [
+                "ignored",
+                "--no-wait"
+            ],
+            {}
+        )
 
-        self.mock_run_server.assert_called_once_with(mock_launch_settings, wait=False)
+        self.mock_run_server.assert_called_once_with(
+            mock_launch_settings, localappdata=None, wait=False)
 
     def test_sets_log_level_to_debug_when_debug_option_is_specified(self) -> None:
-        main([
-            "ignored",
-            "--debug"
-        ])
+        main(
+            [
+                "ignored",
+                "--debug"
+            ],
+            {}
+        )
 
         self.mock_basic_config.assert_called_once_with(
             format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
@@ -93,12 +123,15 @@ class TestMain(unittest.TestCase):
     def test_loads_bundles_when_specified_in_arguments(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
 
-        main([
-            "ignored",
-            "bundle1",
-            "bundle2",
-            "bundle3"
-        ])
+        main(
+            [
+                "ignored",
+                "bundle1",
+                "bundle2",
+                "bundle3"
+            ],
+            {}
+        )
 
         assert mock_launch_settings.load_bundle.call_count == 3
 
@@ -112,9 +145,12 @@ class TestMain(unittest.TestCase):
         self.mock_run_server.side_effect = Exception("run_server error")
 
         with self.assertRaises(SystemExit) as error:
-            main([
-                "ignored"
-            ])
+            main(
+                [
+                    "ignored"
+                ],
+                {}
+            )
 
         assert error.exception.code == 1
 
@@ -159,7 +195,7 @@ class TestRunServer(unittest.TestCase):
     def test_runs_executable_with_provided_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings, wait=False)
+        run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         self.mock_popen.assert_called_once_with(["server.exe", "-config=config.cfg"])
 
@@ -171,7 +207,7 @@ class TestRunServer(unittest.TestCase):
         self.server_config.server_profile = "PROFILE"
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings, wait=False)
+        run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         self.mock_popen.assert_called_once_with([
             "server.exe", "-config=config.cfg", "-profiles=PROFILE"
@@ -181,7 +217,7 @@ class TestRunServer(unittest.TestCase):
         self.server_config.mission = "MISSION"
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings, wait=False)
+        run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         self.mock_popen.assert_called_once_with([
             "server.exe", "-config=config.cfg", "-mission=MISSION"
@@ -193,7 +229,7 @@ class TestRunServer(unittest.TestCase):
         settings.add_mod(r"P:\path\to\mod")
         settings.add_mod("@Workshop Mod")
 
-        run_server.run_server(settings, wait=False)
+        run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
 
@@ -215,7 +251,7 @@ class TestRunServer(unittest.TestCase):
         settings.add_server_mod(r"P:\path\to\mod")
         settings.add_server_mod("@Workshop Mod")
 
-        run_server.run_server(settings, wait=False)
+        run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
 
@@ -238,7 +274,7 @@ class TestRunServer(unittest.TestCase):
         self.server_config.server_profile = "profile/dir"
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings, wait=True)
+        run_server.run_server(settings, localappdata="localappdata", wait=True)
 
         self.mock_newest.assert_called_once_with("profile/dir")
 
@@ -262,7 +298,7 @@ class TestRunServer(unittest.TestCase):
         self.server_config.server_profile = "profile/dir"
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        run_server.run_server(settings, wait=True)
+        run_server.run_server(settings, localappdata="localappdata", wait=True)
 
         self.mock_open.assert_not_called()
         self.mock_stream.assert_not_called()
@@ -275,10 +311,9 @@ class TestRunServer(unittest.TestCase):
 
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        with mock.patch.dict(os.environ, {"LOCALAPPDATA": "localappdir"}):
-            run_server.run_server(settings, wait=True)
+        run_server.run_server(settings, localappdata="localappdata", wait=True)
 
-        expected_dir = os.path.join("localappdir", "DayZ")
+        expected_dir = os.path.join("localappdata", "DayZ")
 
         self.mock_newest.assert_called_once_with(expected_dir)
 
@@ -291,8 +326,7 @@ class TestRunServer(unittest.TestCase):
 
         settings = launch_settings.LaunchSettings(self.server_config)
 
-        with mock.patch.dict(os.environ, {}, clear=True):
-            run_server.run_server(settings, wait=True)
+        run_server.run_server(settings, localappdata=None, wait=True)
 
         self.mock_newest.assert_called_once_with(".")
 
