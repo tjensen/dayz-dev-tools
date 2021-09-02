@@ -37,8 +37,8 @@ def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
 def load(filename: str) -> ServerConfig:
     try:
         config = toml.load(filename)
-    except FileNotFoundError:
-        logging.debug(f"Unable to read config file ({filename})", exc_info=True)
+    except FileNotFoundError as error:
+        logging.debug(f"Unable to read config file ({filename}): {error}")
         config = {}
 
     config.setdefault("server", {})

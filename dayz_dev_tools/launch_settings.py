@@ -31,8 +31,8 @@ class LaunchSettings:
         try:
             loader = importlib.machinery.SourceFileLoader("bundles", config.bundle_path)
             self._bundle_module = loader.load_module()
-        except FileNotFoundError:
-            logging.debug(f"Unable to load bundles at: {config.bundle_path}", exc_info=True)
+        except FileNotFoundError as error:
+            logging.debug(f"Unable to load bundles at {config.bundle_path}: {error}")
 
     def executable(self) -> str:
         return self._executable
