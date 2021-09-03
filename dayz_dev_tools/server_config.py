@@ -106,7 +106,8 @@ def load(filename: str) -> ServerConfig:
         config = _validate(toml.load(filename), CONFIG_SCHEMA)
     except toml.TomlDecodeError as error:
         raise Exception(
-            f"Configuration error in {filename}:{error.lineno}:{error.colno}"
+            # TODO: Figure out why mypy thinks TomlDecodeError doesn't have lineno, colno, and msg
+            f"Configuration error in {filename}:{error.lineno}:{error.colno}"  # type: ignore
             f": {error.msg}") \
             from error
     except FileNotFoundError as error:
