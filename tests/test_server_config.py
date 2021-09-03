@@ -32,8 +32,25 @@ class TestLoad(unittest.TestCase):
         with open(self.config_file.name, "w") as f:
             f.write("invalid toml file")
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(Exception) as error:
             server_config.load(self.config_file.name)
+
+        assert str(error.exception) == \
+            f"Configuration error in {self.config_file.name}:1:9: Found invalid character in key" \
+            " name: 't'. Try quoting the key name."
+
+    def test_requires_settings_to_have_correct_types(self) -> None:
+        with open(self.config_file.name, "w") as f:
+            f.write("""\
+[server]
+executable = 42
+""")
+
+        with self.assertRaises(Exception) as error:
+            server_config.load(self.config_file.name)
+
+        assert str(error.exception) == \
+            "Configuration error at server.executable: 42 is not of type 'string'"
 
     def test_returns_defaults_for_attributes_not_set_in_config_file(self) -> None:
         config = server_config.load(self.config_file.name)
@@ -114,3 +131,16 @@ server_mods = "mod3"
                 server_mods=["mod3"]),
             "override_nothing": server_config.BundleConfig()
         }
+
+    def test_requires_bundles_to_have_correct_types(self) -> None:
+        with open(self.config_file.name, "w") as f:
+            f.write("""\
+[bundle.invalid]
+mods = 2112
+""")
+
+        with self.assertRaises(Exception) as error:
+            server_config.load(self.config_file.name)
+
+        assert str(error.exception) == \
+            "Configuration error at bundle.invalid.mods: 2112 is not of type 'string'"

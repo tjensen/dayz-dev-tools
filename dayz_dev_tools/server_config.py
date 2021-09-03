@@ -2,7 +2,74 @@ import dataclasses
 import logging
 import typing
 
+import jsonschema
 import toml
+
+
+CONFIG_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "server": {
+            "type": "object",
+            "properties": {
+                "executable": {"type": "string"},
+                "config": {"type": "string"},
+                "profile": {"type": "string"},
+                "mission": {"type": "string"},
+                "bundles": {"type": "string"}
+            }
+        },
+        "workshop": {
+            "type": "object",
+            "properties": {
+                "directory": {"type": "string"}
+            }
+        }
+    }
+}
+
+BUNDLE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "executable": {"type": "string"},
+        "config": {"type": "string"},
+        "profile": {"type": "string"},
+        "workshop": {"type": "string"},
+        "mods": {
+            "oneOf": [
+                {"type": "string"},
+                {
+                    "type": "array",
+                    "items": {"type": "string"}
+                }
+            ]
+        },
+        "server_mods": {
+            "oneOf": [
+                {"type": "string"},
+                {
+                    "type": "array",
+                    "items": {"type": "string"}
+                }
+            ]
+        },
+        "mission": {"type": "string"}
+    }
+}
+
+
+def _validate(
+    instance: typing.MutableMapping[str, typing.Any],
+    schema: typing.Any,
+    *, prefix: str = ""
+) -> typing.MutableMapping[str, typing.Any]:
+    try:
+        jsonschema.validate(instance, schema)
+
+        return instance
+    except jsonschema.ValidationError as error:
+        path = ".".join(error.absolute_path)
+        raise Exception(f"Configuration error at {prefix}{path}: {error.message}") from error
 
 
 @dataclasses.dataclass
@@ -36,7 +103,12 @@ def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
 
 def load(filename: str) -> ServerConfig:
     try:
-        config = toml.load(filename)
+        config = _validate(toml.load(filename), CONFIG_SCHEMA)
+    except toml.TomlDecodeError as error:
+        raise Exception(
+            f"Configuration error in {filename}:{error.lineno}:{error.colno}"
+            f": {error.msg}") \
+            from error
     except FileNotFoundError as error:
         logging.debug(f"Unable to read config file ({filename}): {error}")
         config = {}
@@ -48,6 +120,12 @@ def load(filename: str) -> ServerConfig:
     config.setdefault("workshop", {})
     config["workshop"].setdefault(
         "directory", r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
+    config.setdefault("bundle", {})
+
+    for name, bundle in config["bundle"].items():
+        _validate(bundle, BUNDLE_SCHEMA, prefix=f"bundle.{name}.")
+        bundle.setdefault("mods", [])
+        bundle.setdefault("server_mods", [])
 
     return ServerConfig(
         server_executable=config["server"]["executable"],
@@ -62,8 +140,8 @@ def load(filename: str) -> ServerConfig:
                 config=bundle.get("config"),
                 profile=bundle.get("profile"),
                 workshop=bundle.get("workshop"),
-                mods=_parse_mods(bundle.get("mods", [])),
-                server_mods=_parse_mods(bundle.get("server_mods", [])),
+                mods=_parse_mods(bundle["mods"]),
+                server_mods=_parse_mods(bundle["server_mods"]),
                 mission=bundle.get("mission"))
             for name, bundle in config.get("bundle", {}).items()
         })
