@@ -14,12 +14,12 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     license="MIT",
-    url="https://github.com/tjensen/dayz-dev-tools",
+    url="https://dayz-dev-tools.readthedocs.io/",
     project_urls={
         "Source": "https://github.com/tjensen/dayz-dev-tools",
         "Tracker": "https://github.com/tjensen/dayz-dev-tools/issues"
     },
-    keywords=["dayz", "tools", "pbo"],
+    keywords=["dayz", "tools", "pbo", "server"],
     packages=["dayz_dev_tools"],
     package_data={
         "dayz_dev_tools": ["py.typed"]  # PEP 561
