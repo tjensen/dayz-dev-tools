@@ -68,23 +68,39 @@ def _validate(
 
 @dataclasses.dataclass
 class BundleConfig:
+    """Configuration file bundle settings."""
+    #: DayZ Server executable filename override (optional)
     executable: typing.Optional[str] = None
+    #: DayZ Server config filename override (optional)
     config: typing.Optional[str] = None
+    #: DayZ Server profile directory name override (optional)
     profile_directory: typing.Optional[str] = None
+    #: DayZ workshop directory name override (optional)
     workshop_directory: typing.Optional[str] = None
+    #: DayZ mod list to add
     mods: typing.List[str] = dataclasses.field(default_factory=list)
+    #: DayZ server mod list to add
     server_mods: typing.List[str] = dataclasses.field(default_factory=list)
+    #: DayZ Server mission directory name override (optional)
     mission_directory: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
 class ServerConfig:
+    """Configuration file settings."""
+    #: DayZ Server executable filename
     executable: str
+    #: DayZ Server config filename
     config: str
+    #: Filename of the bundles Python module
     bundle_path: str
+    #: DayZ workshop directory name
     workshop_directory: str
+    #: Configuration file bundles, by name (see :class:`dayz_dev_tools.server_config.BundleConfig`)
     bundles: typing.Dict[str, BundleConfig]
+    #: DayZ Server profile directory name (optional)
     profile_directory: typing.Optional[str] = None
+    #: DayZ Server mission directory name (optional)
     mission_directory: typing.Optional[str] = None
 
 
@@ -96,6 +112,14 @@ def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
 
 
 def load(filename: str) -> ServerConfig:
+    """Read a TOML-syntax DayZ Server configuration file.
+
+    :Parameters:
+      - `filename`: The name of the configuration file to read (e.g. ``server.toml``)
+
+    :Returns:
+      A :class:`~dayz_dev_tools.server_config.ServerConfig`.
+    """
     try:
         config = _validate(toml.load(filename), CONFIG_SCHEMA)
     except toml.TomlDecodeError as error:
