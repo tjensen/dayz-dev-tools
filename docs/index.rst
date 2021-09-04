@@ -1,10 +1,15 @@
-Welcome to dayz-dev-tools's documentation!
-==========================================
+DayZ Dev Tools
+==============
+
+DayZ Dev Tools contains command line tools and libraries that can be useful for
+DayZ mod developers and server owners.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   installation
+   commands
    api
 
 
