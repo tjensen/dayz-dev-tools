@@ -13,5 +13,6 @@ formats:
 python:
   version: "3.8"
   install:
-    - requirements: dev-requirements.txt
+    - method: pip
+      path: .
     - requirements: docs/requirements.txt
