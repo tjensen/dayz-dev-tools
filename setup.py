@@ -1,13 +1,19 @@
 from os import path
 import setuptools  # type: ignore[import]
+import typing
 
 
 with open(path.join(path.abspath(path.dirname(__file__)), "README.md"), "r", encoding="utf8") as fh:
     long_description = fh.read()
 
+with open(path.join("dayz_dev_tools", "__init__.py")) as f:
+    ns: typing.Dict[str, str] = {}
+    exec(f.read(), ns)
+    version = ns["version"]
+
 setuptools.setup(
     name="dayz-dev-tools",
-    version="1.1.0",
+    version=version,
     author="Tim Jensen",
     author_email="tim.l.jensen@gmail.com",
     description="Useful tools for DayZ mod developers.",

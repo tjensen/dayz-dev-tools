@@ -1,11 +1,11 @@
 import argparse
-from importlib import metadata
 import logging
 import os
 import subprocess
 import sys
 import typing
 
+import dayz_dev_tools
 from dayz_dev_tools import keys
 from dayz_dev_tools import launch_settings
 from dayz_dev_tools import script_logs
@@ -13,12 +13,6 @@ from dayz_dev_tools import server_config
 
 
 DEFAULT_CONFIG_FILE = "server.toml"
-
-
-try:
-    VERSION = metadata.version("dayz-dev-tools")
-except metadata.PackageNotFoundError:
-    VERSION = "local"
 
 
 def _resolve_mod(mod: str, workshop_directory: str) -> str:
@@ -103,7 +97,7 @@ def main() -> None:
         help=f"read configuration from this file (default: {DEFAULT_CONFIG_FILE})")
     parser.add_argument(
         "-d", "--debug", action="store_true", help="enable debug logs")
-    parser.add_argument("-V", "--version", action="version", version=VERSION)
+    parser.add_argument("-V", "--version", action="version", version=dayz_dev_tools.version)
     parser.add_argument(
         "--no-wait", action="store_true",
         help="do not wait for server to finish running before exiting")
