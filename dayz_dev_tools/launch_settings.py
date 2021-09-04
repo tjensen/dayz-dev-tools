@@ -63,13 +63,15 @@ class LaunchSettings:
         return self._mods
 
     def add_mod(self, name: str) -> None:
-        self._mods.append(name)
+        if name not in self._mods:
+            self._mods.append(name)
 
     def server_mods(self) -> typing.List[str]:
         return self._server_mods
 
     def add_server_mod(self, name: str) -> None:
-        self._server_mods.append(name)
+        if name not in self._server_mods:
+            self._server_mods.append(name)
 
     def mission_directory(self) -> typing.Optional[str]:
         return self._mission

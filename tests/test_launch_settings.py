@@ -94,6 +94,16 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.mods() == ["MOD1", "MOD2", "MOD3"]
 
+    def test_add_mod_ignores_mods_that_have_already_been_added(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+        settings.add_mod("MOD1")
+        settings.add_mod("MOD2")
+        settings.add_mod("MOD3")
+
+        settings.add_mod("MOD2")
+
+        assert settings.mods() == ["MOD1", "MOD2", "MOD3"]
+
     def test_server_mods_returns_empty_list_by_default(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
@@ -105,6 +115,16 @@ class TestLaunchSettings(unittest.TestCase):
         settings.add_server_mod("MOD1")
         settings.add_server_mod("MOD2")
         settings.add_server_mod("MOD3")
+
+        assert settings.server_mods() == ["MOD1", "MOD2", "MOD3"]
+
+    def test_add_server_mod_ignores_server_mods_that_have_already_been_added(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+        settings.add_server_mod("MOD1")
+        settings.add_server_mod("MOD2")
+        settings.add_server_mod("MOD3")
+
+        settings.add_server_mod("MOD2")
 
         assert settings.server_mods() == ["MOD1", "MOD2", "MOD3"]
 
