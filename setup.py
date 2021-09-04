@@ -1,5 +1,5 @@
 from os import path
-import setuptools
+import setuptools  # type: ignore[import]
 
 
 with open(path.join(path.abspath(path.dirname(__file__)), "README.md"), "r", encoding="utf8") as fh:
@@ -7,7 +7,7 @@ with open(path.join(path.abspath(path.dirname(__file__)), "README.md"), "r", enc
 
 setuptools.setup(
     name="dayz-dev-tools",
-    version="1.0.1",
+    version="1.0.2",
     author="Tim Jensen",
     author_email="tim.l.jensen@gmail.com",
     description="Useful tools for DayZ mod developers.",
