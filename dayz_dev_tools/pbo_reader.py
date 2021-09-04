@@ -85,10 +85,10 @@ class PBOReader():
     def file(self, filename: typing.AnyStr) -> typing.Optional[pbo_file.PBOFile]:
         for f in self._files:
             if isinstance(filename, bytes):
-                if filename == f.filename:
+                if filename.lower() == f.filename.lower():
                     return f
             else:
-                if filename == f.normalized_filename():
+                if filename.lower() == f.normalized_filename().lower():
                     return f
 
         return None
