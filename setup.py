@@ -38,8 +38,8 @@ setuptools.setup(
     ],
     python_requires=">=3.8",
     install_requires=[
-        "jsonschema",
-        "toml"
+        "jsonschema>=3.2.0",
+        "toml>=0.10.2"
     ],
     entry_points={
         "console_scripts": [
