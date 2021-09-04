@@ -138,6 +138,19 @@ class TestPBOReader(unittest.TestCase):
 
         assert matching_file == reader.files()[0]
 
+    def test_file_matches_string_names_case_insensitively(self) -> None:
+        pbo_file = io.BytesIO(
+            b"dir\\f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
+            b"Dir\\F2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+            b"file1content"
+            b"file2data")
+        reader = pbo_reader.PBOReader(pbo_file)
+
+        matching_file = reader.file(os.path.join("dir", "F2"))
+
+        assert matching_file == reader.files()[1]
+
     def test_file_returns_file_with_matching_filename_bytes(self) -> None:
         pbo_file = io.BytesIO(
             b"dir\\f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
@@ -150,6 +163,19 @@ class TestPBOReader(unittest.TestCase):
         matching_file = reader.file(b"dir\\f1")
 
         assert matching_file == reader.files()[0]
+
+    def test_file_matches_bytes_names_case_insensitively(self) -> None:
+        pbo_file = io.BytesIO(
+            b"dir\\f1\0\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x0c\0\0\0"
+            b"Dir\\F2\0\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x20\x09\0\0\0"
+            b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+            b"file1content"
+            b"file2data")
+        reader = pbo_reader.PBOReader(pbo_file)
+
+        matching_file = reader.file(b"dir\\f2")
+
+        assert matching_file == reader.files()[1]
 
     def test_headers_returns_empty_list_when_pbo_is_empty(self) -> None:
         reader = pbo_reader.PBOReader(io.BytesIO())
