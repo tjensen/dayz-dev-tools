@@ -1,0 +1,17 @@
+version: 2
+
+sphinx:
+  builder: html
+  configuration: docs/conf.py
+  fail_on_warning: true
+
+formats:
+  - html
+  - epub
+  - pdf
+
+python:
+  version: "3.8"
+  install:
+    - requirements: dev-requirements.txt
+    - requirements: docs/requirements.txt
