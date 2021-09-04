@@ -4,6 +4,13 @@ import shutil
 
 
 def copy_keys(source: str, destination: str) -> None:
+    """Search for `*.bikey` (public key) files in one directory and copy them to another directory.
+
+    :Parameters:
+      - `source`: The source directory to be searched for ``*.bikey`` files.
+      - `destination`: The destination directory where found ``*.bikey`` files are to be copied to.
+        This directory will be created if it does not already exist.
+    """
     try:
         keys = [filename for filename in os.listdir(source) if filename.lower().endswith(".bikey")]
     except FileNotFoundError:

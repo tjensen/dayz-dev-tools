@@ -69,6 +69,17 @@ def extract_pbo(
     reader: pbo_reader.PBOReader, files_to_extract: typing.List[str], *, verbose: bool,
     deobfuscate: bool
 ) -> None:
+    """Extract one or more files contained in a PBO archive.
+
+    :Parameters:
+      - `reader`: A :class:`~dayz_dev_tools.pbo_reader.PBOReader` instance representing the PBO
+        archive containing the file(s) to be extracted.
+      - `files_to_extract`: A list of fully-qualified paths of the files to be extracted.
+      - `verbose`: When `True`, print the paths of the files being extracted to stdout.
+      - `deobfuscate`: When `True`, **attempt** to deobfuscate obfuscated script files.
+
+    .. note:: Deobfuscation may not always work, as obfuscation techniques may evolve over time.
+    """
     ignored: typing.List[bytes] = []
 
     if len(files_to_extract) == 0:

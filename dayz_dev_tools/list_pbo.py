@@ -4,6 +4,13 @@ from dayz_dev_tools import pbo_reader
 
 
 def list_pbo(reader: pbo_reader.PBOReader, *, verbose: bool) -> None:
+    """Print the contents of a PBO archive to stdout in tabular format.
+
+    :Parameters:
+      - `reader`: A :class:`~dayz_dev_tools.pbo_reader.PBOReader` instance representing the PBO
+        archive to list.
+      - `verbose`: When `True`, additional detail will be printed.
+    """
     if verbose:
         print("Headers:")
         print("--------")

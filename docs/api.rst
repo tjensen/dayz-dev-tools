@@ -1,12 +1,6 @@
 API Reference
 =============
 
-Expanding Compressed Files
---------------------------
-
-.. automodule:: dayz_dev_tools.expand
-   :members:
-
 Extracting PBO Content
 ----------------------
 
@@ -35,12 +29,6 @@ PBO File
 --------
 
 .. automodule:: dayz_dev_tools.pbo_file
-   :members:
-
-PBO File Reader
----------------
-
-.. automodule:: dayz_dev_tools.pbo_file_reader
    :members:
 
 PBO Reader

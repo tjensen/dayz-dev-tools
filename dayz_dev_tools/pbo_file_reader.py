@@ -9,6 +9,8 @@ class InsufficientBytes(Exception):
 
 
 class PBOFileReader():
+    """Interface for reading PBO archive contents."""
+
     def __init__(self, content_file: typing.BinaryIO, offset: int, size: int) -> None:
         self.content_file = content_file
         self.offset = offset

@@ -69,7 +69,13 @@ def _read_file_entries(
 
 
 class PBOReader():
+    """Interface for reading a PBO archive."""
     def __init__(self, file: typing.BinaryIO):
+        """Create a new :class:`PBOReader` instance.
+
+        :Parameters:
+          - `file`: A binary file-like object providing PBO archive contents.
+        """
         self._file = file
         self._file.seek(0, io.SEEK_END)
         size = file.tell()
@@ -80,9 +86,27 @@ class PBOReader():
         self._files = _read_file_entries(reader, self._prefix)
 
     def files(self) -> typing.List[pbo_file.PBOFile]:
+        """Get the list of files contained in the PBO archive.
+
+        :Returns:
+          A list of :class:`~dayz_dev_tools.pbo_file.PBOFile` instances representing the files
+          contained in the PBO archive.
+        """
         return self._files
 
     def file(self, filename: typing.AnyStr) -> typing.Optional[pbo_file.PBOFile]:
+        """Get a file contained in the PBO archive, by name.
+
+        :Parameters:
+          - `filename`: A ``str`` or ``bytes`` containing the filename of the file to be retrieved.
+            If a ``str``, the filename is matched case-insensitively by the normalized filename in
+            the PBO (see :meth:`dayz_dev_tools.pbo_file.PBOFile.normalized_filename`). If a
+            ``bytes``, the filename is matched case-insensitively by the raw filename (see
+            :any:`dayz_dev_tools.pbo_file.PBOFile.filename`).
+
+        :Returns:
+          An instance of :class:`dayz_dev_tools.pbo_file.PBOFile` representing the retrieved file.
+        """
         for f in self._files:
             if isinstance(filename, bytes):
                 if filename.lower() == f.filename.lower():
@@ -94,7 +118,17 @@ class PBOReader():
         return None
 
     def headers(self) -> typing.List[typing.Tuple[bytes, bytes]]:
+        """Get the PBO archive headers.
+
+        :Returns:
+          A list of tuples containing the header names and values.
+        """
         return self._headers
 
     def prefix(self) -> typing.Optional[bytes]:
+        """Get the PBO archive prefix.
+
+        :Returns:
+          The PBO archive prefix, or ``None`` if the PBO archive does not have a ``prefix`` header.
+        """
         return self._prefix
