@@ -1,14 +1,12 @@
-import sys
-import typing
 import unittest
 from unittest import mock
 
 from dayz_dev_tools import unpbo
 
+from tests import helpers
 
-def main(argv: typing.List[str]) -> None:
-    with mock.patch.object(sys, "argv", argv):
-        unpbo.main()
+
+main = helpers.call_main(unpbo)
 
 
 class TestMain(unittest.TestCase):

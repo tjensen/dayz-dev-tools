@@ -37,8 +37,13 @@ setuptools.setup(
         "Typing :: Typed"
     ],
     python_requires=">=3.8",
+    install_requires=[
+        "jsonschema>=3.2.0",
+        "toml>=0.10.2"
+    ],
     entry_points={
         "console_scripts": [
-            "unpbo=dayz_dev_tools.unpbo:main"
+            "unpbo=dayz_dev_tools.unpbo:main",
+            "run-server=dayz_dev_tools.run_server:main"
         ]
     })
