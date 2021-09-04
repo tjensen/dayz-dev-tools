@@ -14,12 +14,15 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
 
+import dayz_dev_tools  # noqa: E402
+
 
 # -- Project information -----------------------------------------------------
 
 project = 'dayz-dev-tools'
 copyright = '2021, Tim Jensen'
 author = 'Tim Jensen'
+version = dayz_dev_tools.version
 
 
 # -- General configuration ---------------------------------------------------
