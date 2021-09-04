@@ -19,13 +19,13 @@ class LaunchSettings:
     _bundles: typing.Dict[str, server_config.BundleConfig]
 
     def __init__(self, config: server_config.ServerConfig) -> None:
-        self._executable = config.server_executable
-        self._config = config.server_config
-        self._profile = config.server_profile
+        self._executable = config.executable
+        self._config = config.config
+        self._profile = config.profile_directory
         self._workshop_path = config.workshop_directory
         self._mods = []
         self._server_mods = []
-        self._mission = config.mission
+        self._mission = config.mission_directory
         self._bundles = config.bundles
 
         try:
@@ -47,10 +47,10 @@ class LaunchSettings:
     def set_config(self, path: str) -> None:
         self._config = path
 
-    def profile(self) -> typing.Optional[str]:
+    def profile_directory(self) -> typing.Optional[str]:
         return self._profile
 
-    def set_profile(self, path: str) -> None:
+    def set_profile_directory(self, path: str) -> None:
         self._profile = path
 
     def workshop_directory(self) -> str:
@@ -71,10 +71,10 @@ class LaunchSettings:
     def add_server_mod(self, name: str) -> None:
         self._server_mods.append(name)
 
-    def mission(self) -> typing.Optional[str]:
+    def mission_directory(self) -> typing.Optional[str]:
         return self._mission
 
-    def set_mission(self, name: str) -> None:
+    def set_mission_directory(self, name: str) -> None:
         self._mission = name
 
     def load_bundle(self, name: str) -> None:
@@ -98,11 +98,11 @@ def _config_bundle(bundle: server_config.BundleConfig, settings: LaunchSettings)
     if bundle.config is not None:
         settings.set_config(bundle.config)
 
-    if bundle.profile is not None:
-        settings.set_profile(bundle.profile)
+    if bundle.profile_directory is not None:
+        settings.set_profile_directory(bundle.profile_directory)
 
-    if bundle.workshop is not None:
-        settings.set_workshop_directory(bundle.workshop)
+    if bundle.workshop_directory is not None:
+        settings.set_workshop_directory(bundle.workshop_directory)
 
     for mod in bundle.mods:
         settings.add_mod(mod)
@@ -110,5 +110,5 @@ def _config_bundle(bundle: server_config.BundleConfig, settings: LaunchSettings)
     for mod in bundle.server_mods:
         settings.add_server_mod(mod)
 
-    if bundle.mission is not None:
-        settings.set_mission(bundle.mission)
+    if bundle.mission_directory is not None:
+        settings.set_mission_directory(bundle.mission_directory)

@@ -14,8 +14,8 @@ CONFIG_SCHEMA = {
             "properties": {
                 "executable": {"type": "string"},
                 "config": {"type": "string"},
-                "profile": {"type": "string"},
-                "mission": {"type": "string"},
+                "profile_directory": {"type": "string"},
+                "mission_directory": {"type": "string"},
                 "bundles": {"type": "string"}
             }
         },
@@ -33,27 +33,21 @@ BUNDLE_SCHEMA = {
     "properties": {
         "executable": {"type": "string"},
         "config": {"type": "string"},
-        "profile": {"type": "string"},
-        "workshop": {"type": "string"},
+        "profile_directory": {"type": "string"},
+        "workshop_directory": {"type": "string"},
+        "mission_directory": {"type": "string"},
         "mods": {
             "oneOf": [
                 {"type": "string"},
-                {
-                    "type": "array",
-                    "items": {"type": "string"}
-                }
+                {"type": "array", "items": {"type": "string"}}
             ]
         },
         "server_mods": {
             "oneOf": [
                 {"type": "string"},
-                {
-                    "type": "array",
-                    "items": {"type": "string"}
-                }
+                {"type": "array", "items": {"type": "string"}}
             ]
-        },
-        "mission": {"type": "string"}
+        }
     }
 }
 
@@ -76,22 +70,22 @@ def _validate(
 class BundleConfig:
     executable: typing.Optional[str] = None
     config: typing.Optional[str] = None
-    profile: typing.Optional[str] = None
-    workshop: typing.Optional[str] = None
+    profile_directory: typing.Optional[str] = None
+    workshop_directory: typing.Optional[str] = None
     mods: typing.List[str] = dataclasses.field(default_factory=list)
     server_mods: typing.List[str] = dataclasses.field(default_factory=list)
-    mission: typing.Optional[str] = None
+    mission_directory: typing.Optional[str] = None
 
 
 @dataclasses.dataclass
 class ServerConfig:
-    server_executable: str
-    server_config: str
+    executable: str
+    config: str
     bundle_path: str
     workshop_directory: str
     bundles: typing.Dict[str, BundleConfig]
-    server_profile: typing.Optional[str] = None
-    mission: typing.Optional[str] = None
+    profile_directory: typing.Optional[str] = None
+    mission_directory: typing.Optional[str] = None
 
 
 def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
@@ -129,20 +123,20 @@ def load(filename: str) -> ServerConfig:
         bundle.setdefault("server_mods", [])
 
     return ServerConfig(
-        server_executable=config["server"]["executable"],
-        server_config=config["server"]["config"],
-        server_profile=config["server"].get("profile"),
-        mission=config["server"].get("mission"),
+        executable=config["server"]["executable"],
+        config=config["server"]["config"],
+        profile_directory=config["server"].get("profile_directory"),
+        mission_directory=config["server"].get("mission_directory"),
         workshop_directory=config["workshop"]["directory"],
         bundle_path=config["server"]["bundles"],
         bundles={
             name: BundleConfig(
                 executable=bundle.get("executable"),
                 config=bundle.get("config"),
-                profile=bundle.get("profile"),
-                workshop=bundle.get("workshop"),
+                profile_directory=bundle.get("profile_directory"),
+                workshop_directory=bundle.get("workshop_directory"),
                 mods=_parse_mods(bundle["mods"]),
                 server_mods=_parse_mods(bundle["server_mods"]),
-                mission=bundle.get("mission"))
+                mission_directory=bundle.get("mission_directory"))
             for name, bundle in config.get("bundle", {}).items()
         })

@@ -20,10 +20,10 @@ class TestLoad(unittest.TestCase):
         config = server_config.load(self.config_file.name)
 
         assert config == server_config.ServerConfig(
-            server_executable=r".\DayZServer_x64.exe",
-            server_config="serverDZ.cfg",
-            server_profile=None,
-            mission=None,
+            executable=r".\DayZServer_x64.exe",
+            config="serverDZ.cfg",
+            profile_directory=None,
+            mission_directory=None,
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
             bundles={})
@@ -56,10 +56,10 @@ executable = 42
         config = server_config.load(self.config_file.name)
 
         assert config == server_config.ServerConfig(
-            server_executable=r".\DayZServer_x64.exe",
-            server_config="serverDZ.cfg",
-            server_profile=None,
-            mission=None,
+            executable=r".\DayZServer_x64.exe",
+            config="serverDZ.cfg",
+            profile_directory=None,
+            mission_directory=None,
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
             bundles={})
@@ -70,8 +70,8 @@ executable = 42
 [server]
 executable = "EXECUTABLE"
 config = "CONFIG-FILE"
-profile = "PROFILE"
-mission = "MISSION"
+profile_directory = "PROFILE"
+mission_directory = "MISSION"
 bundles = "BUNDLES"
 
 [workshop]
@@ -81,10 +81,10 @@ directory = "WORKSHOP-DIRECTORY"
         config = server_config.load(self.config_file.name)
 
         assert config == server_config.ServerConfig(
-            server_executable="EXECUTABLE",
-            server_config="CONFIG-FILE",
-            server_profile="PROFILE",
-            mission="MISSION",
+            executable="EXECUTABLE",
+            config="CONFIG-FILE",
+            profile_directory="PROFILE",
+            mission_directory="MISSION",
             bundle_path="BUNDLES",
             workshop_directory="WORKSHOP-DIRECTORY",
             bundles={})
@@ -95,11 +95,11 @@ directory = "WORKSHOP-DIRECTORY"
 [bundle.override_all]
 executable = "OVERRIDDEN-EXE"
 config = "OVERRIDDEN-CFG"
-profile = "OVERRIDDEN-PROFILE"
-workshop = "OVERRIDDEN-WORKSHOP"
+profile_directory = "OVERRIDDEN-PROFILE"
+workshop_directory = "OVERRIDDEN-WORKSHOP"
 mods = ["mod1", "mod2", "mod3"]
 server_mods = ["smod1", "smod2", "smod3"]
-mission = "OVERRIDDEN-MISSION"
+mission_directory = "OVERRIDDEN-MISSION"
 
 [bundle.override_some]
 mods = ["mod1", "mod2"]
@@ -118,11 +118,11 @@ server_mods = "mod3"
             "override_all": server_config.BundleConfig(
                 executable="OVERRIDDEN-EXE",
                 config="OVERRIDDEN-CFG",
-                profile="OVERRIDDEN-PROFILE",
-                workshop="OVERRIDDEN-WORKSHOP",
+                profile_directory="OVERRIDDEN-PROFILE",
+                workshop_directory="OVERRIDDEN-WORKSHOP",
                 mods=["mod1", "mod2", "mod3"],
                 server_mods=["smod1", "smod2", "smod3"],
-                mission="OVERRIDDEN-MISSION"),
+                mission_directory="OVERRIDDEN-MISSION"),
             "override_some": server_config.BundleConfig(
                 mods=["mod1", "mod2"],
                 server_mods=["mod3"]),

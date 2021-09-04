@@ -60,7 +60,7 @@ Bundles defined in the config file generally look like:
 ```toml
 [bundle.mybundle]
 mods = '@CF;@MasPuertas;P:\MyModPack'
-mission = 'mpmissions\dayzoffline.enoch'
+mission_directory = 'mpmissions\dayzoffline.enoch'
 ```
 
 To load a bundle, specify it on the command line as a positional argument. For
@@ -99,27 +99,27 @@ By default, `run-server` will tell DayZ Server to load its configuration from
 config = "config.cfg"
 ```
 
-##### Server Profile
+##### Server Profile Directory
 
 By default, `run-server` will let DayZ Server choose a profile directory
 automatically (usually, `%LOCALAPPDATA\DayZ`). The profile directory is where
 DayZ Server writes logs and other information. To override the profile
-directory, set the `profile` key:
+directory, set the `profile_directory` key:
 
 ```toml
 [server]
-profile = "profile"
+profile_directory = "profile"
 ```
 
-##### DayZ Mission
+##### DayZ Mission Directory
 
 By default, `run-server` will let DayZ Server choose the mission directory
 based on the server configuration file (e.g. `serverDZ.cfg`). To override the
-mission directory, set the `mission` key:
+mission directory, set the `mission_directory` key:
 
 ```toml
 [server]
-mission = 'mpmissions\dayzoffline.enoch'
+mission_directory = 'mpmissions\dayzoffline.enoch'
 ```
 
 #### Bundles Python Module
@@ -199,48 +199,48 @@ def example(settings):
     settings.set_config(r"path\to\config.cfg")
 ```
 
-##### Server Profile
+##### Server Profile Directory
 
 Bundles can override the DayZ Server profile directory. In the config file,
-this is done by setting the `profile` key:
+this is done by setting the `profile_directory` key:
 
 ```toml
 [bundle.example]
-profile = 'path\to\profile'
+profile_directory = 'path\to\profile'
 ```
 
-In Python, this is done by calling the `set_profile` method:
+In Python, this is done by calling the `set_profile_directory` method:
 
 ```python
 def example(settings):
-    settings.set_profile(r"path\to\profile")
+    settings.set_profile_directory(r"path\to\profile")
 ```
 
-##### DayZ Mission
+##### DayZ Mission Directory
 
 Bundles can override the DayZ mission directory. In the config file, this is
-done by setting the `mission` key:
+done by setting the `mission_directory` key:
 
 ```toml
 [bundle.example]
-mission = 'path\to\mission'
+mission_directory = 'path\to\mission'
 ```
 
-In Python, this is done by calling the `set_mission` method:
+In Python, this is done by calling the `set_mission_directory` method:
 
 ```python
 def example(settings):
-    settings.set_mission(r"path\to\mission")
+    settings.set_mission_directory(r"path\to\mission")
 ```
 
 ##### DayZ Workshop Directory
 
 Bundles can override the DayZ Workshop directory. In the config file, this is
-done by setting the `workshop` key:
+done by setting the `workshop_directory` key:
 
 ```toml
 [bundle.example]
-workshop = 'path\to\workshop'
+workshop_directory = 'path\to\workshop'
 ```
 
 In Python, this is done by calling the `set_workshop_directory` method:

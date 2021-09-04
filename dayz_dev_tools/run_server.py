@@ -42,11 +42,11 @@ def run_server(
         f"-config={settings.config()}"
     ]
 
-    if settings.profile() is not None:
-        args.append(f"-profiles={settings.profile()}")
+    if settings.profile_directory() is not None:
+        args.append(f"-profiles={settings.profile_directory()}")
 
-    if settings.mission() is not None:
-        args.append(f"-mission={settings.mission()}")
+    if settings.mission_directory() is not None:
+        args.append(f"-mission={settings.mission_directory()}")
 
     if len(settings.mods()) > 0:
         args.append(_mod_parameter("mod", settings.mods(), settings.workshop_directory()))
@@ -58,7 +58,7 @@ def run_server(
     logging.info(f"Running server with: {args}")
 
     if wait:
-        profile = settings.profile()
+        profile = settings.profile_directory()
         if profile is None:
             if localappdata is None:
                 logging.debug("Server profile directory is unknown!")

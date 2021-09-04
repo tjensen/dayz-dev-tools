@@ -19,8 +19,8 @@ class TestMain(unittest.TestCase):
         super().setUp()
 
         self.server_config = server_config.ServerConfig(
-            server_executable="SERVER-EXECUTABLE",
-            server_config="SERVER-CONFIG",
+            executable="SERVER-EXECUTABLE",
+            config="SERVER-CONFIG",
             workshop_directory="WORKSHOP-DIRECTORY",
             bundle_path="BUNDLE-PATH",
             bundles={})
@@ -160,8 +160,8 @@ class TestRunServer(unittest.TestCase):
         super().setUp()
 
         self.server_config = server_config.ServerConfig(
-            server_executable="server.exe",
-            server_config="config.cfg",
+            executable="server.exe",
+            config="config.cfg",
             workshop_directory="workshopdir",
             bundle_path="dont-care",
             bundles={})
@@ -204,7 +204,7 @@ class TestRunServer(unittest.TestCase):
         self.mock_popen.return_value.wait.assert_not_called()
 
     def test_runs_executable_with_profiles_parameter_when_profile_is_not_none(self) -> None:
-        self.server_config.server_profile = "PROFILE"
+        self.server_config.profile_directory = "PROFILE"
         settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings, localappdata="localappdata", wait=False)
@@ -214,7 +214,7 @@ class TestRunServer(unittest.TestCase):
         ])
 
     def test_runs_executable_with_mission_parameter_when_mission_is_not_none(self) -> None:
-        self.server_config.mission = "MISSION"
+        self.server_config.mission_directory = "MISSION"
         settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings, localappdata="localappdata", wait=False)
@@ -271,7 +271,7 @@ class TestRunServer(unittest.TestCase):
         self.mock_newest.return_value = "script_previous.log"
         self.mock_wait_for_new.return_value = "script_new.log"
 
-        self.server_config.server_profile = "profile/dir"
+        self.server_config.profile_directory = "profile/dir"
         settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings, localappdata="localappdata", wait=True)
@@ -295,7 +295,7 @@ class TestRunServer(unittest.TestCase):
     def test_does_not_stream_script_log_if_no_new_script_log_is_created(self) -> None:
         self.mock_wait_for_new.return_value = None
 
-        self.server_config.server_profile = "profile/dir"
+        self.server_config.profile_directory = "profile/dir"
         settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings, localappdata="localappdata", wait=True)

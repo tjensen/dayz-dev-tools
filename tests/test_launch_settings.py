@@ -14,19 +14,19 @@ class TestLaunchSettings(unittest.TestCase):
         super().setUp()
 
         self.config = server_config.ServerConfig(
-            server_executable="server.exe",
-            server_config="config.cfg",
+            executable="server.exe",
+            config="config.cfg",
             workshop_directory="workshop/dir",
             bundle_path=BUNDLE_PATH,
             bundles={
                 "override_all": server_config.BundleConfig(
                     executable="OVERRIDDEN-EXE",
                     config="OVERRIDDEN-CFG",
-                    profile="OVERRIDDEN-PROFILE",
-                    workshop="OVERRIDDEN-WORKSHOP",
+                    profile_directory="OVERRIDDEN-PROFILE",
+                    workshop_directory="OVERRIDDEN-WORKSHOP",
                     mods=["mod1", "mod2", "mod3"],
                     server_mods=["mod4", "mod5", "mod6"],
-                    mission="OVERRIDDEN-MISSION"),
+                    mission_directory="OVERRIDDEN-MISSION"),
                 "override_some": server_config.BundleConfig(
                     mods=["mod7", "mod8"],
                     server_mods=["mod9"])
@@ -35,7 +35,7 @@ class TestLaunchSettings(unittest.TestCase):
     def test_executable_returns_specified_executable(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
-        assert settings.executable() == self.config.server_executable
+        assert settings.executable() == self.config.executable
 
     def test_executable_returns_executable_overridden_using_set_executable(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
@@ -56,17 +56,17 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.config() == "other.cfg"
 
-    def test_profile_returns_specified_profile_directory(self) -> None:
+    def test_profile_directory_returns_specified_profile_directory(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
-        assert settings.profile() is None
+        assert settings.profile_directory() is None
 
-    def test_profile_returns_profile_overridden_using_set_profile(self) -> None:
+    def test_profile_directory_returns_profile_overridden_using_set_profile_directory(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
-        settings.set_profile("PROFILE")
+        settings.set_profile_directory("PROFILE")
 
-        assert settings.profile() == "PROFILE"
+        assert settings.profile_directory() == "PROFILE"
 
     def test_workshop_directory_returns_specified_workshop_path(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
@@ -108,17 +108,17 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.server_mods() == ["MOD1", "MOD2", "MOD3"]
 
-    def test_mission_returns_specified_mission_directory(self) -> None:
+    def test_mission_directory_returns_specified_mission_directory(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
-        assert settings.mission() is None
+        assert settings.mission_directory() is None
 
-    def test_mission_returns_mission_configured_with_set_mission(self) -> None:
+    def test_mission_directory_returns_mission_configured_with_set_mission_directory(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
-        settings.set_mission("MISSION")
+        settings.set_mission_directory("MISSION")
 
-        assert settings.mission() == "MISSION"
+        assert settings.mission_directory() == "MISSION"
 
     def test_load_bundle_loads_bundle_from_config_when_present_in_config(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
@@ -127,11 +127,11 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.executable() == "OVERRIDDEN-EXE"
         assert settings.config() == "OVERRIDDEN-CFG"
-        assert settings.profile() == "OVERRIDDEN-PROFILE"
+        assert settings.profile_directory() == "OVERRIDDEN-PROFILE"
         assert settings.workshop_directory() == "OVERRIDDEN-WORKSHOP"
         assert settings.mods() == ["mod1", "mod2", "mod3"]
         assert settings.server_mods() == ["mod4", "mod5", "mod6"]
-        assert settings.mission() == "OVERRIDDEN-MISSION"
+        assert settings.mission_directory() == "OVERRIDDEN-MISSION"
 
     def test_load_bundle_from_config_only_sets_settings_in_config(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
@@ -140,11 +140,11 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.executable() == "server.exe"
         assert settings.config() == "config.cfg"
-        assert settings.profile() is None
+        assert settings.profile_directory() is None
         assert settings.workshop_directory() == "workshop/dir"
         assert settings.mods() == ["mod7", "mod8"]
         assert settings.server_mods() == ["mod9"]
-        assert settings.mission() is None
+        assert settings.mission_directory() is None
 
     def test_load_bundle_calls_bundle_function_by_name_in_bundle_module(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
