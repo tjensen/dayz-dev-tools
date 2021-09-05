@@ -82,6 +82,7 @@ file. For example:
    profile_directory = "profile"
    mission_directory = 'mpmissions\dayzoffline.enoch'
    bundles = 'path\to\module.py'
+   parameters = [ '-opt1', '-opt2=value' ]
 
    [workshop]
    directory = 'E:\DayZ\Workshop'
@@ -151,6 +152,17 @@ By default, ``run-server`` will look for bundles in a Python file named
 Bundles can also be loaded from the ``run-server`` config file, as described
 below.
 
+Extra Parameters
+""""""""""""""""
+
+Use the ``parameters`` key to pass extra command line parameters to DayZ
+Server. For example, to enable admin logs:
+
+.. code:: toml
+
+   [server]
+   parameters = [ '-adminLog' ]
+
 DayZ Workshop Directory
 """""""""""""""""""""""
 
@@ -179,6 +191,7 @@ named ``example``:
    profile_directory = 'path\to\profile'
    mission_directory = 'path\to\mission'
    workshop_directory = 'path\to\workshop'
+   parameters = [ '-extraParam', '-another=arg' ]
 
 These settings work the same as the ones of the same names described in
 `Configuration File`_. In addition, bundles can define DayZ mods and server
