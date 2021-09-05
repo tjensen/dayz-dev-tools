@@ -43,6 +43,7 @@ setuptools.setup(
         "Typing :: Typed"
     ],
     python_requires=">=3.8",
+    setup_requires=["wheel"],
     install_requires=[
         "jsonschema>=3.2.0",
         "toml>=0.10.2"
@@ -52,4 +53,12 @@ setuptools.setup(
             "unpbo=dayz_dev_tools.unpbo:main",
             "run-server=dayz_dev_tools.run_server:main"
         ]
-    })
+    },
+    ext_modules=[
+        setuptools.Extension(
+            name="dayz_dev_tools_ext",
+            sources=[
+                "src/dayz_dev_tools_ext.c"
+            ]
+        )
+    ])
