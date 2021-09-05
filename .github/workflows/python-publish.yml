@@ -1,8 +1,6 @@
 name: Upload Python Package
 
-on:
-  release:
-    types: [created]
+on: [push]
 
 jobs:
   build:
@@ -59,9 +57,3 @@ jobs:
         python setup.py sdist
         cp artifacts/artifact/* dist
         ls -lR dist
-    - name: Publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        twine upload dist/*
