@@ -16,6 +16,7 @@ CONFIG_SCHEMA = {
                 "config": {"type": "string"},
                 "profile_directory": {"type": "string"},
                 "mission_directory": {"type": "string"},
+                "parameters": {"type": "array", "items": {"type": "string"}},
                 "bundles": {"type": "string"}
             }
         },
@@ -47,7 +48,8 @@ BUNDLE_SCHEMA = {
                 {"type": "string"},
                 {"type": "array", "items": {"type": "string"}}
             ]
-        }
+        },
+        "parameters": {"type": "array", "items": {"type": "string"}},
     }
 }
 
@@ -83,6 +85,8 @@ class BundleConfig:
     server_mods: typing.List[str] = dataclasses.field(default_factory=list)
     #: DayZ Server mission directory name override (optional)
     mission_directory: typing.Optional[str] = None
+    #: Extra server command line parameters to add
+    parameters: typing.List[str] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
@@ -102,6 +106,8 @@ class ServerConfig:
     profile_directory: typing.Optional[str] = None
     #: DayZ Server mission directory name (optional)
     mission_directory: typing.Optional[str] = None
+    #: Extra server command line parameters to add
+    parameters: typing.List[str] = dataclasses.field(default_factory=list)
 
 
 def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
@@ -135,6 +141,7 @@ def load(filename: str) -> ServerConfig:
     config.setdefault("server", {})
     config["server"].setdefault("executable", r".\DayZServer_x64.exe")
     config["server"].setdefault("config", "serverDZ.cfg")
+    config["server"].setdefault("parameters", [])
     config["server"].setdefault("bundles", "bundles.py")
     config.setdefault("workshop", {})
     config["workshop"].setdefault(
@@ -145,6 +152,7 @@ def load(filename: str) -> ServerConfig:
         _validate(bundle, BUNDLE_SCHEMA, prefix=f"bundle.{name}.")
         bundle.setdefault("mods", [])
         bundle.setdefault("server_mods", [])
+        bundle.setdefault("parameters", [])
 
     return ServerConfig(
         executable=config["server"]["executable"],
@@ -153,6 +161,7 @@ def load(filename: str) -> ServerConfig:
         mission_directory=config["server"].get("mission_directory"),
         workshop_directory=config["workshop"]["directory"],
         bundle_path=config["server"]["bundles"],
+        parameters=config["server"]["parameters"],
         bundles={
             name: BundleConfig(
                 executable=bundle.get("executable"),
@@ -161,6 +170,7 @@ def load(filename: str) -> ServerConfig:
                 workshop_directory=bundle.get("workshop_directory"),
                 mods=_parse_mods(bundle["mods"]),
                 server_mods=_parse_mods(bundle["server_mods"]),
-                mission_directory=bundle.get("mission_directory"))
+                mission_directory=bundle.get("mission_directory"),
+                parameters=bundle["parameters"])
             for name, bundle in config.get("bundle", {}).items()
         })

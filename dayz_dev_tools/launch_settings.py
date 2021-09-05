@@ -17,6 +17,7 @@ class LaunchSettings:
     _mods: typing.List[str]
     _server_mods: typing.List[str]
     _mission: typing.Optional[str]
+    _parameters: typing.List[str]
     _bundles: typing.Dict[str, server_config.BundleConfig]
 
     def __init__(self, config: server_config.ServerConfig) -> None:
@@ -34,6 +35,7 @@ class LaunchSettings:
         self._mods = []
         self._server_mods = []
         self._mission = config.mission_directory
+        self._parameters = config.parameters
         self._bundles = config.bundles
 
         try:
@@ -168,6 +170,22 @@ class LaunchSettings:
         """
         self._mission = name
 
+    def parameters(self) -> typing.List[str]:
+        """Get extra command line parameters to pass to DayZ Server.
+
+        :Returns:
+          The list of extra command line parameters to pass to DayZ Server.
+        """
+        return self._parameters
+
+    def add_parameter(self, param: str) -> None:
+        """Add extra parameter to pass on the DayZ Server command line.
+
+        :Parameters:
+          - `param`: The parameter to pass on the DayZ Server command line.
+        """
+        self._parameters.append(param)
+
     def load_bundle(self, name: str) -> None:
         """Load a bundle to configure DayZ Server launch settings.
 
@@ -212,3 +230,6 @@ def _config_bundle(bundle: server_config.BundleConfig, settings: LaunchSettings)
 
     if bundle.mission_directory is not None:
         settings.set_mission_directory(bundle.mission_directory)
+
+    for param in bundle.parameters:
+        settings.add_parameter(param)

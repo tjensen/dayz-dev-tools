@@ -56,6 +56,8 @@ def run_server(
         args.append(
             _mod_parameter("servermod", settings.server_mods(), settings.workshop_directory()))
 
+    args.extend(settings.parameters())
+
     logging.info(f"Running server with: {args}")
 
     if wait:

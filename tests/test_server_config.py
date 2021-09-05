@@ -26,6 +26,7 @@ class TestLoad(unittest.TestCase):
             mission_directory=None,
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
+            parameters=[],
             bundles={})
 
     def test_raises_for_other_errors(self) -> None:
@@ -62,6 +63,7 @@ executable = 42
             mission_directory=None,
             bundle_path="bundles.py",
             workshop_directory=r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop",
+            parameters=[],
             bundles={})
 
     def test_returns_config_file_settings(self) -> None:
@@ -72,6 +74,7 @@ executable = "EXECUTABLE"
 config = "CONFIG-FILE"
 profile_directory = "PROFILE"
 mission_directory = "MISSION"
+parameters = ["-opt1", "-opt2=value"]
 bundles = "BUNDLES"
 
 [workshop]
@@ -87,6 +90,7 @@ directory = "WORKSHOP-DIRECTORY"
             mission_directory="MISSION",
             bundle_path="BUNDLES",
             workshop_directory="WORKSHOP-DIRECTORY",
+            parameters=["-opt1", "-opt2=value"],
             bundles={})
 
     def test_returns_config_with_bundles_when_present_in_config_file(self) -> None:
@@ -100,6 +104,7 @@ workshop_directory = "OVERRIDDEN-WORKSHOP"
 mods = ["mod1", "mod2", "mod3"]
 server_mods = ["smod1", "smod2", "smod3"]
 mission_directory = "OVERRIDDEN-MISSION"
+parameters = ["-opt1", "-opt2=value"]
 
 [bundle.override_some]
 mods = ["mod1", "mod2"]
@@ -122,7 +127,8 @@ server_mods = "mod3"
                 workshop_directory="OVERRIDDEN-WORKSHOP",
                 mods=["mod1", "mod2", "mod3"],
                 server_mods=["smod1", "smod2", "smod3"],
-                mission_directory="OVERRIDDEN-MISSION"),
+                mission_directory="OVERRIDDEN-MISSION",
+                parameters=["-opt1", "-opt2=value"]),
             "override_some": server_config.BundleConfig(
                 mods=["mod1", "mod2"],
                 server_mods=["mod3"]),
