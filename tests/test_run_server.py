@@ -267,6 +267,20 @@ class TestRunServer(unittest.TestCase):
             f"-servermod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
         ])
 
+    def test_passes_extra_parameters_when_added_to_launch_settings(self) -> None:
+        settings = launch_settings.LaunchSettings(self.server_config)
+        settings.add_parameter("-opt1")
+        settings.add_parameter("-opt2=value")
+
+        run_server.run_server(settings, localappdata="localappdata", wait=False)
+
+        self.mock_popen.assert_called_once_with([
+            "server.exe",
+            "-config=config.cfg",
+            "-opt1",
+            "-opt2=value"
+        ])
+
     def test_waits_for_new_script_log_and_streams_it_when_wait_is_true(self) -> None:
         self.mock_newest.return_value = "script_previous.log"
         self.mock_wait_for_new.return_value = "script_new.log"

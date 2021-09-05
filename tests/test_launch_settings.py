@@ -26,7 +26,8 @@ class TestLaunchSettings(unittest.TestCase):
                     workshop_directory="OVERRIDDEN-WORKSHOP",
                     mods=["mod1", "mod2", "mod3"],
                     server_mods=["mod4", "mod5", "mod6"],
-                    mission_directory="OVERRIDDEN-MISSION"),
+                    mission_directory="OVERRIDDEN-MISSION",
+                    parameters=["-opt1", "-opt2=value"]),
                 "override_some": server_config.BundleConfig(
                     mods=["mod7", "mod8"],
                     server_mods=["mod9"])
@@ -140,6 +141,19 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.mission_directory() == "MISSION"
 
+    def test_parameters_returns_parameters_from_config(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        assert settings.parameters() == []
+
+    def test_parameters_returns_parameters_added_with_add_parameter(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        settings.add_parameter("-opt1")
+        settings.add_parameter("-opt2=value")
+
+        assert settings.parameters() == ["-opt1", "-opt2=value"]
+
     def test_load_bundle_loads_bundle_from_config_when_present_in_config(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
 
@@ -152,6 +166,7 @@ class TestLaunchSettings(unittest.TestCase):
         assert settings.mods() == ["mod1", "mod2", "mod3"]
         assert settings.server_mods() == ["mod4", "mod5", "mod6"]
         assert settings.mission_directory() == "OVERRIDDEN-MISSION"
+        assert settings.parameters() == ["-opt1", "-opt2=value"]
 
     def test_load_bundle_from_config_only_sets_settings_in_config(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
