@@ -35,7 +35,7 @@ class LaunchSettings:
         self._mods = []
         self._server_mods = []
         self._mission = config.mission_directory
-        self._parameters = []
+        self._parameters = config.parameters
         self._bundles = config.bundles
 
         try:
