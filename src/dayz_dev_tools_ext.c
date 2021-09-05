@@ -1,7 +1,6 @@
 #define PY_SSIZE_T_CLEAN
 
 #include <Python.h>
-#include <stdio.h>
 
 static void
 get_pointer(Py_ssize_t *rpos, Py_ssize_t *rlen, Py_ssize_t outlen, unsigned short raw)
