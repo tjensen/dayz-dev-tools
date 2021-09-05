@@ -44,7 +44,7 @@ class TestExpand(unittest.TestCase):
 
         outbytes = expand.expand(infile, 10)
 
-        assert outbytes == b"ABCDEFGH\0\0"
+        assert outbytes == b"ABCDEFGHBC"
 
     def test_inserts_spaces_when_compressed_data_references_negative_offset(self) -> None:
         inbytes = b"\x0fABCD\x05\x0f"

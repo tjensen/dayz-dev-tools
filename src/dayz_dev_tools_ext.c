@@ -58,14 +58,11 @@ expand_impl(unsigned char *outb, Py_ssize_t outlen, const unsigned char *inb, Py
                         }
                     }
                 }
-                else if (((outidx + rlen) <= outlen) && ((rpos + rlen) <= outlen))
-                {
-                    memcpy(&outb[outidx], &outb[rpos], rlen);
-                    outidx += rlen;
-                }
                 else
                 {
-                    return -1;
+                    cpyend = Py_MIN(rlen, outlen - outidx);
+                    memcpy(&outb[outidx], &outb[rpos], cpyend);
+                    outidx += cpyend;
                 }
             }
         }
