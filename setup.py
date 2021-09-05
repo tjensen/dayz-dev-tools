@@ -52,4 +52,12 @@ setuptools.setup(
             "unpbo=dayz_dev_tools.unpbo:main",
             "run-server=dayz_dev_tools.run_server:main"
         ]
-    })
+    },
+    ext_modules=[
+        setuptools.Extension(
+            name="dayz_dev_tools_ext",
+            sources=[
+                "src/dayz_dev_tools_ext.c"
+            ]
+        )
+    ])

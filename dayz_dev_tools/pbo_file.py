@@ -34,7 +34,8 @@ class PBOFile:
             self.content_reader.seek(self.data_size - 4)
             expected_checksum = self.content_reader.readuint()
 
-            expanded = expand.expand(self.content_reader.subreader(0, self.data_size - 4))
+            expanded = expand.expand(
+                self.content_reader.subreader(0, self.data_size - 4), self.original_size)
 
             actual_checksum = sum(expanded)
 
