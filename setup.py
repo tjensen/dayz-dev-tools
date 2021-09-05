@@ -43,6 +43,7 @@ setuptools.setup(
         "Typing :: Typed"
     ],
     python_requires=">=3.8",
+    setup_requires=["wheel"],
     install_requires=[
         "jsonschema>=3.2.0",
         "toml>=0.10.2"
