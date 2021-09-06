@@ -8,6 +8,7 @@ import typing
 import dayz_dev_tools
 from dayz_dev_tools import keys
 from dayz_dev_tools import launch_settings
+from dayz_dev_tools import logging_configuration
 from dayz_dev_tools import script_logs
 from dayz_dev_tools import server_config
 
@@ -109,16 +110,7 @@ def main() -> None:
         " the bundles module, to be loaded in order to add mods or modify other server settings")
     args = parser.parse_args()
 
-    if args.debug:
-        logging.basicConfig(
-            format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S%z",
-            level=logging.DEBUG)
-    else:
-        logging.basicConfig(
-            format="%(asctime)s %(levelname)s:%(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S%z",
-            level=logging.INFO)
+    logging_configuration.configure_logging(debug=args.debug)
 
     try:
         config = server_config.load(args.config)
@@ -132,7 +124,7 @@ def main() -> None:
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
-        logging.error(str(error))
+        logging.error(f"{type(error).__name__}: {error}")
         sys.exit(1)
 
 

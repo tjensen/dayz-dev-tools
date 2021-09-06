@@ -1,9 +1,12 @@
 import argparse
+import logging
 import os
+import sys
 
 import dayz_dev_tools
 from dayz_dev_tools import extract_pbo
 from dayz_dev_tools import list_pbo
+from dayz_dev_tools import logging_configuration
 from dayz_dev_tools import pbo_reader
 from dayz_dev_tools import tools_directory
 
@@ -20,10 +23,13 @@ def main() -> None:
     parser.add_argument(
         "-d", "--deobfuscate", action="store_true", help="Attempt to deobfuscate extracted files")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
+    parser.add_argument("-D", "--debug", action="store_true", help="Enable debug logs")
     parser.add_argument("-V", "--version", action="version", version=dayz_dev_tools.version)
     parser.add_argument("pbofile", help="The PBO archive to read")
     parser.add_argument("files", nargs="*", help="Files to extract from the PBO archive")
     args = parser.parse_args()
+
+    logging_configuration.configure_logging(debug=args.debug)
 
     try:
         with open(args.pbofile, "rb") as pbo_file:
@@ -42,7 +48,9 @@ def main() -> None:
                     reader, args.files,
                     verbose=args.verbose, deobfuscate=args.deobfuscate, cfgconvert=cfgconvert)
     except Exception as error:
-        print(f"ERROR: {error}")
+        logging.debug("Uncaught exception in main", exc_info=True)
+        logging.error(f"{type(error).__name__}: {error}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

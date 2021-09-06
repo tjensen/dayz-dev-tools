@@ -13,6 +13,10 @@ main = helpers.call_main(unpbo)
 class TestMain(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
+        logging_patcher = mock.patch("dayz_dev_tools.logging_configuration.configure_logging")
+        self.mock_configure_logging = logging_patcher.start()
+        self.addCleanup(logging_patcher.stop)
+
         tools_directory_patcher = mock.patch(
             "dayz_dev_tools.tools_directory.tools_directory", return_value=None)
         self.mock_tools_directory = tools_directory_patcher.start()
@@ -39,6 +43,8 @@ class TestMain(unittest.TestCase):
                 "ignored",
                 "path/to/filename.ext"
             ])
+
+        self.mock_configure_logging.assert_called_once_with(debug=False)
 
         mock_open.assert_called_once_with("path/to/filename.ext", "rb")
 
@@ -163,14 +169,26 @@ class TestMain(unittest.TestCase):
 
         self.mock_extract_pbo.assert_not_called()
 
-    def test_prints_uncaught_exceptions(self) -> None:
+    def test_enables_debug_logging_when_option_is_specified(self) -> None:
+        mock_open = mock.mock_open()
+        with mock.patch("builtins.open", mock_open):
+            main([
+                "ignored",
+                "path/to/filename.ext",
+                "--debug"
+            ])
+
+        self.mock_configure_logging.assert_called_once_with(debug=True)
+
+    def test_raises_systemexit_on_error(self) -> None:
         self.mock_extract_pbo.side_effect = Exception("error message")
 
         mock_open = mock.mock_open()
-        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            main([
-                "ignored",
-                "INPUT.pbo"
-            ])
+        with mock.patch("builtins.open", mock_open):
+            with self.assertRaises(SystemExit) as error:
+                main([
+                    "ignored",
+                    "INPUT.pbo"
+                ])
 
-        mock_print.assert_called_once_with("ERROR: error message")
+        assert error.exception.code == 1

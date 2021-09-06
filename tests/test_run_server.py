@@ -1,4 +1,3 @@
-import logging
 import os
 import sys
 import unittest
@@ -25,9 +24,9 @@ class TestMain(unittest.TestCase):
             bundle_path="BUNDLE-PATH",
             bundles={})
 
-        basic_config_patcher = mock.patch("logging.basicConfig")
-        self.mock_basic_config = basic_config_patcher.start()
-        self.addCleanup(basic_config_patcher.stop)
+        logging_patcher = mock.patch("dayz_dev_tools.logging_configuration.configure_logging")
+        self.mock_configure_logging = logging_patcher.start()
+        self.addCleanup(logging_patcher.stop)
 
         load_patcher = mock.patch(
             "dayz_dev_tools.server_config.load", return_value=self.server_config)
@@ -54,10 +53,7 @@ class TestMain(unittest.TestCase):
             }
         )
 
-        self.mock_basic_config.assert_called_once_with(
-            format="%(asctime)s %(levelname)s:%(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S%z",
-            level=logging.INFO)
+        self.mock_configure_logging.assert_called_once_with(debug=False)
 
         self.mock_server_config_load.assert_called_once_with("server.toml")
 
@@ -115,10 +111,7 @@ class TestMain(unittest.TestCase):
             {}
         )
 
-        self.mock_basic_config.assert_called_once_with(
-            format="%(asctime)s %(levelname)s:%(module)s:%(message)s",
-            datefmt="%Y-%m-%d %H:%M:%S%z",
-            level=logging.DEBUG)
+        self.mock_configure_logging.assert_called_once_with(debug=True)
 
     def test_loads_bundles_when_specified_in_arguments(self) -> None:
         mock_launch_settings = self.mock_launch_settings_class.return_value
