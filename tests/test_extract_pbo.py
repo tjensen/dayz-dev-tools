@@ -377,7 +377,8 @@ class TestExtractPbo(unittest.TestCase):
                 self.mock_pboreader, [], verbose=False, deobfuscate=False,
                 cfgconvert="cppconvert.exe")
 
-        mock_print.assert_called_once_with("Failed to convert dir1\\config.bin: cfgconvert error")
+        mock_print.assert_called_once_with(
+            f"Failed to convert {os.path.join('dir1', 'config.bin')}: cfgconvert error")
 
         self.mock_bin_to_cpp.assert_called_once_with(b"1111", "cppconvert.exe")
 
@@ -397,4 +398,6 @@ class TestExtractPbo(unittest.TestCase):
                 self.mock_pboreader, [], verbose=True, deobfuscate=False,
                 cfgconvert="cppconvert.exe")
 
-        mock_print.assert_called_once_with("Converting dir1\\config.bin -> dir1\\config.cpp")
+        mock_print.assert_called_once_with(
+            f"Converting {os.path.join('dir1', 'config.bin')}"
+            f" -> {os.path.join('dir1', 'config.cpp')}")
