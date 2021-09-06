@@ -1,9 +1,11 @@
 import argparse
+import os
 
 import dayz_dev_tools
 from dayz_dev_tools import extract_pbo
 from dayz_dev_tools import list_pbo
 from dayz_dev_tools import pbo_reader
+from dayz_dev_tools import tools_directory
 
 
 def main() -> None:
@@ -26,8 +28,15 @@ def main() -> None:
             if args.list:
                 list_pbo.list_pbo(reader, verbose=args.verbose)
             else:
+                tools_dir = tools_directory.tools_directory()
+                if tools_dir is None:
+                    cfgconvert = None
+                else:
+                    cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
+
                 extract_pbo.extract_pbo(
-                    reader, args.files, verbose=args.verbose, deobfuscate=args.deobfuscate)
+                    reader, args.files,
+                    verbose=args.verbose, deobfuscate=args.deobfuscate, cfgconvert=cfgconvert)
     except Exception as error:
         print(f"ERROR: {error}")
 

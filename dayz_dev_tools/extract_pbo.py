@@ -3,6 +3,7 @@ import os
 import re
 import typing
 
+from dayz_dev_tools import config_cpp
 from dayz_dev_tools import pbo_file
 from dayz_dev_tools import pbo_reader
 
@@ -19,7 +20,7 @@ def _invalid_filename(filename: bytes) -> bool:
 
 def _extract_file(
     reader: pbo_reader.PBOReader, pbofile: pbo_file.PBOFile, verbose: bool, deobfuscate: bool,
-    ignored: typing.List[bytes]
+    cfgconvert: typing.Optional[str], ignored: typing.List[bytes]
 ) -> None:
     if deobfuscate and ((pbofile.filename in ignored) or _invalid_filename(pbofile.filename)):
         if verbose:
@@ -32,6 +33,20 @@ def _extract_file(
 
     if len(parts) > 1:
         os.makedirs(os.path.join(*parts[:-1]), exist_ok=True)
+
+    if parts[-1] == b"config.bin" and cfgconvert is not None:
+        if verbose:
+            print(f"Converting {pbofile.normalized_filename()}")
+
+        buffer = io.BytesIO()
+        pbofile.unpack(buffer)
+        try:
+            cpp_content = config_cpp.bin_to_cpp(buffer.getvalue(), cfgconvert)
+            with open(os.path.join(*parts[:-1], b"config.cpp"), "wb") as out_file:
+                out_file.write(cpp_content)
+                return
+        except Exception as error:
+            print(f"Failed to convert {pbofile.normalized_filename()}: {error}")
 
     with open(os.path.join(*parts), "wb") as out_file:
         if verbose:
@@ -67,7 +82,7 @@ def _extract_file(
 
 def extract_pbo(
     reader: pbo_reader.PBOReader, files_to_extract: typing.List[str], *, verbose: bool,
-    deobfuscate: bool
+    deobfuscate: bool, cfgconvert: typing.Optional[str]
 ) -> None:
     """Extract one or more files contained in a PBO archive.
 
@@ -84,7 +99,7 @@ def extract_pbo(
 
     if len(files_to_extract) == 0:
         for file in reader.files():
-            _extract_file(reader, file, verbose, deobfuscate, ignored)
+            _extract_file(reader, file, verbose, deobfuscate, cfgconvert, ignored)
 
     else:
         for file_to_extract in files_to_extract:
@@ -93,4 +108,4 @@ def extract_pbo(
             if pbofile is None:
                 raise Exception(f"File not found: {file_to_extract}")
 
-            _extract_file(reader, pbofile, verbose, deobfuscate, [])
+            _extract_file(reader, pbofile, verbose, deobfuscate, cfgconvert, [])

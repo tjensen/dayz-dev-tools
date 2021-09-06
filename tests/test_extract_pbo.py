@@ -17,6 +17,10 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_makedirs = makedirs_patcher.start()
         self.addCleanup(makedirs_patcher.stop)
 
+        bin_to_cpp_patcher = mock.patch("dayz_dev_tools.config_cpp.bin_to_cpp")
+        self.mock_bin_to_cpp = bin_to_cpp_patcher.start()
+        self.addCleanup(bin_to_cpp_patcher.stop)
+
     def create_mock_file(self, filename: bytes, contents: bytes) -> pbo_file.PBOFile:
         def unpack(dest: typing.BinaryIO) -> None:
             dest.write(contents)
@@ -37,7 +41,8 @@ class TestExtractPbo(unittest.TestCase):
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=False)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None)
 
         mock_print.assert_not_called()
 
@@ -81,7 +86,7 @@ class TestExtractPbo(unittest.TestCase):
                     os.path.join("filename.ext"),
                     os.path.join("dir1", "filename.ext")
                 ],
-                verbose=False, deobfuscate=False)
+                verbose=False, deobfuscate=False, cfgconvert=None)
 
         mock_print.assert_not_called()
 
@@ -115,7 +120,7 @@ class TestExtractPbo(unittest.TestCase):
                     os.path.join("filename.ext"),
                     os.path.join("dir1", "filename.ext")
                 ],
-                verbose=False, deobfuscate=False)
+                verbose=False, deobfuscate=False, cfgconvert=None)
 
         self.mock_pboreader.file.assert_called_once()
 
@@ -132,7 +137,8 @@ class TestExtractPbo(unittest.TestCase):
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True, deobfuscate=False)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=True, deobfuscate=False, cfgconvert=None)
 
         assert mock_print.call_count == 5
         mock_print.assert_has_calls([
@@ -157,7 +163,7 @@ class TestExtractPbo(unittest.TestCase):
                     os.path.join("filename.ext"),
                     os.path.join("dir1", "filename.ext")
                 ],
-                verbose=True, deobfuscate=False)
+                verbose=True, deobfuscate=False, cfgconvert=None)
 
         assert mock_print.call_count == 2
         mock_print.assert_has_calls([
@@ -181,7 +187,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.file.side_effect = mock_files[3:]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
 
         mock_print.assert_not_called()
 
@@ -215,7 +222,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.prefix.return_value = b"PREFIX"
 
         with mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(
             b"NOT OBFUSCATED CONTENT"),
@@ -239,7 +247,8 @@ class TestExtractPbo(unittest.TestCase):
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True, deobfuscate=True)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=True, deobfuscate=True, cfgconvert=None)
 
         assert mock_print.call_count == 4
         mock_print.assert_has_calls([
@@ -258,7 +267,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.file.return_value = None
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
 
         mock_print.assert_not_called()
 
@@ -277,7 +287,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.file.return_value = None
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=True, deobfuscate=True)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=True, deobfuscate=True, cfgconvert=None)
 
         mock_print.assert_has_calls([
             mock.call("Unable to deobfuscate obfuscated1")
@@ -304,7 +315,8 @@ class TestExtractPbo(unittest.TestCase):
             self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1")
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
-            extract_pbo.extract_pbo(self.mock_pboreader, [], verbose=False, deobfuscate=True)
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
 
         mock_print.assert_not_called()
 
@@ -314,3 +326,75 @@ class TestExtractPbo(unittest.TestCase):
             b"NOT OBFUSCATED CONTENT 1"),
 
         self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated1")
+
+    def test_does_not_convert_config_bin_files_when_cfgconvert_is_none(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir1\\config.bin", b"1111")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None)
+
+        mock_print.assert_not_called()
+
+        self.mock_bin_to_cpp.assert_not_called()
+
+        mock_open.assert_called_once_with(os.path.join(b"dir1", b"config.bin"), "wb")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"1111")
+
+    def test_converts_config_bin_files_when_cfgconvert_is_not_none(self) -> None:
+        self.mock_bin_to_cpp.return_value = b"CPP-CONTENT"
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir1\\config.bin", b"1111")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False,
+                cfgconvert="cppconvert.exe")
+
+        mock_print.assert_not_called()
+
+        self.mock_bin_to_cpp.assert_called_once_with(b"1111", "cppconvert.exe")
+
+        mock_open.assert_called_once_with(os.path.join(b"dir1", b"config.cpp"), "wb")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"CPP-CONTENT")
+
+    def test_extracts_unconverted_config_bin_if_convert_to_config_cpp_fails(self) -> None:
+        self.mock_bin_to_cpp.side_effect = Exception("cfgconvert error")
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir1\\config.bin", b"1111")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False,
+                cfgconvert="cppconvert.exe")
+
+        mock_print.assert_called_once_with("Failed to convert dir1\\config.bin: cfgconvert error")
+
+        self.mock_bin_to_cpp.assert_called_once_with(b"1111", "cppconvert.exe")
+
+        mock_open.assert_called_once_with(os.path.join(b"dir1", b"config.bin"), "wb")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"1111")
+
+    def test_prints_when_converting_config_bin_files(self) -> None:
+        self.mock_bin_to_cpp.return_value = b"CPP-CONTENT"
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir1\\config.bin", b"1111")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=True, deobfuscate=False,
+                cfgconvert="cppconvert.exe")
+
+        mock_print.assert_called_once_with("Converting dir1\\config.bin")
