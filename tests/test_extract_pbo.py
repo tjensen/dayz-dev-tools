@@ -361,7 +361,7 @@ class TestExtractPbo(unittest.TestCase):
 
         self.mock_bin_to_cpp.assert_called_once_with(b"1111", "cppconvert.exe")
 
-        mock_open.assert_called_once_with(os.path.join(b"dir1", b"config.cpp"), "w+b")
+        mock_open.assert_called_once_with(os.path.join("dir1", "config.cpp"), "w+b")
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"CPP-CONTENT")
 
@@ -397,4 +397,4 @@ class TestExtractPbo(unittest.TestCase):
                 self.mock_pboreader, [], verbose=True, deobfuscate=False,
                 cfgconvert="cppconvert.exe")
 
-        mock_print.assert_called_once_with("Converting dir1\\config.bin")
+        mock_print.assert_called_once_with("Converting dir1\\config.bin -> dir1\\config.cpp")

@@ -35,14 +35,17 @@ def _extract_file(
         os.makedirs(os.path.join(*parts[:-1]), exist_ok=True)
 
     if parts[-1] == b"config.bin" and cfgconvert is not None:
+        converted_filename = os.path.join(
+            os.path.dirname(pbofile.normalized_filename()), "config.cpp")
+
         if verbose:
-            print(f"Converting {pbofile.normalized_filename()}")
+            print(f"Converting {pbofile.normalized_filename()} -> {converted_filename}")
 
         buffer = io.BytesIO()
         pbofile.unpack(buffer)
         try:
             cpp_content = config_cpp.bin_to_cpp(buffer.getvalue(), cfgconvert)
-            with open(os.path.join(*parts[:-1], b"config.cpp"), "w+b") as out_file:
+            with open(converted_filename, "w+b") as out_file:
                 out_file.write(cpp_content)
                 return
         except Exception as error:
