@@ -42,13 +42,13 @@ def _extract_file(
         pbofile.unpack(buffer)
         try:
             cpp_content = config_cpp.bin_to_cpp(buffer.getvalue(), cfgconvert)
-            with open(os.path.join(*parts[:-1], b"config.cpp"), "wb") as out_file:
+            with open(os.path.join(*parts[:-1], b"config.cpp"), "w+b") as out_file:
                 out_file.write(cpp_content)
                 return
         except Exception as error:
             print(f"Failed to convert {pbofile.normalized_filename()}: {error}")
 
-    with open(os.path.join(*parts), "wb") as out_file:
+    with open(os.path.join(*parts), "w+b") as out_file:
         if verbose:
             print(f"Extracting {pbofile.normalized_filename()}")
 
