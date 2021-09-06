@@ -10,15 +10,19 @@ from dayz_dev_tools import tools_directory
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="View or extract a PBO file",
+        description="View or extract a PBO archive",
         epilog="See also: https://community.bistudio.com/wiki/PBO_File_Format")
-    parser.add_argument("-l", "--list", action="store_true", help="List contents of the PBO")
+    parser.add_argument(
+        "-l", "--list", action="store_true", help="List contents of the PBO archive")
+    parser.add_argument(
+        "-b", "--no-convert", action="store_true",
+        help="Do not convert config.bin files to config.cpp files")
     parser.add_argument(
         "-d", "--deobfuscate", action="store_true", help="Attempt to deobfuscate extracted files")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("-V", "--version", action="version", version=dayz_dev_tools.version)
-    parser.add_argument("pbofile", help="The PBO file to read")
-    parser.add_argument("files", nargs="*", help="Files to extract from the PBO")
+    parser.add_argument("pbofile", help="The PBO archive to read")
+    parser.add_argument("files", nargs="*", help="Files to extract from the PBO archive")
     args = parser.parse_args()
 
     try:
@@ -28,11 +32,11 @@ def main() -> None:
             if args.list:
                 list_pbo.list_pbo(reader, verbose=args.verbose)
             else:
-                tools_dir = tools_directory.tools_directory()
-                if tools_dir is None:
-                    cfgconvert = None
-                else:
-                    cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
+                cfgconvert = None
+                if args.no_convert is False:
+                    tools_dir = tools_directory.tools_directory()
+                    if tools_dir is not None:
+                        cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
 
                 extract_pbo.extract_pbo(
                     reader, args.files,
