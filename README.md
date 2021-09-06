@@ -1,7 +1,12 @@
 # DayZ Dev Tools
 
 This project contains tools and libraries that can be useful for DayZ mod
-developers and server owners.
+developers and server owners, including:
+
+* `unpbo` - Tool for inspecting PBO archives and extracting their contents
+* `run-server` - Tool that makes running DayZ Server easier
+
+More information:
 
 * [Documentation](https://dayz-dev-tools.readthedocs.io/)
 
