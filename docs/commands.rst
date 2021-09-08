@@ -116,7 +116,7 @@ Profile Directory
 """""""""""""""""
 
 By default, ``run-server`` will let DayZ Server choose a profile directory
-automatically (usually, ``%LOCALAPPDATA\DayZ``). The profile directory is where
+automatically (usually, ``%LOCALAPPDATA%\DayZ``). The profile directory is where
 DayZ Server writes logs and other information. To override the profile
 directory, set the ``profile_directory`` key:
 
