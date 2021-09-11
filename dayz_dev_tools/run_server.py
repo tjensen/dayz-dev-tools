@@ -86,6 +86,8 @@ def run_server(
                     with open(new_log_name, "r", errors="surrogateescape") as log:
                         script_logs.stream(sys.stdout, log, lambda: proc.poll() is None)
 
+                proc.wait()
+
             except KeyboardInterrupt:
                 logging.info("Sending terminate signal to server...")
                 proc.terminate()

@@ -312,7 +312,8 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_stream.assert_called_once_with(sys.stdout, self.mock_open.return_value, mock.ANY)
 
-        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_once_with()
+        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_with()
+        assert self.mock_popen.return_value.__enter__.return_value.wait.call_count == 2
 
         self.mock_popen.return_value.__enter__.return_value.poll.side_effect = [None, None, 123]
 
@@ -331,7 +332,8 @@ class TestRunServer(unittest.TestCase):
         self.mock_open.assert_not_called()
         self.mock_stream.assert_not_called()
 
-        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_once_with()
+        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_with()
+        assert self.mock_popen.return_value.__enter__.return_value.wait.call_count == 2
 
     def test_streams_script_log_from_profile_in_localappdata_if_profile_is_none(self) -> None:
         self.mock_newest.return_value = "script_previous.log"
