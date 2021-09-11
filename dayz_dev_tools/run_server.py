@@ -78,7 +78,7 @@ def run_server(
             new_log_name = script_logs.wait_for_new(profile, previous_log_name)
 
             if new_log_name is None:
-                logging.info("No script log found")
+                logging.warning("No script log found")
             else:
                 logging.info("Streaming script log:")
                 with open(new_log_name, "r", errors="surrogateescape") as log:

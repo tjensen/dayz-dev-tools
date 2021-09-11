@@ -35,18 +35,32 @@ def newest(directory: str) -> typing.Optional[str]:
     return newest
 
 
-def wait_for_new(directory: str, previous_log_name: typing.Optional[str]) -> typing.Optional[str]:
+def wait_for_new(
+    directory: str,
+    previous_log_name: typing.Optional[str],
+    *,
+    timeout: int = 5
+) -> typing.Optional[str]:
     """Wait for a script log that is newer than another script log to be created in a directory.
 
     :Parameters:
       - `directory`: The directory to search for a newer ``script_*.log`` file.
       - `previous_log_name`: The current newest ``script_*.log`` file.
+      - `timeout`: Give up and return ``None`` if no new script log is created after this many
+        seconds.
 
     :Returns:
       The filename of the newer ``script_*.log`` file, or ``None`` if no newer script logs are
       created.
     """
+    tries = 0
+
     while (new_log_name := newest(directory)) == previous_log_name:
+        if tries >= timeout:
+            return None
+
+        tries += 1
+
         time.sleep(1)
 
     return new_log_name
