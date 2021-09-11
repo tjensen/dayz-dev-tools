@@ -14,6 +14,7 @@ CONFIG_SCHEMA = {
             "properties": {
                 "executable": {"type": "string"},
                 "config": {"type": "string"},
+                "directory": {"type": "string"},
                 "profile_directory": {"type": "string"},
                 "mission_directory": {"type": "string"},
                 "parameters": {"type": "array", "items": {"type": "string"}},
@@ -34,6 +35,7 @@ BUNDLE_SCHEMA = {
     "properties": {
         "executable": {"type": "string"},
         "config": {"type": "string"},
+        "directory": {"type": "string"},
         "profile_directory": {"type": "string"},
         "workshop_directory": {"type": "string"},
         "mission_directory": {"type": "string"},
@@ -75,6 +77,8 @@ class BundleConfig:
     executable: typing.Optional[str] = None
     #: DayZ Server config filename override (optional)
     config: typing.Optional[str] = None
+    #: Directory to switch to before running DayZ Server (optional)
+    directory: typing.Optional[str] = None
     #: DayZ Server profile directory name override (optional)
     profile_directory: typing.Optional[str] = None
     #: DayZ workshop directory name override (optional)
@@ -102,6 +106,8 @@ class ServerConfig:
     workshop_directory: str
     #: Configuration file bundles, by name (see :class:`dayz_dev_tools.server_config.BundleConfig`)
     bundles: typing.Dict[str, BundleConfig]
+    #: Directory to switch to before running DayZ Server (optional)
+    directory: typing.Optional[str] = None
     #: DayZ Server profile directory name (optional)
     profile_directory: typing.Optional[str] = None
     #: DayZ Server mission directory name (optional)
@@ -157,6 +163,7 @@ def load(filename: str) -> ServerConfig:
     return ServerConfig(
         executable=config["server"]["executable"],
         config=config["server"]["config"],
+        directory=config["server"].get("directory"),
         profile_directory=config["server"].get("profile_directory"),
         mission_directory=config["server"].get("mission_directory"),
         workshop_directory=config["workshop"]["directory"],
@@ -166,6 +173,7 @@ def load(filename: str) -> ServerConfig:
             name: BundleConfig(
                 executable=bundle.get("executable"),
                 config=bundle.get("config"),
+                directory=bundle.get("directory"),
                 profile_directory=bundle.get("profile_directory"),
                 workshop_directory=bundle.get("workshop_directory"),
                 mods=_parse_mods(bundle["mods"]),

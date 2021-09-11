@@ -38,6 +38,10 @@ class TestMain(unittest.TestCase):
         self.mock_launch_settings_class = settings_patcher.start()
         self.addCleanup(settings_patcher.stop)
 
+        chdir_patcher = mock.patch("dayz_dev_tools.misc.chdir")
+        self.mock_chdir = chdir_patcher.start()
+        self.addCleanup(chdir_patcher.stop)
+
         run_server_patcher = mock.patch("dayz_dev_tools.run_server.run_server")
         self.mock_run_server = run_server_patcher.start()
         self.addCleanup(run_server_patcher.stop)
@@ -49,8 +53,7 @@ class TestMain(unittest.TestCase):
             [
                 "ignored"
             ],
-            {
-            }
+            {}
         )
 
         self.mock_configure_logging.assert_called_once_with(debug=False)
@@ -58,6 +61,8 @@ class TestMain(unittest.TestCase):
         self.mock_server_config_load.assert_called_once_with("server.toml")
 
         self.mock_launch_settings_class.assert_called_once_with(self.server_config)
+
+        self.mock_chdir.assert_called_once_with(mock_launch_settings.directory.return_value)
 
         self.mock_run_server.assert_called_once_with(
             mock_launch_settings, localappdata=None, wait=True)

@@ -22,6 +22,7 @@ class TestLoad(unittest.TestCase):
         assert config == server_config.ServerConfig(
             executable=r".\DayZServer_x64.exe",
             config="serverDZ.cfg",
+            directory=None,
             profile_directory=None,
             mission_directory=None,
             bundle_path="bundles.py",
@@ -59,6 +60,7 @@ executable = 42
         assert config == server_config.ServerConfig(
             executable=r".\DayZServer_x64.exe",
             config="serverDZ.cfg",
+            directory=None,
             profile_directory=None,
             mission_directory=None,
             bundle_path="bundles.py",
@@ -72,6 +74,7 @@ executable = 42
 [server]
 executable = "EXECUTABLE"
 config = "CONFIG-FILE"
+directory = "SERVER-DIRECTORY"
 profile_directory = "PROFILE"
 mission_directory = "MISSION"
 parameters = ["-opt1", "-opt2=value"]
@@ -86,6 +89,7 @@ directory = "WORKSHOP-DIRECTORY"
         assert config == server_config.ServerConfig(
             executable="EXECUTABLE",
             config="CONFIG-FILE",
+            directory="SERVER-DIRECTORY",
             profile_directory="PROFILE",
             mission_directory="MISSION",
             bundle_path="BUNDLES",
@@ -99,6 +103,7 @@ directory = "WORKSHOP-DIRECTORY"
 [bundle.override_all]
 executable = "OVERRIDDEN-EXE"
 config = "OVERRIDDEN-CFG"
+directory = "OVERRIDDEN-SERVER-DIRECTORY"
 profile_directory = "OVERRIDDEN-PROFILE"
 workshop_directory = "OVERRIDDEN-WORKSHOP"
 mods = ["mod1", "mod2", "mod3"]
@@ -123,6 +128,7 @@ server_mods = "mod3"
             "override_all": server_config.BundleConfig(
                 executable="OVERRIDDEN-EXE",
                 config="OVERRIDDEN-CFG",
+                directory="OVERRIDDEN-SERVER-DIRECTORY",
                 profile_directory="OVERRIDDEN-PROFILE",
                 workshop_directory="OVERRIDDEN-WORKSHOP",
                 mods=["mod1", "mod2", "mod3"],

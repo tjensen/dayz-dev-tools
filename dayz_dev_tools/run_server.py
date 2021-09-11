@@ -9,6 +9,7 @@ import dayz_dev_tools
 from dayz_dev_tools import keys
 from dayz_dev_tools import launch_settings
 from dayz_dev_tools import logging_configuration
+from dayz_dev_tools import misc
 from dayz_dev_tools import script_logs
 from dayz_dev_tools import server_config
 
@@ -120,7 +121,8 @@ def main() -> None:
         for bundle in args.bundles:
             settings.load_bundle(bundle)
 
-        run_server(settings, localappdata=os.environ.get("LOCALAPPDATA"), wait=not args.no_wait)
+        with misc.chdir(settings.directory()):
+            run_server(settings, localappdata=os.environ.get("LOCALAPPDATA"), wait=not args.no_wait)
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)

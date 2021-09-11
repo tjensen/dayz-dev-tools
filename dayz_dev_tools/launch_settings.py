@@ -11,6 +11,7 @@ class LaunchSettings:
     """Settings that determine what command line parameters to pass when running DayZ Server."""
     _executable: str
     _config: str
+    _directory: typing.Optional[str] = None
     _profile: typing.Optional[str] = None
     _workshop_path: str
     _bundle_module: typing.Optional[types.ModuleType] = None
@@ -30,6 +31,7 @@ class LaunchSettings:
         """
         self._executable = config.executable
         self._config = config.config
+        self._directory = config.directory
         self._profile = config.profile_directory
         self._workshop_path = config.workshop_directory
         self._mods = []
@@ -76,6 +78,22 @@ class LaunchSettings:
           - `path`: The DayZ Server config filename.
         """
         self._config = path
+
+    def directory(self) -> typing.Optional[str]:
+        """Get the directory to switch to before running DayZ Server.
+
+        :Returns:
+          The directory to switch to or ``None`` if it hasn't been set.
+        """
+        return self._directory
+
+    def set_directory(self, path: str) -> None:
+        """Set the directory to switch to before running DayZ Server.
+
+        :Parameters:
+          - `path`: The directory to switch to before running DayZ Server.
+        """
+        self._directory = path
 
     def profile_directory(self) -> typing.Optional[str]:
         """Get the DayZ Server profile directory name.
@@ -215,6 +233,9 @@ def _config_bundle(bundle: server_config.BundleConfig, settings: LaunchSettings)
 
     if bundle.config is not None:
         settings.set_config(bundle.config)
+
+    if bundle.directory is not None:
+        settings.set_directory(bundle.directory)
 
     if bundle.profile_directory is not None:
         settings.set_profile_directory(bundle.profile_directory)

@@ -16,6 +16,7 @@ class TestLaunchSettings(unittest.TestCase):
         self.config = server_config.ServerConfig(
             executable="server.exe",
             config="config.cfg",
+            directory="server/dir",
             workshop_directory="workshop/dir",
             bundle_path=BUNDLE_PATH,
             parameters=["-extraParam"],
@@ -23,6 +24,7 @@ class TestLaunchSettings(unittest.TestCase):
                 "override_all": server_config.BundleConfig(
                     executable="OVERRIDDEN-EXE",
                     config="OVERRIDDEN-CFG",
+                    directory="OVERRIDDEN-SERVER-DIRECTORY",
                     profile_directory="OVERRIDDEN-PROFILE",
                     workshop_directory="OVERRIDDEN-WORKSHOP",
                     mods=["mod1", "mod2", "mod3"],
@@ -57,6 +59,18 @@ class TestLaunchSettings(unittest.TestCase):
         settings.set_config("other.cfg")
 
         assert settings.config() == "other.cfg"
+
+    def test_directory_returns_directory_specified_in_config(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        assert settings.directory() == "server/dir"
+
+    def test_directory_returns_directory_overridden_using_set_directory(self) -> None:
+        settings = launch_settings.LaunchSettings(self.config)
+
+        settings.set_directory("overridden/server/dir")
+
+        assert settings.directory() == "overridden/server/dir"
 
     def test_profile_directory_returns_specified_profile_directory(self) -> None:
         settings = launch_settings.LaunchSettings(self.config)
@@ -162,6 +176,7 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.executable() == "OVERRIDDEN-EXE"
         assert settings.config() == "OVERRIDDEN-CFG"
+        assert settings.directory() == "OVERRIDDEN-SERVER-DIRECTORY"
         assert settings.profile_directory() == "OVERRIDDEN-PROFILE"
         assert settings.workshop_directory() == "OVERRIDDEN-WORKSHOP"
         assert settings.mods() == ["mod1", "mod2", "mod3"]
@@ -176,6 +191,7 @@ class TestLaunchSettings(unittest.TestCase):
 
         assert settings.executable() == "server.exe"
         assert settings.config() == "config.cfg"
+        assert settings.directory() == "server/dir"
         assert settings.profile_directory() is None
         assert settings.workshop_directory() == "workshop/dir"
         assert settings.mods() == ["mod7", "mod8"]

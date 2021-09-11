@@ -79,6 +79,7 @@ file. For example:
    [server]
    executable = "server.exe"
    config = "config.cfg"
+   directory = 'server\dir'
    profile_directory = "profile"
    mission_directory = 'mpmissions\dayzoffline.enoch'
    bundles = 'path\to\module.py'
@@ -111,6 +112,21 @@ By default, ``run-server`` will tell DayZ Server to load its configuration from
 
    [server]
    config = "config.cfg"
+
+Server Directory
+""""""""""""""""
+
+By default, ``run-server`` will run DayZ Server from the current working
+directory. To have ``run-server`` change to a different directory before
+running DayZ Server, set the ``directory`` key:
+
+.. code:: toml
+
+   [server]
+   directory = 'server\directory'
+
+.. note:: The current working directory is changed after loading bundles
+   specified on the command line.
 
 Profile Directory
 """""""""""""""""
@@ -188,6 +204,7 @@ named ``example``:
    [bundle.example]
    executable = 'path\to\server.exe'
    config = 'path\to\config.cfg'
+   directory = 'path\to\server\dir'
    profile_directory = 'path\to\profile'
    mission_directory = 'path\to\mission'
    workshop_directory = 'path\to\workshop'
