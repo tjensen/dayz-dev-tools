@@ -42,7 +42,8 @@ def run_server(
 ) -> None:
     args = [
         settings.executable(),
-        f"-config={settings.config()}"
+        f"-config={settings.config()}",
+        "-log"
     ]
 
     if settings.profile_directory() is not None:
@@ -73,7 +74,7 @@ def run_server(
 
         previous_log_name = script_logs.newest(profile)
 
-        with subprocess.Popen(args) as proc:
+        with subprocess.Popen(args, stdout=subprocess.DEVNULL) as proc:
             logging.info(f"Server started with PID {proc.pid}; waiting for new script log...")
             new_log_name = script_logs.wait_for_new(profile, previous_log_name)
 
@@ -89,7 +90,7 @@ def run_server(
             logging.info(f"Server finished with status {status}")
 
     else:
-        proc = subprocess.Popen(args)
+        proc = subprocess.Popen(args, stdout=subprocess.DEVNULL)
 
         logging.info(f"Server started with PID {proc.pid}")
 

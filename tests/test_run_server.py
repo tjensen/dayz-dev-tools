@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 import unittest
 from unittest import mock
@@ -195,7 +196,9 @@ class TestRunServer(unittest.TestCase):
 
         run_server.run_server(settings, localappdata="localappdata", wait=False)
 
-        self.mock_popen.assert_called_once_with(["server.exe", "-config=config.cfg"])
+        self.mock_popen.assert_called_once_with(
+            ["server.exe", "-config=config.cfg", "-log"],
+            stdout=subprocess.DEVNULL)
 
         self.mock_newest.assert_not_called()
 
@@ -207,9 +210,11 @@ class TestRunServer(unittest.TestCase):
 
         run_server.run_server(settings, localappdata="localappdata", wait=False)
 
-        self.mock_popen.assert_called_once_with([
-            "server.exe", "-config=config.cfg", "-profiles=PROFILE"
-        ])
+        self.mock_popen.assert_called_once_with(
+            [
+                "server.exe", "-config=config.cfg", "-log", "-profiles=PROFILE"
+            ],
+            stdout=subprocess.DEVNULL)
 
     def test_runs_executable_with_mission_parameter_when_mission_is_not_none(self) -> None:
         self.server_config.mission_directory = "MISSION"
@@ -217,9 +222,11 @@ class TestRunServer(unittest.TestCase):
 
         run_server.run_server(settings, localappdata="localappdata", wait=False)
 
-        self.mock_popen.assert_called_once_with([
-            "server.exe", "-config=config.cfg", "-mission=MISSION"
-        ])
+        self.mock_popen.assert_called_once_with(
+            [
+                "server.exe", "-config=config.cfg", "-log", "-mission=MISSION"
+            ],
+            stdout=subprocess.DEVNULL)
 
     def test_copies_keys_and_runs_with_mod_parameter_when_mods_are_added(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
@@ -237,11 +244,14 @@ class TestRunServer(unittest.TestCase):
             mock.call(os.path.join(expected_workshop_mod_path, "keys"), "keys")
         ])
 
-        self.mock_popen.assert_called_once_with([
-            "server.exe",
-            "-config=config.cfg",
-            f"-mod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
-        ])
+        self.mock_popen.assert_called_once_with(
+            [
+                "server.exe",
+                "-config=config.cfg",
+                "-log",
+                f"-mod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
+            ],
+            stdout=subprocess.DEVNULL)
 
     def test_copies_keys_and_runs_with_servermod_parameter_when_server_mods_are_added(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
@@ -259,11 +269,14 @@ class TestRunServer(unittest.TestCase):
             mock.call(os.path.join(expected_workshop_mod_path, "keys"), "keys")
         ])
 
-        self.mock_popen.assert_called_once_with([
-            "server.exe",
-            "-config=config.cfg",
-            f"-servermod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
-        ])
+        self.mock_popen.assert_called_once_with(
+            [
+                "server.exe",
+                "-config=config.cfg",
+                "-log",
+                f"-servermod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
+            ],
+            stdout=subprocess.DEVNULL)
 
     def test_passes_extra_parameters_when_added_to_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
@@ -272,12 +285,15 @@ class TestRunServer(unittest.TestCase):
 
         run_server.run_server(settings, localappdata="localappdata", wait=False)
 
-        self.mock_popen.assert_called_once_with([
-            "server.exe",
-            "-config=config.cfg",
-            "-opt1",
-            "-opt2=value"
-        ])
+        self.mock_popen.assert_called_once_with(
+            [
+                "server.exe",
+                "-config=config.cfg",
+                "-log",
+                "-opt1",
+                "-opt2=value"
+            ],
+            stdout=subprocess.DEVNULL)
 
     def test_waits_for_new_script_log_and_streams_it_when_wait_is_true(self) -> None:
         self.mock_newest.return_value = "script_previous.log"
