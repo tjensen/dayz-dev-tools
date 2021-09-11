@@ -359,3 +359,15 @@ class TestRunServer(unittest.TestCase):
         self.mock_newest.assert_called_once_with(".")
 
         self.mock_wait_for_new.assert_called_once_with(".", "script_previous.log")
+
+    def test_gracefully_terminates_server_when_ctrl_c_is_pressed(self) -> None:
+        self.mock_newest.return_value = None
+        self.mock_wait_for_new.side_effect = KeyboardInterrupt
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+
+        run_server.run_server(settings, localappdata="localappdata", wait=True)
+
+        self.mock_popen.return_value.__enter__.return_value.terminate.assert_called_once_with()
+
+        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_once_with()
