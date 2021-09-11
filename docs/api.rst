@@ -1,6 +1,10 @@
 API Reference
 =============
 
+The APIs documented in this section are the public interface of the
+``dayz-dev-tools`` package. All other functions and classes are considered
+private and may change without notice.
+
 Extracting PBO Content
 ----------------------
 
