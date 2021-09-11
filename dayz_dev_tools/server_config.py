@@ -1,9 +1,21 @@
 import dataclasses
 import logging
+import os
+import platform
 import typing
 
 import jsonschema
 import toml
+
+
+if platform.system() == "Windows":
+    DEFAULT_EXECUTABLE = os.path.join(".", "DayZServer_x64.exe")
+    DEFAULT_WORKSHOP_DIRECTORY = "C:\\" + os.path.join(
+        "Program Files (x86)", "Steam", "steamapps", "common", "DayZ", "!Workshop")
+else:
+    DEFAULT_EXECUTABLE = os.path.join(".", "DayZServer")
+    DEFAULT_WORKSHOP_DIRECTORY = os.path.join(
+        os.environ["HOME"], ".steam", "steamapps", "common", "DayZ", "!Workshop")
 
 
 CONFIG_SCHEMA = {
@@ -145,13 +157,12 @@ def load(filename: str) -> ServerConfig:
         config = {}
 
     config.setdefault("server", {})
-    config["server"].setdefault("executable", r".\DayZServer_x64.exe")
+    config["server"].setdefault("executable", DEFAULT_EXECUTABLE)
     config["server"].setdefault("config", "serverDZ.cfg")
     config["server"].setdefault("parameters", [])
     config["server"].setdefault("bundles", "bundles.py")
     config.setdefault("workshop", {})
-    config["workshop"].setdefault(
-        "directory", r"C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop")
+    config["workshop"].setdefault("directory", DEFAULT_WORKSHOP_DIRECTORY)
     config.setdefault("bundle", {})
 
     for name, bundle in config["bundle"].items():

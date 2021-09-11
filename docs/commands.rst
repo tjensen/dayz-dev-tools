@@ -94,8 +94,8 @@ Server Executable
 """""""""""""""""
 
 By default, ``run-server`` will try to run DayZ Server by running
-``.\DayZServer_x64.exe``. To override the executable path, set the
-``executable`` key:
+``.\DayZServer_x64.exe`` on Windows or ``./DayZServer`` on Linux. To override
+the executable path, set the ``executable`` key:
 
 .. code:: toml
 
@@ -183,14 +183,20 @@ DayZ Workshop Directory
 """""""""""""""""""""""
 
 By default, ``run-server`` will load mods prefixed with ``@`` from
-the ``C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop`` directory.
-If DayZ client is installed in a different location, override the default by
+the ``C:\Program Files (x86)\Steam\steamapps\common\DayZ\!Workshop`` directory
+on Windows or ``$HOME/.steam/steamapps/common/DayZ/!Workshop`` on Linux. If
+DayZ client is installed in a different location or you have installed mods
+from the Steam workshop in a different location, override the default by
 setting the ``directory`` key in the ``workshop`` table:
 
 .. code:: toml
 
    [workshop]
    directory = 'E:\DayZ\Workshop'
+
+.. note:: As there is currently no Linux version of DayZ *client*, Linux users
+   who want to specify mods using the ``@`` prefix should override this setting
+   to the location where they have installed mods using SteamCMD.
 
 Bundles as Configuration
 """"""""""""""""""""""""
