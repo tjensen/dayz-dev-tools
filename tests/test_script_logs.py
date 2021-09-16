@@ -77,21 +77,29 @@ class TestWaitForNew(unittest.TestCase):
         assert self.mock_sleep.call_count == 3
         self.mock_sleep.assert_called_with(1)
 
-    def test_returns_none_if_no_new_log_is_detected_within_5_second_timeout(self) -> None:
-        self.mock_newest.side_effect = ["script_previous.log"] * 6
+    def test_returns_new_log_if_created_before_timeout_expires(self) -> None:
+        self.mock_newest.side_effect = ["script_previous.log"] * 9 + ["script_new.log"]
+
+        assert script_logs.wait_for_new("profile/dir", "script_previous.log") == "script_new.log"
+
+        assert self.mock_newest.call_count == 10
+        assert self.mock_sleep.call_count == 9
+
+    def test_returns_none_if_no_new_log_is_detected_within_timeout(self) -> None:
+        self.mock_newest.side_effect = ["script_previous.log"] * 11
 
         assert script_logs.wait_for_new("profile/dir", "script_previous.log") is None
 
-        assert self.mock_newest.call_count == 6
-        assert self.mock_sleep.call_count == 5
-
-    def test_gives_up_after_specified_timeout(self) -> None:
-        self.mock_newest.side_effect = ["script_previous.log"] * 11
-
-        assert script_logs.wait_for_new("profile/dir", "script_previous.log", timeout=10) is None
-
         assert self.mock_newest.call_count == 11
         assert self.mock_sleep.call_count == 10
+
+    def test_gives_up_after_specified_timeout(self) -> None:
+        self.mock_newest.side_effect = ["script_previous.log"] * 6
+
+        assert script_logs.wait_for_new("profile/dir", "script_previous.log", timeout=5) is None
+
+        assert self.mock_newest.call_count == 6
+        assert self.mock_sleep.call_count == 5
 
 
 class TestStream(unittest.TestCase):
