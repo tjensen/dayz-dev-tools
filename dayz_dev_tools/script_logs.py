@@ -39,7 +39,7 @@ def wait_for_new(
     directory: str,
     previous_log_name: typing.Optional[str],
     *,
-    timeout: int = 5
+    timeout: int = 10
 ) -> typing.Optional[str]:
     """Wait for a script log that is newer than another script log to be created in a directory.
 
