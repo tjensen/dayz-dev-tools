@@ -1,4 +1,5 @@
 import os
+import stat
 import subprocess
 import sys
 import unittest
@@ -191,6 +192,10 @@ class TestRunServer(unittest.TestCase):
         self.mock_stream = stream_patcher.start()
         self.addCleanup(stream_patcher.stop)
 
+        stat_patcher = mock.patch("os.stat")
+        self.mock_stat = stat_patcher.start()
+        self.addCleanup(stat_patcher.stop)
+
     def test_runs_executable_with_provided_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
 
@@ -229,6 +234,8 @@ class TestRunServer(unittest.TestCase):
             stdout=subprocess.DEVNULL)
 
     def test_copies_keys_and_runs_with_mod_parameter_when_mods_are_added(self) -> None:
+        self.mock_stat.return_value = mock.Mock(st_mode=stat.S_IFDIR)
+
         settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_mod("some-mod")
         settings.add_mod(r"P:\path\to\mod")
@@ -237,6 +244,12 @@ class TestRunServer(unittest.TestCase):
         run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
+
+        self.mock_stat.assert_has_calls([
+            mock.call("some-mod"),
+            mock.call(r"P:\path\to\mod"),
+            mock.call(expected_workshop_mod_path)
+        ])
 
         self.mock_copy_keys.assert_has_calls([
             mock.call(os.path.join("some-mod", "keys"), "keys"),
@@ -254,6 +267,8 @@ class TestRunServer(unittest.TestCase):
             stdout=subprocess.DEVNULL)
 
     def test_copies_keys_and_runs_with_servermod_parameter_when_server_mods_are_added(self) -> None:
+        self.mock_stat.return_value = mock.Mock(st_mode=stat.S_IFDIR)
+
         settings = launch_settings.LaunchSettings(self.server_config)
         settings.add_server_mod("some-mod")
         settings.add_server_mod(r"P:\path\to\mod")
@@ -262,6 +277,12 @@ class TestRunServer(unittest.TestCase):
         run_server.run_server(settings, localappdata="localappdata", wait=False)
 
         expected_workshop_mod_path = os.path.join("workshopdir", "@Workshop Mod")
+
+        self.mock_stat.assert_has_calls([
+            mock.call("some-mod"),
+            mock.call(r"P:\path\to\mod"),
+            mock.call(expected_workshop_mod_path)
+        ])
 
         self.mock_copy_keys.assert_has_calls([
             mock.call(os.path.join("some-mod", "keys"), "keys"),
@@ -277,6 +298,42 @@ class TestRunServer(unittest.TestCase):
                 f"-servermod=some-mod;P:\\path\\to\\mod;{expected_workshop_mod_path}"
             ],
             stdout=subprocess.DEVNULL)
+
+    def test_raises_if_mod_directory_is_not_a_directory(self) -> None:
+        self.mock_stat.return_value = mock.Mock(st_mode=stat.S_IFCHR)
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+        settings.add_mod("some-mod")
+
+        with self.assertRaises(NotADirectoryError):
+            run_server.run_server(settings, localappdata="localappdata", wait=False)
+
+    def test_raises_if_workshop_mod_is_not_a_directory(self) -> None:
+        self.mock_stat.return_value = mock.Mock(st_mode=stat.S_IFCHR)
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+        settings.add_mod("@Workshop Mod")
+
+        with self.assertRaises(NotADirectoryError):
+            run_server.run_server(settings, localappdata="localappdata", wait=False)
+
+    def test_raises_if_server_mod_directory_is_not_a_directory(self) -> None:
+        self.mock_stat.return_value = mock.Mock(st_mode=stat.S_IFCHR)
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+        settings.add_server_mod("some-mod")
+
+        with self.assertRaises(NotADirectoryError):
+            run_server.run_server(settings, localappdata="localappdata", wait=False)
+
+    def test_raises_if_workshop_server_mod_is_not_a_directory(self) -> None:
+        self.mock_stat.return_value = mock.Mock(st_mode=stat.S_IFCHR)
+
+        settings = launch_settings.LaunchSettings(self.server_config)
+        settings.add_server_mod("@Workshop Mod")
+
+        with self.assertRaises(NotADirectoryError):
+            run_server.run_server(settings, localappdata="localappdata", wait=False)
 
     def test_passes_extra_parameters_when_added_to_launch_settings(self) -> None:
         settings = launch_settings.LaunchSettings(self.server_config)
