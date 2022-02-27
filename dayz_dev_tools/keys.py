@@ -14,10 +14,10 @@ def copy_keys(source: str, destination: str) -> None:
         This directory will be created if it does not already exist.
     """
     try:
-        keys = list(itertools.chain(*[
+        keys = list(itertools.chain.from_iterable(
             [os.path.join(root, file) for file in files if file.lower().endswith(".bikey")]
             for root, _, files in os.walk(source)
-        ]))
+        ))
     except FileNotFoundError:
         logging.debug(f"Error when searching for *.bikey files to copy at {source}", exc_info=True)
         keys = []
