@@ -365,6 +365,22 @@ class TestExtractPbo(unittest.TestCase):
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"CPP-CONTENT")
 
+    def test_finds_config_bin_files_case_insensitively(self) -> None:
+        self.mock_bin_to_cpp.return_value = b"CPP-CONTENT"
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir1\\Config.BIN", b"1111")
+        ]
+
+        with mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False,
+                cfgconvert="cppconvert.exe")
+
+        self.mock_bin_to_cpp.assert_called_once_with(b"1111", "cppconvert.exe")
+
+        mock_open.assert_called_once_with(os.path.join("dir1", "config.cpp"), "w+b")
+
     def test_extracts_unconverted_config_bin_if_convert_to_config_cpp_fails(self) -> None:
         self.mock_bin_to_cpp.side_effect = Exception("cfgconvert error")
         mock_open = mock.mock_open()
