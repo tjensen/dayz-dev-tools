@@ -51,7 +51,8 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "unpbo=dayz_dev_tools.unpbo:main",
-            "run-server=dayz_dev_tools.run_server:main"
+            "run-server=dayz_dev_tools.run_server:main",
+            "guid=dayz_dev_tools.guid:main"
         ]
     },
     ext_modules=[
