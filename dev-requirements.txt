@@ -13,5 +13,4 @@ pycodestyle==2.8.0
 pyflakes==2.4.0
 pyparsing==3.0.7
 pytest==7.0.1
-tomli==2.0.1
 typing_extensions==4.1.1
