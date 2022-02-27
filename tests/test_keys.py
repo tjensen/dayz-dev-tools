@@ -41,15 +41,6 @@ class TestCopyKeys(unittest.TestCase):
             mock.call(os.path.join("root3", "file4.bikey"), "destination")
         ])
 
-    def test_does_nothing_if_the_source_directory_does_not_exist(self) -> None:
-        self.mock_walk.side_effect = FileNotFoundError
-
-        keys.copy_keys("source", "destination")
-
-        self.mock_makedirs.assert_not_called()
-
-        self.mock_copy2.assert_not_called()
-
     def test_raises_for_other_errors(self) -> None:
         expected_error = Exception("other walk error")
         self.mock_walk.side_effect = expected_error
