@@ -5,7 +5,7 @@ import platform
 import typing
 
 import jsonschema
-import toml
+import tomli
 
 
 if platform.system() == "Windows":
@@ -145,13 +145,10 @@ def load(filename: str) -> ServerConfig:
       A :class:`~dayz_dev_tools.server_config.ServerConfig`.
     """
     try:
-        config = _validate(toml.load(filename), CONFIG_SCHEMA)
-    except toml.TomlDecodeError as error:
-        raise Exception(
-            # TODO: Figure out why mypy thinks TomlDecodeError doesn't have lineno, colno, and msg
-            f"Configuration error in {filename}:{error.lineno}:{error.colno}"  # type: ignore
-            f": {error.msg}") \
-            from error
+        with open(filename, "rb") as toml_file:
+            config = _validate(tomli.load(toml_file), CONFIG_SCHEMA)
+    except tomli.TOMLDecodeError as error:
+        raise Exception(f"Configuration error in {filename}: {error}") from error
     except FileNotFoundError as error:
         logging.debug(f"Unable to read config file ({filename}): {error}")
         config = {}

@@ -37,9 +37,7 @@ class TestLoad(unittest.TestCase):
         with self.assertRaises(Exception) as error:
             server_config.load(self.config_file.name)
 
-        assert str(error.exception) == \
-            f"Configuration error in {self.config_file.name}:1:9: Found invalid character in key" \
-            " name: 't'. Try quoting the key name."
+        assert f"Configuration error in {self.config_file.name}" in str(error.exception)
 
     def test_requires_settings_to_have_correct_types(self) -> None:
         with open(self.config_file.name, "w") as f:

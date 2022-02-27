@@ -46,7 +46,7 @@ setuptools.setup(
     setup_requires=["wheel"],
     install_requires=[
         "jsonschema>=3.2.0",
-        "toml>=0.10.2"
+        "tomli>=2.0.0"
     ],
     entry_points={
         "console_scripts": [
