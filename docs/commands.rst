@@ -10,6 +10,16 @@ either the ``-h`` or ``--help`` option, e.g.:
 
 .. note:: More tools will be added in the future.
 
+guid
+----
+
+The ``guid`` command can be used to convert 64-bit Steam IDs to DayZ GUIDs.
+Pass the SteamID64 to convert as a parameter to the command:
+
+.. code:: batch
+
+   guid 76561197970002375
+
 unpbo
 -----
 

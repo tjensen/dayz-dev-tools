@@ -11,6 +11,12 @@ Extracting PBO Content
 .. automodule:: dayz_dev_tools.extract_pbo
    :members:
 
+DayZ GUIDs
+----------
+
+.. automodule:: dayz_dev_tools.guid
+   :members:
+
 Public Key Management
 ---------------------
 
