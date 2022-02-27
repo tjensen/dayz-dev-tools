@@ -1,6 +1,7 @@
 import argparse
 import logging
 import os
+import stat
 import subprocess
 import sys
 import typing
@@ -19,9 +20,14 @@ DEFAULT_CONFIG_FILE = "server.toml"
 
 def _resolve_mod(mod: str, workshop_directory: str) -> str:
     if mod.startswith("@"):
-        return os.path.join(workshop_directory, mod)
+        mod_dir = os.path.join(workshop_directory, mod)
     else:
-        return mod
+        mod_dir = mod
+
+    if not stat.S_ISDIR(os.stat(mod_dir).st_mode):
+        raise NotADirectoryError(f"{mod_dir} is not a directory")
+
+    return mod_dir
 
 
 def _copy_keys(mod_dirs: typing.List[str], keys_dir: str) -> None:
