@@ -3,6 +3,7 @@
 This project contains tools and libraries that can be useful for DayZ mod
 developers and server owners, including:
 
+* `guid` - Tool for converting 64-bit SteamIDs to DayZ GUIDs
 * `unpbo` - Tool for inspecting PBO archives and extracting their contents
 * `run-server` - Tool that makes running DayZ Server easier
 
