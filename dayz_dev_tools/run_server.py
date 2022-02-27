@@ -32,7 +32,7 @@ def _resolve_mod(mod: str, workshop_directory: str) -> str:
 
 def _copy_keys(mod_dirs: typing.List[str], keys_dir: str) -> None:
     for mod_dir in mod_dirs:
-        keys.copy_keys(os.path.join(mod_dir, "keys"), keys_dir)
+        keys.copy_keys(mod_dir, keys_dir)
 
 
 def _mod_parameter(option: str, mods: typing.List[str], workshop_directory: str) -> str:
