@@ -252,9 +252,9 @@ class TestRunServer(unittest.TestCase):
         ])
 
         self.mock_copy_keys.assert_has_calls([
-            mock.call(os.path.join("some-mod", "keys"), "keys"),
-            mock.call(os.path.join(r"P:\path\to\mod", "keys"), "keys"),
-            mock.call(os.path.join(expected_workshop_mod_path, "keys"), "keys")
+            mock.call("some-mod", "keys"),
+            mock.call(r"P:\path\to\mod", "keys"),
+            mock.call(expected_workshop_mod_path, "keys")
         ])
 
         self.mock_popen.assert_called_once_with(
@@ -285,9 +285,9 @@ class TestRunServer(unittest.TestCase):
         ])
 
         self.mock_copy_keys.assert_has_calls([
-            mock.call(os.path.join("some-mod", "keys"), "keys"),
-            mock.call(os.path.join(r"P:\path\to\mod", "keys"), "keys"),
-            mock.call(os.path.join(expected_workshop_mod_path, "keys"), "keys")
+            mock.call("some-mod", "keys"),
+            mock.call(r"P:\path\to\mod", "keys"),
+            mock.call(expected_workshop_mod_path, "keys")
         ])
 
         self.mock_popen.assert_called_once_with(
