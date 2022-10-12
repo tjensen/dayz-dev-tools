@@ -149,5 +149,5 @@ server_mods = "mod3"
 mods = 2112
 """)
 
-        with self.assertRaises(Exception) as error:
+        with self.assertRaises(Exception):
             server_config.load(self.config_file.name)
