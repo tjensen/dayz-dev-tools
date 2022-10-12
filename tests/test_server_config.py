@@ -151,6 +151,3 @@ mods = 2112
 
         with self.assertRaises(Exception) as error:
             server_config.load(self.config_file.name)
-
-        assert str(error.exception) == \
-            "Configuration error at bundle.invalid.mods: 2112 is not of type 'string'"
