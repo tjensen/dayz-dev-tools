@@ -217,7 +217,16 @@ class TestLaunchSettings(unittest.TestCase):
         mock_bundle1.assert_not_called()
 
     def test_load_bundle_raises_if_bundle_path_is_invalid(self) -> None:
-        self.config.bundle_path = "invalid"
+        self.config.bundle_path = "invalid.py"
+
+        settings = launch_settings.LaunchSettings(self.config)
+
+        with self.assertRaises(Exception):
+            settings.load_bundle("does_not_matter")
+
+    def test_load_bundle_raises_if_bundle_filename_missing_extension(self) -> None:
+        self.config.bundle_path = os.path.join(
+            os.path.dirname(__file__), "fixtures", "bad_filename")
 
         settings = launch_settings.LaunchSettings(self.config)
 

@@ -1,6 +1,7 @@
 import functools
-import importlib.machinery
+import importlib.util
 import logging
+import sys
 import types
 import typing
 
@@ -41,10 +42,13 @@ class LaunchSettings:
         self._bundles = config.bundles
 
         try:
-            loader = importlib.machinery.SourceFileLoader(
+            spec = importlib.util.spec_from_file_location(
                 "__dayz_server_bundles__", config.bundle_path)
-            self._bundle_module = loader.load_module()
-        except FileNotFoundError as error:
+            assert spec is not None and spec.loader is not None
+            self._bundle_module = importlib.util.module_from_spec(spec)
+            sys.modules[self._bundle_module.__name__] = self._bundle_module
+            spec.loader.exec_module(self._bundle_module)
+        except (AssertionError, FileNotFoundError) as error:
             logging.debug(f"Unable to load bundles at {config.bundle_path}: {error}")
 
     def executable(self) -> str:
