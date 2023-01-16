@@ -2,7 +2,7 @@ Installation
 ============
 
 DayZ Dev Tools is listed on `PyPI <https://pypi.org/project/dayz-dev-tools/>`_.
-I highly recommend installing it using `pipx <https://pypa.github.io/pipx/`_
+I highly recommend installing it using `pipx <https://pypa.github.io/pipx/>`_
 for command line use:
 
 .. code:: bash
