@@ -83,14 +83,13 @@ def run_server(
         with subprocess.Popen(args, stdout=subprocess.DEVNULL) as proc:
             try:
                 logging.info(f"Server started with PID {proc.pid}; waiting for new script log...")
-                new_log_name = script_logs.wait_for_new(profile, previous_log_name)
+                while (new_log_name := script_logs.wait_for_new(
+                        profile, previous_log_name, timeout=1)) is None:
+                    logging.info("Still waiting for new script log...")
 
-                if new_log_name is None:
-                    logging.warning("No script log found")
-                else:
-                    logging.info("Streaming script log:")
-                    with open(new_log_name, "r", errors="surrogateescape") as log:
-                        script_logs.stream(sys.stdout, log, lambda: proc.poll() is None)
+                logging.info("Streaming script log:")
+                with open(new_log_name, "r", errors="surrogateescape") as log:
+                    script_logs.stream(sys.stdout, log, lambda: proc.poll() is None)
 
                 proc.wait()
 
