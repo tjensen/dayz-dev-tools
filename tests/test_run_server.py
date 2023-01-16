@@ -363,7 +363,8 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_newest.assert_called_once_with("profile/dir")
 
-        self.mock_wait_for_new.assert_called_once_with("profile/dir", "script_previous.log")
+        self.mock_wait_for_new.assert_called_once_with(
+            "profile/dir", "script_previous.log", timeout=1)
 
         self.mock_open.assert_called_once_with("script_new.log", "r", errors="surrogateescape")
 
@@ -378,19 +379,16 @@ class TestRunServer(unittest.TestCase):
         assert self.mock_stream.call_args[0][2]()
         assert not self.mock_stream.call_args[0][2]()
 
-    def test_does_not_stream_script_log_if_no_new_script_log_is_created(self) -> None:
-        self.mock_wait_for_new.return_value = None
+    def test_continues_waiting_for_script_log_until_new_script_log_is_created(self) -> None:
+        self.mock_newest.return_value = "script_previous.log"
+        self.mock_wait_for_new.side_effect = [None, None, None, "script_new.log"]
 
         self.server_config.profile_directory = "profile/dir"
         settings = launch_settings.LaunchSettings(self.server_config)
 
         run_server.run_server(settings, localappdata="localappdata", wait=True)
 
-        self.mock_open.assert_not_called()
-        self.mock_stream.assert_not_called()
-
-        self.mock_popen.return_value.__enter__.return_value.wait.assert_called_with()
-        assert self.mock_popen.return_value.__enter__.return_value.wait.call_count == 2
+        assert self.mock_wait_for_new.call_count == 4
 
     def test_streams_script_log_from_profile_in_localappdata_if_profile_is_none(self) -> None:
         self.mock_newest.return_value = "script_previous.log"
@@ -404,7 +402,8 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_newest.assert_called_once_with(expected_dir)
 
-        self.mock_wait_for_new.assert_called_once_with(expected_dir, "script_previous.log")
+        self.mock_wait_for_new.assert_called_once_with(
+            expected_dir, "script_previous.log", timeout=1)
 
     def test_streams_script_log_from_current_dir_if_profile_is_none_and_localappdata_is_unset(
             self) -> None:
@@ -417,7 +416,7 @@ class TestRunServer(unittest.TestCase):
 
         self.mock_newest.assert_called_once_with(".")
 
-        self.mock_wait_for_new.assert_called_once_with(".", "script_previous.log")
+        self.mock_wait_for_new.assert_called_once_with(".", "script_previous.log", timeout=1)
 
     def test_gracefully_terminates_server_when_ctrl_c_is_pressed(self) -> None:
         self.mock_newest.return_value = None
