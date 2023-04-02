@@ -11,10 +11,14 @@ class _Key:
 class _WinReg:
     HKEY_CURRENT_USER: _Key
 
-    def OpenKey(self, key: typing.Any, sub_key: str) -> _Key:
+    def OpenKey(self, key: typing.Any, sub_key: str) -> _Key:  # type: ignore[empty-body]
         ...
 
-    def QueryValueEx(self, key: _Key, value_name: str) -> typing.Tuple[str, int]:
+    def QueryValueEx(  # type: ignore[empty-body]
+        self,
+        key: _Key,
+        value_name: str
+    ) -> typing.Tuple[str, int]:
         ...
 
 
