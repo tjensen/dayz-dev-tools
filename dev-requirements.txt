@@ -11,5 +11,6 @@ pluggy==1.0.0
 pycodestyle==2.10.0
 pyflakes==3.0.1
 pytest==7.2.2
+setuptools
 tomli==2.0.1
 typing_extensions==4.5.0
