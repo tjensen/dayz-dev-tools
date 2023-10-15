@@ -1,5 +1,5 @@
 from dayz_dev_tools import pbo_file_reader
-import dayz_dev_tools_ext  # type: ignore[import]
+import dayz_dev_tools_ext  # type: ignore[import-not-found]
 
 
 def expand(reader: pbo_file_reader.PBOFileReader, outsize: int) -> bytes:
