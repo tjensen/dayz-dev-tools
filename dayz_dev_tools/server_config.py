@@ -24,7 +24,7 @@ class _ServerConfig(pydantic.BaseModel):
     directory: typing.Optional[str] = None
     profile_directory: typing.Optional[str] = None
     mission_directory: typing.Optional[str] = None
-    parameters: list[str] = pydantic.Field(default_factory=list)
+    parameters: typing.List[str] = pydantic.Field(default_factory=list)
     bundles: str = "bundles.py"
 
 
@@ -39,15 +39,15 @@ class _Bundle(pydantic.BaseModel):
     profile_directory: typing.Optional[str] = None
     workshop_directory: typing.Optional[str] = None
     mission_directory: typing.Optional[str] = None
-    mods: typing.Union[str, list[str]] = pydantic.Field(default_factory=list)
-    server_mods: typing.Union[str, list[str]] = pydantic.Field(default_factory=list)
-    parameters: list[str] = pydantic.Field(default_factory=list)
+    mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=list)
+    server_mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=list)
+    parameters: typing.List[str] = pydantic.Field(default_factory=list)
 
 
 class _Config(pydantic.BaseModel):
     server: _ServerConfig = pydantic.Field(default_factory=_ServerConfig)
     workshop: _WorkshopConfig = pydantic.Field(default_factory=_WorkshopConfig)
-    bundle: dict[str, _Bundle] = pydantic.Field(default_factory=dict)
+    bundle: typing.Dict[str, _Bundle] = pydantic.Field(default_factory=dict)
 
 
 @dataclasses.dataclass
