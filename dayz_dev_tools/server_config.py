@@ -4,7 +4,7 @@ import os
 import platform
 import typing
 
-import jsonschema
+import pydantic
 import tomli
 
 
@@ -18,68 +18,36 @@ else:
         os.environ["HOME"], ".steam", "steamapps", "common", "DayZ", "!Workshop")
 
 
-CONFIG_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "server": {
-            "type": "object",
-            "properties": {
-                "executable": {"type": "string"},
-                "config": {"type": "string"},
-                "directory": {"type": "string"},
-                "profile_directory": {"type": "string"},
-                "mission_directory": {"type": "string"},
-                "parameters": {"type": "array", "items": {"type": "string"}},
-                "bundles": {"type": "string"}
-            }
-        },
-        "workshop": {
-            "type": "object",
-            "properties": {
-                "directory": {"type": "string"}
-            }
-        }
-    }
-}
-
-BUNDLE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "executable": {"type": "string"},
-        "config": {"type": "string"},
-        "directory": {"type": "string"},
-        "profile_directory": {"type": "string"},
-        "workshop_directory": {"type": "string"},
-        "mission_directory": {"type": "string"},
-        "mods": {
-            "oneOf": [
-                {"type": "string"},
-                {"type": "array", "items": {"type": "string"}}
-            ]
-        },
-        "server_mods": {
-            "oneOf": [
-                {"type": "string"},
-                {"type": "array", "items": {"type": "string"}}
-            ]
-        },
-        "parameters": {"type": "array", "items": {"type": "string"}},
-    }
-}
+class _ServerConfig(pydantic.BaseModel):
+    executable: str = DEFAULT_EXECUTABLE
+    config: str = "serverDZ.cfg"
+    directory: typing.Optional[str] = None
+    profile_directory: typing.Optional[str] = None
+    mission_directory: typing.Optional[str] = None
+    parameters: typing.List[str] = pydantic.Field(default_factory=list)
+    bundles: str = "bundles.py"
 
 
-def _validate(
-    instance: typing.MutableMapping[str, typing.Any],
-    schema: typing.Any,
-    *, prefix: str = ""
-) -> typing.MutableMapping[str, typing.Any]:
-    try:
-        jsonschema.validate(instance, schema)
+class _WorkshopConfig(pydantic.BaseModel):
+    directory: str = DEFAULT_WORKSHOP_DIRECTORY
 
-        return instance
-    except jsonschema.ValidationError as error:
-        path = ".".join(error.absolute_path)
-        raise Exception(f"Configuration error at {prefix}{path}: {error.message}") from error
+
+class _Bundle(pydantic.BaseModel):
+    executable: typing.Optional[str] = None
+    config: typing.Optional[str] = None
+    directory: typing.Optional[str] = None
+    profile_directory: typing.Optional[str] = None
+    workshop_directory: typing.Optional[str] = None
+    mission_directory: typing.Optional[str] = None
+    mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=list)
+    server_mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=list)
+    parameters: typing.List[str] = pydantic.Field(default_factory=list)
+
+
+class _Config(pydantic.BaseModel):
+    server: _ServerConfig = pydantic.Field(default_factory=_ServerConfig)
+    workshop: _WorkshopConfig = pydantic.Field(default_factory=_WorkshopConfig)
+    bundle: typing.Dict[str, _Bundle] = pydantic.Field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -146,47 +114,37 @@ def load(filename: str) -> ServerConfig:
     """
     try:
         with open(filename, "rb") as toml_file:
-            config = _validate(tomli.load(toml_file), CONFIG_SCHEMA)
+            config = _Config.model_validate(tomli.load(toml_file))
     except tomli.TOMLDecodeError as error:
         raise Exception(f"Configuration error in {filename}: {error}") from error
+    except pydantic.ValidationError as error:
+        loc = ".".join(str(ll) for ll in error.errors()[0]['loc'])
+        inp = error.errors()[0]['input']
+        msg = error.errors()[0]['msg']
+        raise Exception(f"Configuration error at {loc}: {inp}: {msg}") from error
     except FileNotFoundError as error:
         logging.debug(f"Unable to read config file ({filename}): {error}")
-        config = {}
-
-    config.setdefault("server", {})
-    config["server"].setdefault("executable", DEFAULT_EXECUTABLE)
-    config["server"].setdefault("config", "serverDZ.cfg")
-    config["server"].setdefault("parameters", [])
-    config["server"].setdefault("bundles", "bundles.py")
-    config.setdefault("workshop", {})
-    config["workshop"].setdefault("directory", DEFAULT_WORKSHOP_DIRECTORY)
-    config.setdefault("bundle", {})
-
-    for name, bundle in config["bundle"].items():
-        _validate(bundle, BUNDLE_SCHEMA, prefix=f"bundle.{name}.")
-        bundle.setdefault("mods", [])
-        bundle.setdefault("server_mods", [])
-        bundle.setdefault("parameters", [])
+        config = _Config()
 
     return ServerConfig(
-        executable=config["server"]["executable"],
-        config=config["server"]["config"],
-        directory=config["server"].get("directory"),
-        profile_directory=config["server"].get("profile_directory"),
-        mission_directory=config["server"].get("mission_directory"),
-        workshop_directory=config["workshop"]["directory"],
-        bundle_path=config["server"]["bundles"],
-        parameters=config["server"]["parameters"],
+        executable=config.server.executable,
+        config=config.server.config,
+        directory=config.server.directory,
+        profile_directory=config.server.profile_directory,
+        mission_directory=config.server.mission_directory,
+        workshop_directory=config.workshop.directory,
+        bundle_path=config.server.bundles,
+        parameters=config.server.parameters,
         bundles={
             name: BundleConfig(
-                executable=bundle.get("executable"),
-                config=bundle.get("config"),
-                directory=bundle.get("directory"),
-                profile_directory=bundle.get("profile_directory"),
-                workshop_directory=bundle.get("workshop_directory"),
-                mods=_parse_mods(bundle["mods"]),
-                server_mods=_parse_mods(bundle["server_mods"]),
-                mission_directory=bundle.get("mission_directory"),
-                parameters=bundle["parameters"])
-            for name, bundle in config.get("bundle", {}).items()
+                executable=bundle.executable,
+                config=bundle.config,
+                directory=bundle.directory,
+                profile_directory=bundle.profile_directory,
+                workshop_directory=bundle.workshop_directory,
+                mods=_parse_mods(bundle.mods),
+                server_mods=_parse_mods(bundle.server_mods),
+                mission_directory=bundle.mission_directory,
+                parameters=bundle.parameters)
+            for name, bundle in config.bundle.items()
         })
