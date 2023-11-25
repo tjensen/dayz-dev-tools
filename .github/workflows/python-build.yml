@@ -30,7 +30,7 @@ jobs:
         python setup.py sdist
     - name: Install package
       run: |
-        python setup.py develop
+        python -m pip install -e .
     - name: Run tests
       run: |
         pytest -v
