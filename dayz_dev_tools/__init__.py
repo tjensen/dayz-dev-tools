@@ -1,1 +1,4 @@
-version = "1.6.dev0"
+from importlib import metadata
+
+
+version = metadata.version('dayz-dev-tools')
