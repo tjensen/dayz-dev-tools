@@ -1,5 +1,5 @@
 from os import path
-import setuptools  # type: ignore[import]
+import setuptools  # type: ignore[import-untyped]
 
 
 with open(path.join(path.abspath(path.dirname(__file__)), "README.md"), "r", encoding="utf8") as fh:
