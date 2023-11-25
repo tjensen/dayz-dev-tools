@@ -43,7 +43,7 @@ setuptools.setup(
     python_requires=">=3.8",
     setup_requires=["wheel"],
     install_requires=[
-        "jsonschema>=3.2.0",
+        "pydantic>=2.5.0",
         "tomli>=2.0.0"
     ],
     entry_points={
