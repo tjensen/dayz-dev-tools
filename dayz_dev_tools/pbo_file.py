@@ -7,6 +7,10 @@ from dayz_dev_tools import expand
 from dayz_dev_tools import pbo_file_reader
 
 
+def normalize_filename(parts: typing.List[bytes]) -> str:
+    return os.path.join(*parts).decode(errors="replace")
+
+
 @dataclasses.dataclass
 class PBOFile:
     """Interface for accessing a file contained within a PBO archive. Instances should be obtained
@@ -56,7 +60,7 @@ class PBOFile:
         :Returns:
           A normalized version of the file's name.
         """
-        return os.path.join(*self.split_filename()).decode(errors="replace")
+        return normalize_filename(self.split_filename())
 
     def split_filename(self) -> typing.List[bytes]:
         """Get the file's name as a ``list``, where each element in the list represents a component

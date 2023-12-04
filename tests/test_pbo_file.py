@@ -7,6 +7,19 @@ from dayz_dev_tools import pbo_file
 from dayz_dev_tools import pbo_file_reader
 
 
+class TestNormalizeFilename(unittest.TestCase):
+    def test_returns_filenames_with_os_style_paths(self) -> None:
+        filename = [b"xxx", b"yyy", b"zzz.www"]
+
+        assert pbo_file.normalize_filename(filename) == os.path.join("xxx", "yyy", "zzz.www")
+
+    def test_replaces_invalid_characters(self) -> None:
+        filename = [b"x\x88x", b"y\x99y", b"z\xaaz.www"]
+
+        assert pbo_file.normalize_filename(filename) == \
+            os.path.join("x\ufffdx", "y\ufffdy", "z\ufffdz.www")
+
+
 class TestPBOFile(unittest.TestCase):
     def setUp(self) -> None:
         super().setUp()
