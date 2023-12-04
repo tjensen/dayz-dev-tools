@@ -31,6 +31,10 @@ def _extract_file(
 
     parts = pbofile.split_filename()
 
+    if len(parts) == 0 or len(parts[-1]) == 0:
+        print("Skipping empty obfuscation filename")
+        return
+
     if len(parts) > 1:
         os.makedirs(os.path.join(*parts[:-1]), exist_ok=True)
 

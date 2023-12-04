@@ -65,12 +65,17 @@ class PBOFile:
         :Returns:
           A list of path components.
         """
-        def rec_split(s: bytes) -> typing.List[bytes]:
-            rest, tail = ntpath.split(s)
-            if len(rest) == 0:
-                return [tail]
-            return rec_split(rest) + [tail]
-        return rec_split(self.filename)
+        rest = self.filename
+        result: typing.List[bytes] = []
+
+        while len(rest) > 0:
+            rest, tail = ntpath.split(rest)
+            result.insert(0, tail)
+
+            if rest == self.filename:
+                break
+
+        return result
 
     def unpacked_size(self) -> int:
         """Get the original size of the file. If the file is compressed, this will be different

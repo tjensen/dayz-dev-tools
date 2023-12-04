@@ -305,6 +305,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.files.return_value = [
             self.create_mock_file(b"\t\t", b""),
             self.create_mock_file(b"*.*", b""),
+            self.create_mock_file(b"", b""),
+            self.create_mock_file(b"\\\\\\", b""),
             self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
             self.create_mock_file(b"file?to-skip", b""),
             self.create_mock_file(b"another-file-to*skip", b""),
@@ -318,7 +320,10 @@ class TestExtractPbo(unittest.TestCase):
             extract_pbo.extract_pbo(
                 self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
 
-        mock_print.assert_not_called()
+        mock_print.assert_has_calls([
+            mock.call("Skipping empty obfuscation filename"),
+            mock.call("Skipping empty obfuscation filename")
+        ])
 
         mock_open.assert_called_once_with(b"obfuscated1", "w+b")
 

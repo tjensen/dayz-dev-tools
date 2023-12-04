@@ -91,6 +91,11 @@ class TestPBOFile(unittest.TestCase):
 
         assert self.pbofile.split_filename() == [b"xxx", b"yyy", b"zzz.www"]
 
+    def test_split_filename_handles_bogus_obfuscation_filename(self) -> None:
+        self.pbofile.filename = b"\\\\\\"
+
+        assert self.pbofile.split_filename() == [b""]
+
     def test_unpacked_size_returns_original_size(self) -> None:
         assert self.pbofile.unpacked_size() == 12345
 
