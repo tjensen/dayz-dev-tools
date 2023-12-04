@@ -393,9 +393,15 @@ class TestExtractPbo(unittest.TestCase):
                 self.mock_pboreader, [], verbose=True, deobfuscate=True, cfgconvert=None)
 
         mock_print.assert_has_calls([
-            mock.call("Extracting dir\\obfus\ufffdcated.c -> dir\\deobfs00000.c"),
-            mock.call("Extracting dir\\trashy?file.c -> dir\\deobfs00001.c"),
-            mock.call("Extracting dir\\gar\tbage.c -> dir\\deobfs00002.c")
+            mock.call(
+                "Extracting " + os.path.join('dir', 'obfus\ufffdcated.c')
+                + f" -> {os.path.join('dir', 'deobfs00000.c')}"),
+            mock.call(
+                "Extracting " + os.path.join('dir', 'trashy?file.c')
+                + f" -> {os.path.join('dir', 'deobfs00001.c')}"),
+            mock.call(
+                "Extracting " + os.path.join('dir', 'gar\tbage.c')
+                + f" -> {os.path.join('dir', 'deobfs00002.c')}")
         ])
 
     def test_does_not_convert_config_bin_files_when_cfgconvert_is_none(self) -> None:
