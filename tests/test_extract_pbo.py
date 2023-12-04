@@ -392,7 +392,6 @@ class TestExtractPbo(unittest.TestCase):
             extract_pbo.extract_pbo(
                 self.mock_pboreader, [], verbose=True, deobfuscate=True, cfgconvert=None)
 
-        print(mock_print.call_args_list)
         mock_print.assert_has_calls([
             mock.call("Extracting dir\\obfus\ufffdcated.c -> dir\\deobfs00000.c"),
             mock.call("Extracting dir\\trashy?file.c -> dir\\deobfs00001.c"),
