@@ -305,6 +305,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.files.return_value = [
             self.create_mock_file(b"\t\t", b""),
             self.create_mock_file(b"*.*", b""),
+            self.create_mock_file(b"", b""),
+            self.create_mock_file(b"\\\\\\", b""),
             self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
             self.create_mock_file(b"file?to-skip", b""),
             self.create_mock_file(b"another-file-to*skip", b""),
@@ -318,7 +320,10 @@ class TestExtractPbo(unittest.TestCase):
             extract_pbo.extract_pbo(
                 self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
 
-        mock_print.assert_not_called()
+        mock_print.assert_has_calls([
+            mock.call("Skipping empty obfuscation filename"),
+            mock.call("Skipping empty obfuscation filename")
+        ])
 
         mock_open.assert_called_once_with(b"obfuscated1", "w+b")
 
@@ -326,6 +331,78 @@ class TestExtractPbo(unittest.TestCase):
             b"NOT OBFUSCATED CONTENT 1"),
 
         self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated1")
+
+    def test_renames_script_files_with_obfuscated_filenames_when_deobfuscating(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir\\obfus\xcccated.c", b"contents1"),
+            self.create_mock_file(b"dir\\trashy?file.c", b"contents2"),
+            self.create_mock_file(b"dir\\gar\tbage.c", b"contents3")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
+
+        mock_print.assert_not_called()
+
+        assert mock_open.call_count == 3
+        mock_open.assert_has_calls([
+            mock.call(os.path.join(b"dir", b"deobfs00000.c"), "w+b"),
+            mock.call(os.path.join(b"dir", b"deobfs00001.c"), "w+b"),
+            mock.call(os.path.join(b"dir", b"deobfs00002.c"), "w+b")
+        ], any_order=True)
+
+        mock_open.return_value.__enter__.return_value.write.assert_has_calls([
+            mock.call(b"contents1"),
+            mock.call(b"contents2"),
+            mock.call(b"contents3")
+        ])
+
+    def test_does_not_rename_obfuscated_filenames_when_not_deobfuscating(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir\\obfus\xcccated.c", b"contents1"),
+            self.create_mock_file(b"dir\\trashy?file.c", b"contents2"),
+            self.create_mock_file(b"dir\\gar\tbage.c", b"contents3")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None)
+
+        mock_print.assert_not_called()
+
+        assert mock_open.call_count == 3
+        mock_open.assert_has_calls([
+            mock.call(os.path.join(b"dir", b"obfus\xcccated.c"), "w+b"),
+            mock.call(os.path.join(b"dir", b"trashy?file.c"), "w+b"),
+            mock.call(os.path.join(b"dir", b"gar\tbage.c"), "w+b")
+        ], any_order=True)
+
+    def test_prints_renamed_script_files_when_verbose_is_true(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(b"dir\\obfus\xcccated.c", b"contents1"),
+            self.create_mock_file(b"dir\\trashy?file.c", b"contents2"),
+            self.create_mock_file(b"dir\\gar\tbage.c", b"contents3")
+        ]
+
+        with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=True, deobfuscate=True, cfgconvert=None)
+
+        mock_print.assert_has_calls([
+            mock.call(
+                "Extracting " + os.path.join('dir', 'obfus\ufffdcated.c')
+                + f" -> {os.path.join('dir', 'deobfs00000.c')}"),
+            mock.call(
+                "Extracting " + os.path.join('dir', 'trashy?file.c')
+                + f" -> {os.path.join('dir', 'deobfs00001.c')}"),
+            mock.call(
+                "Extracting " + os.path.join('dir', 'gar\tbage.c')
+                + f" -> {os.path.join('dir', 'deobfs00002.c')}")
+        ])
 
     def test_does_not_convert_config_bin_files_when_cfgconvert_is_none(self) -> None:
         mock_open = mock.mock_open()

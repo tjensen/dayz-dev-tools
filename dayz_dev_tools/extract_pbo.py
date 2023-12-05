@@ -18,11 +18,16 @@ def _invalid_filename(filename: bytes) -> bool:
     return INVALID_FILENAME_RE.search(filename) is not None
 
 
+_deobfs_count = 0
+
+
 def _extract_file(
     reader: pbo_reader.PBOReader, pbofile: pbo_file.PBOFile, verbose: bool, deobfuscate: bool,
     cfgconvert: typing.Optional[str], ignored: typing.List[bytes]
 ) -> None:
-    if deobfuscate and ((pbofile.filename in ignored) or _invalid_filename(pbofile.filename)):
+    if deobfuscate and (
+            (pbofile.filename in ignored)
+            or (_invalid_filename(pbofile.filename) and not pbofile.filename.endswith(b".c"))):
         if verbose:
             print(f"Skipping obfuscation file: {pbofile.normalized_filename()}")
         return
@@ -30,6 +35,10 @@ def _extract_file(
     prefix = reader.prefix()
 
     parts = pbofile.split_filename()
+
+    if len(parts) == 0 or len(parts[-1]) == 0:
+        print("Skipping empty obfuscation filename")
+        return
 
     if len(parts) > 1:
         os.makedirs(os.path.join(*parts[:-1]), exist_ok=True)
@@ -51,9 +60,21 @@ def _extract_file(
         except Exception as error:
             print(f"Failed to convert {pbofile.normalized_filename()}: {error}")
 
+    renamed_filename: typing.Optional[str] = None
+
+    if deobfuscate and _invalid_filename(parts[-1]) and parts[-1].endswith(b".c"):
+        global _deobfs_count
+        parts[-1] = f"deobfs{_deobfs_count:05}.c".encode()
+        _deobfs_count += 1
+
+        renamed_filename = pbo_file.normalize_filename(parts)
+
     with open(os.path.join(*parts), "w+b") as out_file:
         if verbose:
-            print(f"Extracting {pbofile.normalized_filename()}")
+            if renamed_filename is None:
+                print(f"Extracting {pbofile.normalized_filename()}")
+            else:
+                print(f"Extracting {pbofile.normalized_filename()} -> {renamed_filename}")
 
         if deobfuscate:
             buffer = io.BytesIO()
@@ -98,6 +119,9 @@ def extract_pbo(
 
     .. note:: Deobfuscation may not always work, as obfuscation techniques may evolve over time.
     """
+    global _deobfs_count
+    _deobfs_count = 0
+
     ignored: typing.List[bytes] = []
 
     if len(files_to_extract) == 0:
