@@ -1,3 +1,72 @@
+[project]
+name = "dayz-dev-tools"
+version = "1.7.dev0"
+authors = [
+    {name = "Tim Jensen", email = "tim.l.jensen@gmail.com"}
+]
+description = "Useful tools for DayZ mod developers."
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.8"
+dependencies = [
+    "pydantic>=2.5.0",
+    "tomli>=2.0.0"
+]
+keywords = ["dayz", "tools", "pbo", "server"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment :: First Person Shooters",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Utilities",
+    "Typing :: Typed"
+]
+
+[project.urls]
+Homepage = "https://dayz-dev-tools.readthedocs.io/"
+Repository = "https://github.com/tjensen/dayz-dev-tools"
+Issues = "https://github.com/tjensen/dayz-dev-tools/issues"
+Changelog = "https://github.com/tjensen/dayz-dev-tools/releases"
+
+[tool.setuptools.packages.find]
+include = ["dayz_dev_tools"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error"
+]
+
+[tool.mypy]
+files = "dayz_dev_tools,tests"
+plugins = "pydantic.mypy"
+strict = true
+show_error_codes = true
+
+[project.optional-dependencies]
+dev = [
+    "build==1.0.3",
+    "flake8==6.1.0",
+    "mypy==1.7.1",
+    "pytest==7.4.3"
+]
+publish = ["twine==4.0.2"]
+docs = [
+    "readthedocs-sphinx-search",
+    "Sphinx>=4.1.2",
+    "sphinx-rtd-theme"
+]
+
+[project.scripts]
+unpbo = "dayz_dev_tools.unpbo:main"
+run-server = "dayz_dev_tools.run_server:main"
+guid = "dayz_dev_tools.guid:main"
+
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"

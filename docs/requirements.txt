@@ -1,3 +1,0 @@
-readthedocs-sphinx-search
-Sphinx>=4.1.2
-sphinx-rtd-theme

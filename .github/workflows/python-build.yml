@@ -24,13 +24,10 @@ jobs:
         architecture: ${{ matrix.architecture }}
     - name: Install dependencies
       run: |
-        pip install -r dev-requirements.txt
-    - name: Build sdist
+        pip install -e .[dev]
+    - name: Build sdist and wheel
       run: |
-        python setup.py sdist
-    - name: Install package
-      run: |
-        python setup.py develop
+        python -m build -s -w
     - name: Run tests
       run: |
         pytest -v
