@@ -38,7 +38,7 @@ Changelog = "https://github.com/tjensen/dayz-dev-tools/releases"
 include = ["dayz_dev_tools"]
 
 [project.optional-dependencies]
-dev = ["pytest", "flake8", "mypy"]
+dev = ["pytest", "flake8", "mypy", "build"]
 
 [project.scripts]
 unpbo = "dayz_dev_tools.unpbo:main"
