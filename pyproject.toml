@@ -52,8 +52,8 @@ show_error_codes = true
 dev = [
     "build==1.0.3",
     "flake8==6.1.0",
-    "mypy==1.6.0",
-    "pytest==7.4.2"
+    "mypy==1.7.1",
+    "pytest==7.4.3"
 ]
 publish = ["twine==4.0.2"]
 
