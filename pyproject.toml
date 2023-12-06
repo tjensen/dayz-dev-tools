@@ -56,6 +56,11 @@ dev = [
     "pytest==7.4.3"
 ]
 publish = ["twine==4.0.2"]
+docs = [
+    "readthedocs-sphinx-search",
+    "Sphinx>=4.1.2",
+    "sphinx-rtd-theme"
+]
 
 [project.scripts]
 unpbo = "dayz_dev_tools.unpbo:main"
