@@ -25,9 +25,9 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e .[dev]
-    - name: Build sdist
+    - name: Build sdist and wheel
       run: |
-        python -m build -s
+        python -m build -s -w
     - name: Run tests
       run: |
         pytest -v
