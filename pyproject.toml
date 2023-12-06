@@ -68,5 +68,5 @@ run-server = "dayz_dev_tools.run_server:main"
 guid = "dayz_dev_tools.guid:main"
 
 [build-system]
-requires = ["setuptools>=61", "wheel"]
+requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
