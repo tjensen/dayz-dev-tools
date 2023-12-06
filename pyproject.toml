@@ -37,6 +37,13 @@ Changelog = "https://github.com/tjensen/dayz-dev-tools/releases"
 [tool.setuptools.packages.find]
 include = ["dayz_dev_tools"]
 
+[tool.mypy]
+files = "dayz_dev_tools,tests"
+mypy_path = "stubs"
+plugins = "pydantic.mypy"
+strict = true
+show_error_codes = true
+
 [project.optional-dependencies]
 dev = ["pytest", "flake8", "mypy", "build"]
 
