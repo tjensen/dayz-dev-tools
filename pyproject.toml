@@ -44,7 +44,13 @@ strict = true
 show_error_codes = true
 
 [project.optional-dependencies]
-dev = ["pytest==7.4.2", "flake8==6.1.0", "mypy==1.6.0", "build==1.0.3"]
+dev = [
+  "build==1.0.3",
+  "flake8==6.1.0",
+  "mypy==1.6.0",
+  "pytest==7.4.2"
+]
+publish = ["twine==4.0.2"]
 
 [project.scripts]
 unpbo = "dayz_dev_tools.unpbo:main"

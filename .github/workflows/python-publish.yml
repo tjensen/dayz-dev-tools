@@ -44,8 +44,7 @@ jobs:
         python-version: '3.9'
     - name: Install dependencies
       run: |
-        pip install -e .[dev]
-        pip install twine
+        pip install -e .[dev,publish]
     - uses: actions/download-artifact@v3
       with:
         path: artifacts
