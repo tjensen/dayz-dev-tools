@@ -57,7 +57,7 @@ dev = [
 ]
 publish = ["twine==4.0.2"]
 docs = [
-    "readthedocs-sphinx-search",
+    "readthedocs-sphinx-search>=0.3.2",
     "Sphinx>=4.1.2",
     "sphinx-rtd-theme"
 ]
