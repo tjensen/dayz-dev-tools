@@ -23,10 +23,10 @@ jobs:
         architecture: ${{ matrix.architecture }}
     - name: Install dependencies
       run: |
-        pip install -r dev-requirements.txt
+        pip install -e .[dev]
     - name: Build wheel
       run: |
-        python setup.py bdist_wheel
+        python -m build -w
     - uses: actions/upload-artifact@v3
       with:
         path: dist/*
@@ -44,14 +44,13 @@ jobs:
         python-version: '3.9'
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools
-        pip install twine
+        pip install -e .[dev,publish]
     - uses: actions/download-artifact@v3
       with:
         path: artifacts
     - name: Build sdist
       run: |
-        python setup.py sdist
+        python -m build -s
         cp artifacts/artifact/* dist
         ls -lR dist
     - name: Publish
