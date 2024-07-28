@@ -1,5 +1,4 @@
 import io
-import ntpath
 import typing
 
 from dayz_dev_tools import pbo_file
@@ -49,7 +48,7 @@ def _read_file_entries(
             break
 
         if prefix is not None:
-            filename = ntpath.join(prefix, filename)
+            filename = b"\\".join((prefix, filename))
 
         mime_type = reader.read(4)
         original_size = reader.readuint()

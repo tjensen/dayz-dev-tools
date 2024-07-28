@@ -57,11 +57,11 @@ class TestExtractPbo(unittest.TestCase):
 
         assert mock_open.call_count == 5
         mock_open.assert_has_calls([
-            mock.call(os.path.join(b"dir1", b"dir2", b"filename.ext"), "w+b"),
-            mock.call(os.path.join(b"dir1", b"filename.ext"), "w+b"),
-            mock.call(os.path.join(b"dir1", b"dir2", b"dir3", b"filename.ext"), "w+b"),
-            mock.call(os.path.join(b"filename.ext"), "w+b"),
-            mock.call(os.path.join(b"other-filename.png"), "w+b")
+            mock.call(os.path.join("dir1", "dir2", "filename.ext"), "w+b"),
+            mock.call(os.path.join("dir1", "filename.ext"), "w+b"),
+            mock.call(os.path.join("dir1", "dir2", "dir3", "filename.ext"), "w+b"),
+            mock.call(os.path.join("filename.ext"), "w+b"),
+            mock.call(os.path.join("other-filename.png"), "w+b")
         ], any_order=True)
 
         mock_open.return_value.__enter__.return_value.write.assert_has_calls([
@@ -101,8 +101,8 @@ class TestExtractPbo(unittest.TestCase):
 
         assert mock_open.call_count == 2
         mock_open.assert_has_calls([
-            mock.call(os.path.join(b"filename.ext"), "w+b"),
-            mock.call(os.path.join(b"dir1", b"filename.ext"), "w+b")
+            mock.call(os.path.join("filename.ext"), "w+b"),
+            mock.call(os.path.join("dir1", "filename.ext"), "w+b")
         ], any_order=True)
 
         mock_open.return_value.__enter__.return_value.write.assert_has_calls([
@@ -194,9 +194,9 @@ class TestExtractPbo(unittest.TestCase):
 
         assert mock_open.call_count == 3
         mock_open.assert_has_calls([
-            mock.call(b"obfuscated1", "w+b"),
-            mock.call(b"obfuscated2", "w+b"),
-            mock.call(b"obfuscated3", "w+b")
+            mock.call("obfuscated1", "w+b"),
+            mock.call("obfuscated2", "w+b"),
+            mock.call("obfuscated3", "w+b")
         ], any_order=True)
 
         mock_open.return_value.__enter__.return_value.write.assert_has_calls([
@@ -272,7 +272,7 @@ class TestExtractPbo(unittest.TestCase):
 
         mock_print.assert_not_called()
 
-        mock_open.assert_called_once_with(b"obfuscated1", "w+b")
+        mock_open.assert_called_once_with("obfuscated1", "w+b")
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(content)
 
@@ -294,7 +294,7 @@ class TestExtractPbo(unittest.TestCase):
             mock.call("Unable to deobfuscate obfuscated1")
         ])
 
-        mock_open.assert_called_once_with(b"obfuscated1", "w+b")
+        mock_open.assert_called_once_with("obfuscated1", "w+b")
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(content)
 
@@ -325,7 +325,7 @@ class TestExtractPbo(unittest.TestCase):
             mock.call("Skipping empty obfuscation filename")
         ])
 
-        mock_open.assert_called_once_with(b"obfuscated1", "w+b")
+        mock_open.assert_called_once_with("obfuscated1", "w+b")
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(
             b"NOT OBFUSCATED CONTENT 1"),
@@ -348,9 +348,9 @@ class TestExtractPbo(unittest.TestCase):
 
         assert mock_open.call_count == 3
         mock_open.assert_has_calls([
-            mock.call(os.path.join(b"dir", b"deobfs00000.c"), "w+b"),
-            mock.call(os.path.join(b"dir", b"deobfs00001.c"), "w+b"),
-            mock.call(os.path.join(b"dir", b"deobfs00002.c"), "w+b")
+            mock.call(os.path.join("dir", "deobfs00000.c"), "w+b"),
+            mock.call(os.path.join("dir", "deobfs00001.c"), "w+b"),
+            mock.call(os.path.join("dir", "deobfs00002.c"), "w+b")
         ], any_order=True)
 
         mock_open.return_value.__enter__.return_value.write.assert_has_calls([
@@ -375,9 +375,9 @@ class TestExtractPbo(unittest.TestCase):
 
         assert mock_open.call_count == 3
         mock_open.assert_has_calls([
-            mock.call(os.path.join(b"dir", b"obfus\xcccated.c"), "w+b"),
-            mock.call(os.path.join(b"dir", b"trashy?file.c"), "w+b"),
-            mock.call(os.path.join(b"dir", b"gar\tbage.c"), "w+b")
+            mock.call(os.path.join("dir", "obfus\ufffdcated.c"), "w+b"),
+            mock.call(os.path.join("dir", "trashy?file.c"), "w+b"),
+            mock.call(os.path.join("dir", "gar\tbage.c"), "w+b")
         ], any_order=True)
 
     def test_prints_renamed_script_files_when_verbose_is_true(self) -> None:
@@ -418,7 +418,7 @@ class TestExtractPbo(unittest.TestCase):
 
         self.mock_bin_to_cpp.assert_not_called()
 
-        mock_open.assert_called_once_with(os.path.join(b"dir1", b"config.bin"), "w+b")
+        mock_open.assert_called_once_with(os.path.join("dir1", "config.bin"), "w+b")
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"1111")
 
@@ -475,7 +475,7 @@ class TestExtractPbo(unittest.TestCase):
 
         self.mock_bin_to_cpp.assert_called_once_with(b"1111", "cppconvert.exe")
 
-        mock_open.assert_called_once_with(os.path.join(b"dir1", b"config.bin"), "w+b")
+        mock_open.assert_called_once_with(os.path.join("dir1", "config.bin"), "w+b")
 
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(b"1111")
 
