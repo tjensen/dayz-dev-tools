@@ -1,6 +1,6 @@
 import dataclasses
-import ntpath
 import os
+import re
 import typing
 
 from dayz_dev_tools import expand
@@ -8,7 +8,7 @@ from dayz_dev_tools import pbo_file_reader
 
 
 def normalize_filename(parts: typing.List[bytes]) -> str:
-    return os.path.join(*parts).decode(errors="replace")
+    return os.path.sep.encode().join(parts).decode(errors="replace")
 
 
 @dataclasses.dataclass
@@ -69,15 +69,10 @@ class PBOFile:
         :Returns:
           A list of path components.
         """
-        rest = self.filename
-        result: typing.List[bytes] = []
+        result = list(filter(lambda c: len(c) > 0, re.split(b"[\\\\/]", self.filename)))
 
-        while len(rest) > 0:
-            rest, tail = ntpath.split(rest)
-            result.insert(0, tail)
-
-            if rest == self.filename:
-                break
+        if len(result) == 0:
+            return [b""]
 
         return result
 

@@ -61,15 +61,16 @@ def _extract_file(
             print(f"Failed to convert {pbofile.normalized_filename()}: {error}")
 
     renamed_filename: typing.Optional[str] = None
+    normalized = pbofile.normalized_filename()
 
     if deobfuscate and _invalid_filename(parts[-1]) and parts[-1].endswith(b".c"):
         global _deobfs_count
         parts[-1] = f"deobfs{_deobfs_count:05}.c".encode()
         _deobfs_count += 1
 
-        renamed_filename = pbo_file.normalize_filename(parts)
+        normalized = renamed_filename = pbo_file.normalize_filename(parts)
 
-    with open(os.path.join(*parts), "w+b") as out_file:
+    with open(normalized, "w+b") as out_file:
         if verbose:
             if renamed_filename is None:
                 print(f"Extracting {pbofile.normalized_filename()}")
