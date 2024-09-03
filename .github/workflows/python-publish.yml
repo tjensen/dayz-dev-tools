@@ -45,7 +45,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -e .[dev,publish]
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4.1.7
       with:
         path: artifacts
     - name: Build sdist
