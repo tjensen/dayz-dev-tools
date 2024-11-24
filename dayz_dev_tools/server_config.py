@@ -39,8 +39,9 @@ class _Bundle(pydantic.BaseModel):
     profile_directory: typing.Optional[str] = None
     workshop_directory: typing.Optional[str] = None
     mission_directory: typing.Optional[str] = None
-    mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=list)
-    server_mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=list)
+    mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=lambda: list())
+    server_mods: typing.Union[str, typing.List[str]] = pydantic.Field(
+        default_factory=lambda: list())
     parameters: typing.List[str] = pydantic.Field(default_factory=list)
 
 
