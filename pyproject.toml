@@ -55,7 +55,7 @@ dev = [
     "mypy==1.7.1",
     "pytest==7.4.3"
 ]
-publish = ["twine==4.0.2"]
+publish = ["twine==5.1.1"]
 docs = [
     "readthedocs-sphinx-search>=0.3.2",
     "Sphinx>=4.1.2",
