@@ -50,10 +50,10 @@ show_error_codes = true
 
 [project.optional-dependencies]
 dev = [
-    "build==1.0.3",
-    "flake8==6.1.0",
-    "mypy==1.7.1",
-    "pytest==7.4.3"
+    "build==1.2.2.post1",
+    "flake8==7.1.1",
+    "mypy==1.13.0",
+    "pytest==8.3.3"
 ]
 publish = ["twine==5.1.1"]
 docs = [
