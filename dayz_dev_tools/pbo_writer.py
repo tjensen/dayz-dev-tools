@@ -4,7 +4,7 @@ import typing
 
 
 def _write_file_entry(output: typing.BinaryIO, path: pathlib.Path, size: int, mtime: int) -> None:
-    output.write("\\".join(path.parts).encode("utf8") + b"\x00")
+    output.write("\\".join(path.relative_to(path.anchor).parts).encode("utf8") + b"\x00")
     output.write(struct.pack("LLLLL", 0, size, 0, mtime, size))
 
 

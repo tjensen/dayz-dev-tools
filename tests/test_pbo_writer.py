@@ -34,17 +34,16 @@ class TestPBOWriter(unittest.TestCase):
 
         assert b"NAME\x00VALUE\x00\x00" + (b"\x00" * 21) == output.getvalue()[21:]
 
-    def test_add_file_includes_added_file_in_written_pbo_file(self) -> None:
+    @mock.patch.object(pathlib.Path, "stat")
+    def test_add_file_includes_added_file_in_written_pbo_file(self, mock_stat: mock.Mock) -> None:
         output = io.BytesIO()
         mock_open = mock.mock_open()
         mock_open.return_value.__enter__.return_value.read.return_value = b"FILE-CONTENTS"
 
-        mock_stat = mock.Mock()
         mock_stat.return_value.st_size = 13
         mock_stat.return_value.st_mtime = 305419896.567
 
-        original_path = pathlib.Path("./PATH/TO/FILENAME")
-        path = mock.MagicMock(spec=pathlib.Path, stat=mock_stat, parts=original_path.parts)
+        path = pathlib.Path("PATH/TO/FILENAME")
 
         self.pbo_writer.add_file(path)
 
@@ -58,3 +57,21 @@ class TestPBOWriter(unittest.TestCase):
         assert b"PATH\\TO\\FILENAME\x00\x00\x00\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00" \
             b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" \
             == output.getvalue()[22:]
+
+    @mock.patch.object(pathlib.Path, "stat")
+    def test_add_file_removes_anchor_from_filename(self, mock_stat: mock.Mock) -> None:
+        output = io.BytesIO()
+        mock_open = mock.mock_open()
+        mock_open.return_value.__enter__.return_value.read.return_value = b"FILE-CONTENTS"
+
+        mock_stat.return_value.st_size = 13
+        mock_stat.return_value.st_mtime = 305419896.567
+
+        path = pathlib.Path("C:/PATH/TO/FILENAME")
+
+        self.pbo_writer.add_file(path)
+
+        with mock.patch("builtins.open", mock_open):
+            self.pbo_writer.write(output)
+
+        assert b"PATH\\TO\\FILENAME\x00" == output.getvalue()[22:39]
