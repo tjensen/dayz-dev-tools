@@ -78,7 +78,7 @@ class TestPBOWriter(unittest.TestCase):
         mock_stat.return_value.st_size = 13
         mock_stat.return_value.st_mtime = 305419896.567
 
-        path = pathlib.Path("C:/PATH/TO/FILENAME")
+        path = pathlib.Path("/PATH/TO/FILENAME")
 
         with mock.patch("builtins.open", mock_open):
             writer = pbo_writer.PBOWriter(cfgconvert="path/to/cfgconvert.exe")

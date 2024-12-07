@@ -62,9 +62,9 @@ def main() -> None:
                 writer.add_header(*header)
 
             for pattern in args.pattern:
-                anchor = pathlib.Path(pattern).anchor
+                anchor = pathlib.Path(pathlib.Path(pattern).anchor)
                 rest = pathlib.Path(pattern).relative_to(anchor)
-                for path in pathlib.Path(anchor).glob(rest):
+                for path in anchor.glob(str(rest)):
                     if not path.is_dir():
                         logging.info("Adding file `%s`", path)
                         writer.add_file(path)

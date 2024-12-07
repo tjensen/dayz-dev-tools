@@ -1,5 +1,4 @@
 import dataclasses
-import fnmatch
 import hashlib
 import logging
 import pathlib
@@ -65,7 +64,7 @@ class PBOWriter:
         info = path.stat()
         size = info.st_size
 
-        if self.cfgconvert is not None and fnmatch.fnmatch(path.name, "config.cpp"):
+        if self.cfgconvert is not None and path.name.lower() == "config.cpp":
             with open(path, "rb") as infile:
                 logging.debug("Converting %s to %s", path, path.with_suffix(".bin"))
                 contents = config_cpp.cpp_to_bin(infile.read(), self.cfgconvert)
@@ -106,7 +105,7 @@ class PBOWriter:
         for entry in entries:
             logging.debug("Writing file entry: %s", entry.stored_path)
             writer.write(entry.stored_path.encode("utf8") + b"\x00")
-            writer.write(struct.pack("LLLLL", 0, entry.size, 0, int(entry.mtime), entry.size))
+            writer.write(struct.pack("IIIII", 0, entry.size, 0, int(entry.mtime), entry.size))
 
         writer.write(b"\x00" * 21)
 

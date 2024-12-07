@@ -196,11 +196,11 @@ class TestMain(unittest.TestCase):
         with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
             main([
                 "ignored",
-                "--pattern", "C:/folder/**/*.ext",
+                "--pattern", "/folder/**/*.ext",
                 "output.pbo"
             ])
 
-        mock_glob.assert_called_once_with(pathlib.Path("C:/"), pathlib.Path("folder/**/*.ext"))
+        mock_glob.assert_called_once_with(pathlib.Path("/"), os.path.join("folder", "**", "*.ext"))
 
     @mock.patch("subprocess.run")
     def test_signs_pbo_file_when_requested(self, mock_run: mock.Mock) -> None:
