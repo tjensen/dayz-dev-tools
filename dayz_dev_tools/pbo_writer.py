@@ -44,27 +44,13 @@ class PBOWriter:
         self.headers: list[tuple[bytes, bytes]] = []
         self.entries: list[_Entry] = []
 
-    @typing.overload
-    def add_header(self, name: bytes, value: bytes) -> None:
-        """Add a header to the PBO archive.
-
-        :Parameters:
-          - `name`: The name of the header.
-          - `value`: The value of the header.
-        """
-        pass
-
-    @typing.overload
-    def add_header(self, name: str, value: str) -> None:
-        """Add a header to the PBO archive.
-
-        :Parameters:
-          - `name`: The name of the header.
-          - `value`: The value of the header.
-        """
-        pass
-
     def add_header(self, name: typing.Union[str, bytes], value: typing.Union[str, bytes]) -> None:
+        """Add a header to the PBO archive.
+
+        :Parameters:
+          - `name`: The name of the header.
+          - `value`: The value of the header.
+        """
         self.headers.append((
             name.encode("utf8") if hasattr(name, "encode") else name,
             value.encode("utf8") if hasattr(value, "encode") else value
