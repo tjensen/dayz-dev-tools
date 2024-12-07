@@ -8,7 +8,7 @@ import typing
 from dayz_dev_tools import config_cpp
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(eq=True, frozen=True)
 class _Entry:
     read_path: pathlib.Path
     stored_path: str
@@ -112,13 +112,15 @@ class PBOWriter:
 
         writer.write(b"\x00")
 
-        for entry in self.entries:
+        entries = sorted(set(self.entries), key=lambda e: e.read_path)
+
+        for entry in entries:
             writer.write(entry.stored_path.encode("utf8") + b"\x00")
             writer.write(struct.pack("LLLLL", 0, entry.size, 0, int(entry.mtime), entry.size))
 
         writer.write(b"\x00" * 21)
 
-        for entry in self.entries:
+        for entry in entries:
             if entry.contents is None:
                 with open(entry.read_path, "rb") as infile:
                     contents = infile.read()

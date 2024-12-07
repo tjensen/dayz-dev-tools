@@ -151,6 +151,48 @@ class TestPBOWriter(unittest.TestCase):
         assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")
+    def test_write_sorts_files(self, mock_stat: mock.Mock) -> None:
+        output = io.BytesIO()
+        mock_open = mock.mock_open()
+        mock_open.return_value.__enter__.return_value.read.return_value = b"CONTENT"
+
+        mock_stat.return_value.st_size = 7
+        mock_stat.return_value.st_mtime = 305419896.567
+
+        with mock.patch("builtins.open", mock_open):
+            writer = pbo_writer.PBOWriter(cfgconvert=None)
+            writer.add_file(pathlib.Path("zzz/yyy/xxx"))
+            writer.add_file(pathlib.Path("aa/bb/cc"))
+            writer.add_file(pathlib.Path("a/a/a"))
+            writer.add_file(pathlib.Path("a/b/c"))
+            writer.write(output)
+
+        assert [
+            mock.call(pathlib.Path("a/a/a"), "rb"),
+            mock.call(pathlib.Path("a/b/c"), "rb"),
+            mock.call(pathlib.Path("aa/bb/cc"), "rb"),
+            mock.call(pathlib.Path("zzz/yyy/xxx"), "rb")
+        ] == mock_open.call_args_list
+
+    @mock.patch.object(pathlib.Path, "stat")
+    def test_write_ignores_duplicate_files(self, mock_stat: mock.Mock) -> None:
+        output = io.BytesIO()
+        mock_open = mock.mock_open()
+        mock_open.return_value.__enter__.return_value.read.return_value = b"CONTENT"
+
+        mock_stat.return_value.st_size = 7
+        mock_stat.return_value.st_mtime = 305419896.567
+
+        with mock.patch("builtins.open", mock_open):
+            writer = pbo_writer.PBOWriter(cfgconvert=None)
+            writer.add_file(pathlib.Path("aa/bb/cc"))
+            writer.add_file(pathlib.Path("aa/bb/cc"))
+            writer.add_file(pathlib.Path("aa/bb/cc"))
+            writer.write(output)
+
+        mock_open.assert_called_once_with(pathlib.Path("aa/bb/cc"), "rb")
+
+    @mock.patch.object(pathlib.Path, "stat")
     def test_write_raises_when_added_file_size_does_not_match(self, mock_stat: mock.Mock) -> None:
         output = io.BytesIO()
         mock_open = mock.mock_open()
