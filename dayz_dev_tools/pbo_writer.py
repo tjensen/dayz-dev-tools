@@ -1,6 +1,7 @@
 import dataclasses
 import fnmatch
 import hashlib
+import logging
 import pathlib
 import struct
 import typing
@@ -80,6 +81,7 @@ class PBOWriter:
 
         if self.cfgconvert is not None and fnmatch.fnmatch(path.name, "config.cpp"):
             with open(path, "rb") as infile:
+                logging.debug("Converting %s to %s", path, path.with_suffix(".bin"))
                 contents = config_cpp.cpp_to_bin(infile.read(), self.cfgconvert)
 
             path = path.with_suffix(".bin")
@@ -107,6 +109,7 @@ class PBOWriter:
         writer.write(b"sreV\x00")
         writer.write(b"\x00" * 15)
 
+        logging.debug("Writing headers")
         for header in self.headers:
             writer.write(header[0] + b"\x00" + header[1] + b"\x00")
 
@@ -115,6 +118,7 @@ class PBOWriter:
         entries = sorted(set(self.entries), key=lambda e: e.read_path)
 
         for entry in entries:
+            logging.debug("Writing file entry: %s", entry.stored_path)
             writer.write(entry.stored_path.encode("utf8") + b"\x00")
             writer.write(struct.pack("LLLLL", 0, entry.size, 0, int(entry.mtime), entry.size))
 
@@ -130,6 +134,8 @@ class PBOWriter:
             if len(contents) != entry.size:
                 raise Exception(f"File size mismatch {len(contents)} != {entry.size}")
 
+            logging.debug("Writing file content: %s", entry.stored_path)
             writer.write(contents)
 
+        logging.debug("Finalizing PBO")
         writer.finalize()
