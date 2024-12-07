@@ -121,8 +121,13 @@ class PBOWriter:
         for entry in self.entries:
             if entry.contents is None:
                 with open(entry.read_path, "rb") as infile:
-                    writer.write(infile.read())
+                    contents = infile.read()
             else:
-                writer.write(entry.contents)
+                contents = entry.contents
+
+            if len(contents) != entry.size:
+                raise Exception(f"File size mismatch {len(contents)} != {entry.size}")
+
+            writer.write(contents)
 
         writer.finalize()
