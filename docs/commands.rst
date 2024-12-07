@@ -20,6 +20,22 @@ Pass the SteamID64 to convert as a parameter to the command:
 
    guid 76561197970002375
 
+pbo
+---
+
+The ``pbo`` command can be used to create PBO files. Pass the name of the PBO
+file to create, followed by the names of any files to add to the PBO. For
+example:
+
+.. code:: batch
+
+   pbo mymod.pbo config.cpp scripts\3_game\something.c
+
+Note that this command is relatively low level compared to many other PBO
+creation tools, like PboProject and AddonBuilder. Adding headers and signing
+the resulting PBO requires additional options. See the ``-h`` or ``--help``
+output for further details.
+
 unpbo
 -----
 
