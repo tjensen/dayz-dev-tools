@@ -93,3 +93,61 @@ class TestMain(unittest.TestCase):
             ])
 
         assert 2 == error.exception.code
+
+    def test_adds_files_matching_glob_when_pattern_argument_is_specified(self) -> None:
+        pathlib.Path(self.indir.name, "match1.ext").touch()
+        pathlib.Path(self.indir.name, "path", "to").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "path", "to", "match2.ext").touch()
+        pathlib.Path(self.indir.name, "path", "to", "no-match.dat").touch()
+        pathlib.Path(self.indir.name, "another", "path").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "another", "path", "match3.ext").touch()
+        pathlib.Path(self.indir.name, "another", "path", "subdir").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "another", "path", "subdir", "match4.ext").touch()
+
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
+            main([
+                "ignored",
+                "--pattern", "**/*.ext",
+                "output.pbo"
+            ])
+
+        assert 4 == self.mock_pbo_writer.add_file.call_count
+        self.mock_pbo_writer.add_file.assert_has_calls([
+            mock.call(pathlib.Path("match1.ext")),
+            mock.call(pathlib.Path("path", "to", "match2.ext")),
+            mock.call(pathlib.Path("another", "path", "match3.ext")),
+            mock.call(pathlib.Path("another", "path", "subdir", "match4.ext")),
+        ])
+
+    @mock.patch("pathlib.Path.glob", autospec=True)
+    def test_accepts_patterns_with_absolute_paths(self, mock_glob) -> None:
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
+            main([
+                "ignored",
+                "--pattern", "C:/folder/**/*.ext",
+                "output.pbo"
+            ])
+
+        mock_glob.assert_called_once_with(pathlib.Path("C:/"), pathlib.Path("folder/**/*.ext"))
+
+    def test_enables_debug_logging_when_option_is_specified(self) -> None:
+        with mock.patch("builtins.open", mock.mock_open()):
+            main([
+                "ignored",
+                "--debug",
+                "output.pbo"
+            ])
+
+        self.mock_configure_logging.assert_called_once_with(debug=True)
+
+    def test_raises_systemexit_on_error(self) -> None:
+        self.mock_pbo_writer_class.side_effect = Exception("error message")
+
+        with mock.patch("builtins.open", mock.mock_open()):
+            with self.assertRaises(SystemExit) as error:
+                main([
+                    "ignored",
+                    "output.pbo"
+                ])
+
+        assert error.exception.code == 1
