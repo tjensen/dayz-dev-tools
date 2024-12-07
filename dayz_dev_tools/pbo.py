@@ -58,7 +58,7 @@ def main() -> None:
                 " - https://dayz-dev-tools.readthedocs.io/en/stable/")
 
             for header in args.header:
-                logging.info(f"Adding header: `{header[0]}` = `{header[1]}`")
+                logging.info("Adding header: `%s` = `%s`", header[0], header[1])
                 writer.add_header(*header)
 
             for pattern in args.pattern:
@@ -66,7 +66,7 @@ def main() -> None:
                 rest = pathlib.Path(pattern).relative_to(anchor)
                 for path in pathlib.Path(anchor).glob(rest):
                     if not path.is_dir():
-                        logging.info(f"Adding file `{path}`")
+                        logging.info("Adding file `%s`", path)
                         writer.add_file(path)
 
             for file in args.files:
@@ -74,21 +74,22 @@ def main() -> None:
                 if path.is_dir():
                     for subpath in path.glob("**/*"):
                         if not subpath.is_dir():
-                            logging.info(f"Adding file `{subpath}`")
+                            logging.info("Adding file `%s`", subpath)
                             writer.add_file(subpath)
                 else:
-                    logging.info(f"Adding file `{path}`")
+                    logging.info("Adding file `%s`", path)
                     writer.add_file(path)
 
             with open(args.pbofile, "wb") as output:
-                logging.info(f"Writing PBO file `{args.pbofile}`")
+                logging.info("Writing PBO file `%s`", args.pbofile)
                 writer.write(output)
 
             if args.sign is not None:
                 if tools_dir is None:
                     raise Exception("Unable to find DayZ Tools directory!")
 
-                logging.info(f"Signing PBO file `{args.pbofile}` using private key `{args.sign}`")
+                logging.info(
+                    "Signing PBO file `%s` using private key `%s`", args.pbofile, args.sign)
                 subprocess.run(
                     [
                         os.path.join(tools_dir, "bin", "DsUtils", "DSSignFile.exe"),
