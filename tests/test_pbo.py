@@ -87,8 +87,6 @@ class TestMain(unittest.TestCase):
 
         self.mock_configure_logging.assert_called_once_with(debug=False)
 
-        self.mock_tools_directory.assert_called_once_with()
-
         self.mock_pbo_writer_class.assert_called_once_with(cfgconvert=None)
 
         assert 4 == self.mock_pbo_writer.add_file.call_count
@@ -125,8 +123,6 @@ class TestMain(unittest.TestCase):
                 "-b",
                 "output.pbo"
             ])
-
-        self.mock_tools_directory.assert_not_called()
 
         self.mock_pbo_writer_class.assert_called_once_with(cfgconvert=None)
 
@@ -191,6 +187,42 @@ class TestMain(unittest.TestCase):
             ])
 
         mock_glob.assert_called_once_with(pathlib.Path("C:/"), pathlib.Path("folder/**/*.ext"))
+
+    @mock.patch("subprocess.run")
+    def test_signs_pbo_file_when_requested(self, mock_run: mock.Mock) -> None:
+        self.mock_tools_directory.return_value = "TOOLS-DIR"
+
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
+            main([
+                "ignored",
+                "-s", "PRIVATE-KEY-FILENAME",
+                "output.pbo"
+            ])
+
+        mock_run.assert_called_once_with(
+            [
+                os.path.join("TOOLS-DIR", "bin", "DsUtils", "DSSignFile.exe"),
+                "PRIVATE-KEY-FILENAME",
+                "output.pbo"
+            ],
+            check=True)
+
+    @mock.patch("subprocess.run")
+    def test_refuses_to_sign_pbo_file_when_tools_directory_is_none(
+        self,
+        mock_run: mock.Mock
+    ) -> None:
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()), \
+                self.assertRaises(SystemExit) as error:
+            main([
+                "ignored",
+                "-s", "PRIVATE-KEY-FILENAME",
+                "output.pbo"
+            ])
+
+        assert 1 == error.exception.code
+
+        mock_run.assert_not_called()
 
     def test_enables_debug_logging_when_option_is_specified(self) -> None:
         with mock.patch("builtins.open", mock.mock_open()):

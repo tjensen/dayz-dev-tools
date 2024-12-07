@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import pathlib
+import subprocess
 import sys
 
 import dayz_dev_tools
@@ -28,6 +29,9 @@ def main() -> None:
     parser.add_argument(
         "-P", "--pattern", action="append", default=[], metavar="GLOB",
         help="Add files matching GLOB")
+    parser.add_argument(
+        "-s", "--sign", metavar="PRIVATEKEY-FILENAME",
+        help="Sign the PBO with the provided private key")
     parser.add_argument("pbofile", help="The PBO file to create")
     parser.add_argument("files", nargs="*", default=[], help="Files to add to the PBO")
     args = parser.parse_args()
@@ -35,11 +39,11 @@ def main() -> None:
     logging_configuration.configure_logging(debug=args.debug)
 
     try:
+        tools_dir = tools_directory.tools_directory()
+
         cfgconvert = None
-        if not args.no_convert:
-            tools_dir = tools_directory.tools_directory()
-            if tools_dir is not None:
-                cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
+        if not args.no_convert and tools_dir is not None:
+            cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
 
         writer = pbo_writer.PBOWriter(cfgconvert=cfgconvert)
 
@@ -68,6 +72,18 @@ def main() -> None:
 
         with open(args.pbofile, "wb") as output:
             writer.write(output)
+
+        if args.sign is not None:
+            if tools_dir is None:
+                raise Exception("Unable to find DayZ Tools directory!")
+
+            subprocess.run(
+                [
+                    os.path.join(tools_dir, "bin", "DsUtils", "DSSignFile.exe"),
+                    args.sign,
+                    args.pbofile
+                ],
+                check=True)
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
