@@ -159,8 +159,8 @@ class TestMain(unittest.TestCase):
         pathlib.Path(self.indir.name, "path", "to", "no-match.dat").touch()
         pathlib.Path(self.indir.name, "another", "path").mkdir(parents=True)
         pathlib.Path(self.indir.name, "another", "path", "match3.ext").touch()
-        pathlib.Path(self.indir.name, "another", "path", "subdir").mkdir(parents=True)
-        pathlib.Path(self.indir.name, "another", "path", "subdir", "match4.ext").touch()
+        pathlib.Path(self.indir.name, "another", "path", "subdir.ext").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "another", "path", "subdir.ext", "match4.ext").touch()
 
         with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
             main([
@@ -174,7 +174,7 @@ class TestMain(unittest.TestCase):
             mock.call(pathlib.Path("match1.ext")),
             mock.call(pathlib.Path("path", "to", "match2.ext")),
             mock.call(pathlib.Path("another", "path", "match3.ext")),
-            mock.call(pathlib.Path("another", "path", "subdir", "match4.ext")),
+            mock.call(pathlib.Path("another", "path", "subdir.ext", "match4.ext")),
         ])
 
     @mock.patch("pathlib.Path.glob", autospec=True)

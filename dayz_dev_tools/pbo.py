@@ -61,8 +61,9 @@ def main() -> None:
             anchor = pathlib.Path(pattern).anchor
             rest = pathlib.Path(pattern).relative_to(anchor)
             for path in pathlib.Path(anchor).glob(rest):
-                logging.info(f"Adding file `{path}`")
-                writer.add_file(path)
+                if not path.is_dir():
+                    logging.info(f"Adding file `{path}`")
+                    writer.add_file(path)
 
         for file in args.files:
             path = pathlib.Path(file)
