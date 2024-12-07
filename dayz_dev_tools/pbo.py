@@ -17,7 +17,7 @@ def _split_header(option: str) -> tuple[str, str]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(usage="%(prog)s [options] pbofile [files...]")
     parser.register("type", "header", _split_header)
     parser.add_argument(
         "-b", "--no-convert", action="store_true",
@@ -32,6 +32,7 @@ def main() -> None:
     parser.add_argument(
         "-s", "--sign", metavar="PRIVATEKEY-FILENAME",
         help="Sign the PBO with the provided private key")
+    parser.add_argument("-V", "--version", action="version", version=dayz_dev_tools.version)
     parser.add_argument("pbofile", help="The PBO file to create")
     parser.add_argument("files", nargs="*", default=[], help="Files to add to the PBO")
     args = parser.parse_args()
