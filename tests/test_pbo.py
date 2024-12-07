@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from unittest import mock
 
+import dayz_dev_tools
 from dayz_dev_tools import misc
 from dayz_dev_tools import pbo
 
@@ -38,6 +39,33 @@ class TestMain(unittest.TestCase):
         self.mock_pbo_writer = self.mock_pbo_writer_class.return_value
 
     def test_parses_args_and_creates_pbo(self) -> None:
+        mock_open = mock.mock_open()
+
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock_open):
+            main([
+                "ignored",
+                "output.pbo"
+            ])
+
+        self.mock_configure_logging.assert_called_once_with(debug=False)
+
+        self.mock_tools_directory.assert_called_once_with()
+
+        self.mock_pbo_writer_class.assert_called_once_with(cfgconvert=None)
+
+        self.mock_pbo_writer.add_header.assert_called_once_with(
+            "product",
+            "DayZ Dev Tools v" + dayz_dev_tools.version
+            + " - https://dayz-dev-tools.readthedocs.io/en/stable/"),
+
+        self.mock_pbo_writer.add_file.assert_not_called()
+
+        mock_open.assert_called_once_with("output.pbo", "wb")
+
+        self.mock_pbo_writer.write.assert_called_once_with(
+            mock_open.return_value.__enter__.return_value)
+
+    def test_adds_specified_files_and_directories_to_pbo(self) -> None:
         pathlib.Path(self.indir.name, "path", "to").mkdir(parents=True)
         pathlib.Path(self.indir.name, "path", "to", "file1.ext").touch()
         pathlib.Path(self.indir.name, "another", "path").mkdir(parents=True)
@@ -111,7 +139,7 @@ class TestMain(unittest.TestCase):
                 "output.pbo"
             ])
 
-        assert 2 == self.mock_pbo_writer.add_header.call_count
+        assert 3 == self.mock_pbo_writer.add_header.call_count
         self.mock_pbo_writer.add_header.assert_has_calls([
             mock.call("prefix", "PREFIX"),
             mock.call("extra", "data=stuff=and=things")

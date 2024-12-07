@@ -4,6 +4,7 @@ import os
 import pathlib
 import sys
 
+import dayz_dev_tools
 from dayz_dev_tools import logging_configuration
 from dayz_dev_tools import pbo_writer
 from dayz_dev_tools import tools_directory
@@ -41,6 +42,11 @@ def main() -> None:
                 cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
 
         writer = pbo_writer.PBOWriter(cfgconvert=cfgconvert)
+
+        writer.add_header(
+            "product",
+            f"DayZ Dev Tools v{dayz_dev_tools.version}"
+            " - https://dayz-dev-tools.readthedocs.io/en/stable/")
 
         for header in args.header:
             writer.add_header(*header)
