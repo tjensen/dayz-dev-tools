@@ -102,7 +102,7 @@ def main() -> None:
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
-        logging.error(f"{type(error).__name__}: {error}")
+        logging.error("%s: %s", type(error).__name__, error)
         sys.exit(1)
 
 
