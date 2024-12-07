@@ -1,4 +1,5 @@
 import io
+import hashlib
 import pathlib
 import unittest
 from unittest import mock
@@ -13,7 +14,10 @@ class TestPBOWriter(unittest.TestCase):
         writer = pbo_writer.PBOWriter(cfgconvert="path/to/cfgconvert.exe")
         writer.write(output)
 
-        assert b"\x00sreV" + (b"\x00" * 38) == output.getvalue()
+        data = output.getvalue()
+
+        assert b"\x00sreV" + (b"\x00" * 38) == data[:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     def test_add_header_includes_added_header_in_written_pbo_file(self) -> None:
         output = io.BytesIO()
@@ -22,7 +26,10 @@ class TestPBOWriter(unittest.TestCase):
         writer.add_header("NAME", "VALUE")
         writer.write(output)
 
-        assert b"NAME\x00VALUE\x00\x00" + (b"\x00" * 21) == output.getvalue()[21:]
+        data = output.getvalue()
+
+        assert b"NAME\x00VALUE\x00\x00" + (b"\x00" * 21) == data[21:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     def test_add_header_accepts_values_as_bytes(self) -> None:
         output = io.BytesIO()
@@ -31,7 +38,10 @@ class TestPBOWriter(unittest.TestCase):
         writer.add_header(b"NAME", b"VALUE")
         writer.write(output)
 
-        assert b"NAME\x00VALUE\x00\x00" + (b"\x00" * 21) == output.getvalue()[21:]
+        data = output.getvalue()
+
+        assert b"NAME\x00VALUE\x00\x00" + (b"\x00" * 21) == data[21:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")
     def test_add_file_includes_added_file_in_written_pbo_file(self, mock_stat: mock.Mock) -> None:
@@ -53,9 +63,11 @@ class TestPBOWriter(unittest.TestCase):
 
         mock_open.assert_called_once_with(path, "rb")
 
+        data = output.getvalue()
+
         assert b"PATH\\TO\\FILENAME\x00\x00\x00\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00" \
-            b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" \
-            == output.getvalue()[22:]
+            b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" == data[22:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")
     def test_add_file_removes_anchor_from_filename(self, mock_stat: mock.Mock) -> None:
@@ -73,7 +85,10 @@ class TestPBOWriter(unittest.TestCase):
             writer.add_file(path)
             writer.write(output)
 
-        assert b"PATH\\TO\\FILENAME\x00" == output.getvalue()[22:39]
+        data = output.getvalue()
+
+        assert b"PATH\\TO\\FILENAME\x00" == data[22:39]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")
     @mock.patch("dayz_dev_tools.config_cpp.cpp_to_bin")
@@ -100,9 +115,11 @@ class TestPBOWriter(unittest.TestCase):
 
         mock_cpp_to_bin.assert_called_once_with(b"FILE-CONTENTS", "path/to/cfgconvert.exe")
 
+        data = output.getvalue()
+
         assert b"path\\to\\ConFig.bin\x00\x00\x00\x00\x00\x0c\x00\x00\x00\x00\x00\x00\x00" \
-            b"\x78\x56\x34\x12\x0c\x00\x00\x00" + (b"\x00" * 21) + b"BIN-CONTENTS" \
-            == output.getvalue()[22:]
+            b"\x78\x56\x34\x12\x0c\x00\x00\x00" + (b"\x00" * 21) + b"BIN-CONTENTS" == data[22:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")
     def test_add_file_does_not_convert_config_cpp_if_cfgconvert_is_none(
@@ -127,6 +144,8 @@ class TestPBOWriter(unittest.TestCase):
 
         mock_open.assert_called_once_with(path, "rb")
 
+        data = output.getvalue()
+
         assert b"path\\to\\config.cpp\x00\x00\x00\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00" \
-            b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" \
-            == output.getvalue()[22:]
+            b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" == data[22:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]

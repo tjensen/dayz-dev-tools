@@ -1,5 +1,6 @@
 import dataclasses
 import fnmatch
+import hashlib
 import pathlib
 import struct
 import typing
@@ -14,6 +15,19 @@ class _Entry:
     size: int
     mtime: int
     contents: typing.Optional[bytes]
+
+
+class _HashWriter:
+    def __init__(self, output: typing.BinaryIO) -> None:
+        self.output = output
+        self.hash = hashlib.sha1()
+
+    def write(self, data: bytes) -> int:
+        self.hash.update(data)
+        return self.output.write(data)
+
+    def finalize(self) -> int:
+        return self.output.write(b"\x00" + self.hash.digest())
 
 
 class PBOWriter:
@@ -88,24 +102,27 @@ class PBOWriter:
         :Parameters:
           - `output`: A binary file-like object to receive the PBO archive contents.
         """
-        output.write(b"\x00")
-        output.write(b"sreV\x00")
-        output.write(b"\x00" * 15)
+        writer = _HashWriter(output)
+        writer.write(b"\x00")
+        writer.write(b"sreV\x00")
+        writer.write(b"\x00" * 15)
 
         for header in self.headers:
-            output.write(header[0] + b"\x00" + header[1] + b"\x00")
+            writer.write(header[0] + b"\x00" + header[1] + b"\x00")
 
-        output.write(b"\x00")
+        writer.write(b"\x00")
 
         for entry in self.entries:
-            output.write(entry.stored_path.encode("utf8") + b"\x00")
-            output.write(struct.pack("LLLLL", 0, entry.size, 0, int(entry.mtime), entry.size))
+            writer.write(entry.stored_path.encode("utf8") + b"\x00")
+            writer.write(struct.pack("LLLLL", 0, entry.size, 0, int(entry.mtime), entry.size))
 
-        output.write(b"\x00" * 21)
+        writer.write(b"\x00" * 21)
 
         for entry in self.entries:
             if entry.contents is None:
                 with open(entry.read_path, "rb") as infile:
-                    output.write(infile.read())
+                    writer.write(infile.read())
             else:
-                output.write(entry.contents)
+                writer.write(entry.contents)
+
+        writer.finalize()
