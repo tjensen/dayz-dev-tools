@@ -7,6 +7,7 @@ import sys
 
 import dayz_dev_tools
 from dayz_dev_tools import logging_configuration
+from dayz_dev_tools import misc
 from dayz_dev_tools import pbo_writer
 from dayz_dev_tools import tools_directory
 
@@ -22,6 +23,8 @@ def main() -> None:
     parser.add_argument(
         "-b", "--no-convert", action="store_true",
         help="Do not convert config.cpp files to config.bin files")
+    parser.add_argument(
+        "-C", "--chdir", metavar="DIR", help="Change to directory DIR before creating PBO")
     parser.add_argument("-D", "--debug", action="store_true", help="Enable debug logs")
     parser.add_argument(
         "-H", "--header", type="header", action="append", default=[], metavar="HEADER=VALUE",
@@ -30,7 +33,7 @@ def main() -> None:
         "-P", "--pattern", action="append", default=[], metavar="GLOB",
         help="Add files matching GLOB")
     parser.add_argument(
-        "-s", "--sign", metavar="PRIVATEKEY-FILENAME",
+        "-s", "--sign", metavar="KEYFILE",
         help="Sign the PBO with the provided private key")
     parser.add_argument("-V", "--version", action="version", version=dayz_dev_tools.version)
     parser.add_argument("pbofile", help="The PBO file to create")
@@ -40,58 +43,59 @@ def main() -> None:
     logging_configuration.configure_logging(debug=args.debug)
 
     try:
-        tools_dir = tools_directory.tools_directory()
+        with misc.chdir(args.chdir or "."):
+            tools_dir = tools_directory.tools_directory()
 
-        cfgconvert = None
-        if not args.no_convert and tools_dir is not None:
-            cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
+            cfgconvert = None
+            if not args.no_convert and tools_dir is not None:
+                cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
 
-        writer = pbo_writer.PBOWriter(cfgconvert=cfgconvert)
+            writer = pbo_writer.PBOWriter(cfgconvert=cfgconvert)
 
-        writer.add_header(
-            "product",
-            f"DayZ Dev Tools v{dayz_dev_tools.version}"
-            " - https://dayz-dev-tools.readthedocs.io/en/stable/")
+            writer.add_header(
+                "product",
+                f"DayZ Dev Tools v{dayz_dev_tools.version}"
+                " - https://dayz-dev-tools.readthedocs.io/en/stable/")
 
-        for header in args.header:
-            logging.info(f"Adding header: `{header[0]}` = `{header[1]}`")
-            writer.add_header(*header)
+            for header in args.header:
+                logging.info(f"Adding header: `{header[0]}` = `{header[1]}`")
+                writer.add_header(*header)
 
-        for pattern in args.pattern:
-            anchor = pathlib.Path(pattern).anchor
-            rest = pathlib.Path(pattern).relative_to(anchor)
-            for path in pathlib.Path(anchor).glob(rest):
-                if not path.is_dir():
+            for pattern in args.pattern:
+                anchor = pathlib.Path(pattern).anchor
+                rest = pathlib.Path(pattern).relative_to(anchor)
+                for path in pathlib.Path(anchor).glob(rest):
+                    if not path.is_dir():
+                        logging.info(f"Adding file `{path}`")
+                        writer.add_file(path)
+
+            for file in args.files:
+                path = pathlib.Path(file)
+                if path.is_dir():
+                    for subpath in path.glob("**/*"):
+                        if not subpath.is_dir():
+                            logging.info(f"Adding file `{subpath}`")
+                            writer.add_file(subpath)
+                else:
                     logging.info(f"Adding file `{path}`")
                     writer.add_file(path)
 
-        for file in args.files:
-            path = pathlib.Path(file)
-            if path.is_dir():
-                for subpath in path.glob("**/*"):
-                    if not subpath.is_dir():
-                        logging.info(f"Adding file `{subpath}`")
-                        writer.add_file(subpath)
-            else:
-                logging.info(f"Adding file `{path}`")
-                writer.add_file(path)
+            with open(args.pbofile, "wb") as output:
+                logging.info(f"Writing PBO file `{args.pbofile}`")
+                writer.write(output)
 
-        with open(args.pbofile, "wb") as output:
-            logging.info(f"Writing PBO file `{args.pbofile}`")
-            writer.write(output)
+            if args.sign is not None:
+                if tools_dir is None:
+                    raise Exception("Unable to find DayZ Tools directory!")
 
-        if args.sign is not None:
-            if tools_dir is None:
-                raise Exception("Unable to find DayZ Tools directory!")
-
-            logging.info(f"Signing PBO file `{args.pbofile}` using private key `{args.sign}`")
-            subprocess.run(
-                [
-                    os.path.join(tools_dir, "bin", "DsUtils", "DSSignFile.exe"),
-                    args.sign,
-                    args.pbofile
-                ],
-                check=True)
+                logging.info(f"Signing PBO file `{args.pbofile}` using private key `{args.sign}`")
+                subprocess.run(
+                    [
+                        os.path.join(tools_dir, "bin", "DsUtils", "DSSignFile.exe"),
+                        args.sign,
+                        args.pbofile
+                    ],
+                    check=True)
 
         logging.info("Done!")
 

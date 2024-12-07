@@ -42,12 +42,15 @@ class TestMain(unittest.TestCase):
         mock_open = mock.mock_open()
 
         with misc.chdir(self.indir.name), mock.patch("builtins.open", mock_open):
-            main([
-                "ignored",
-                "output.pbo"
-            ])
+            with mock.patch("dayz_dev_tools.misc.chdir") as mock_chdir:
+                main([
+                    "ignored",
+                    "output.pbo"
+                ])
 
         self.mock_configure_logging.assert_called_once_with(debug=False)
+
+        mock_chdir.assert_called_once_with(".")
 
         self.mock_tools_directory.assert_called_once_with()
 
@@ -125,6 +128,17 @@ class TestMain(unittest.TestCase):
             ])
 
         self.mock_pbo_writer_class.assert_called_once_with(cfgconvert=None)
+
+    def test_changes_directory_when_specified(self) -> None:
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
+            with mock.patch("dayz_dev_tools.misc.chdir") as mock_chdir:
+                main([
+                    "ignored",
+                    "-C", "some/dir",
+                    "output.pbo"
+                ])
+
+        mock_chdir.assert_called_once_with("some/dir")
 
     def test_adds_headers_when_specified(self) -> None:
         with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
