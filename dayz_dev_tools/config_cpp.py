@@ -31,8 +31,26 @@ def _run(executable: str, mode: _Mode, in_bytes: bytes) -> bytes:
 
 
 def bin_to_cpp(bin_content: bytes, executable: str) -> bytes:
+    """Convert binarized config.cpp content to unbinarized content.
+
+    :Parameters:
+      - `bin_content`: Binarized content to convert.
+      - `executable`: The location of the DayZ Tools ``CfgConvert.exe`` program.
+
+    :Returns:
+      The unbinarized content.
+    """
     return _run(executable, _Mode.TXT, bin_content)
 
 
 def cpp_to_bin(cpp_content: bytes, executable: str) -> bytes:
+    """Convert unbinarized config.cpp content to binarized content.
+
+    :Parameters:
+      - `cpp_content`: Unbinarized content to convert.
+      - `executable`: The location of the DayZ Tools ``CfgConvert.exe`` program.
+
+    :Returns:
+      The binarized content.
+    """
     return _run(executable, _Mode.BIN, cpp_content)
