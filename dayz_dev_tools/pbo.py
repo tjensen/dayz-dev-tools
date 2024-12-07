@@ -1,10 +1,12 @@
 import argparse
 import logging
+import os
 import pathlib
 import sys
 
 from dayz_dev_tools import logging_configuration
 from dayz_dev_tools import pbo_writer
+from dayz_dev_tools import tools_directory
 
 
 def _split_header(option: str) -> tuple[str, str]:
@@ -15,6 +17,9 @@ def _split_header(option: str) -> tuple[str, str]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.register("type", "header", _split_header)
+    parser.add_argument(
+        "-b", "--no-convert", action="store_true",
+        help="Do not convert config.cpp files to config.bin files")
     parser.add_argument("-D", "--debug", action="store_true", help="Enable debug logs")
     parser.add_argument(
         "-H", "--header", type="header", action="append", default=[], metavar="HEADER=VALUE",
@@ -29,7 +34,13 @@ def main() -> None:
     logging_configuration.configure_logging(debug=args.debug)
 
     try:
-        writer = pbo_writer.PBOWriter()
+        cfgconvert = None
+        if not args.no_convert:
+            tools_dir = tools_directory.tools_directory()
+            if tools_dir is not None:
+                cfgconvert = os.path.join(tools_dir, "bin", "CfgConvert", "CfgConvert.exe")
+
+        writer = pbo_writer.PBOWriter(cfgconvert=cfgconvert)
 
         for header in args.header:
             writer.add_header(*header)

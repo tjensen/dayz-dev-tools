@@ -1,17 +1,26 @@
+import dataclasses
+import fnmatch
 import pathlib
 import struct
 import typing
 
+from dayz_dev_tools import config_cpp
 
-def _write_file_entry(output: typing.BinaryIO, path: pathlib.Path, size: int, mtime: int) -> None:
-    output.write("\\".join(path.relative_to(path.anchor).parts).encode("utf8") + b"\x00")
-    output.write(struct.pack("LLLLL", 0, size, 0, mtime, size))
+
+@dataclasses.dataclass
+class _Entry:
+    read_path: pathlib.Path
+    stored_path: str
+    size: int
+    mtime: int
+    contents: typing.Optional[bytes]
 
 
 class PBOWriter:
-    def __init__(self) -> None:
+    def __init__(self, *, cfgconvert: typing.Optional[str]) -> None:
+        self.cfgconvert = cfgconvert
         self.headers: list[tuple[bytes, bytes]] = []
-        self.paths: list[pathlib.Path] = []
+        self.entries: list[_Entry] = []
 
     @typing.overload
     def add_header(self, name: bytes, value: bytes) -> None:
@@ -28,7 +37,26 @@ class PBOWriter:
         ))
 
     def add_file(self, path: pathlib.Path) -> None:
-        self.paths.append(path)
+        info = path.stat()
+        size = info.st_size
+
+        if self.cfgconvert is not None and fnmatch.fnmatch(path.name, "config.cpp"):
+            with open(path, "rb") as infile:
+                contents = config_cpp.cpp_to_bin(infile.read(), self.cfgconvert)
+
+            path = path.with_suffix(".bin")
+            size = len(contents)
+
+        else:
+            contents = None
+
+        self.entries.append(
+            _Entry(
+                read_path=path,
+                stored_path="\\".join(path.relative_to(path.anchor).parts),
+                size=size,
+                mtime=info.st_mtime,
+                contents=contents))
 
     def write(self, output: typing.BinaryIO) -> None:
         output.write(b"\x00")
@@ -40,12 +68,15 @@ class PBOWriter:
 
         output.write(b"\x00")
 
-        for path in self.paths:
-            info = path.stat()
-            _write_file_entry(output, path, info.st_size, int(info.st_mtime))
+        for entry in self.entries:
+            output.write(entry.stored_path.encode("utf8") + b"\x00")
+            output.write(struct.pack("LLLLL", 0, entry.size, 0, int(entry.mtime), entry.size))
 
-        _write_file_entry(output, pathlib.Path(""), 0, 0)
+        output.write(b"\x00" * 21)
 
-        for path in self.paths:
-            with open(path, "rb") as infile:
-                output.write(infile.read())
+        for entry in self.entries:
+            if entry.contents is None:
+                with open(entry.read_path, "rb") as infile:
+                    output.write(infile.read())
+            else:
+                output.write(entry.contents)
