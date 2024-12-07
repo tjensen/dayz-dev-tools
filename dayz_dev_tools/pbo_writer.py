@@ -80,7 +80,7 @@ class PBOWriter:
                 read_path=path,
                 stored_path="\\".join(path.relative_to(path.anchor).parts),
                 size=size,
-                mtime=info.st_mtime,
+                mtime=int(info.st_mtime),
                 contents=contents))
 
     def write(self, output: typing.BinaryIO) -> None:

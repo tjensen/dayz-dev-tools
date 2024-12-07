@@ -192,7 +192,7 @@ class TestMain(unittest.TestCase):
         ])
 
     @mock.patch("pathlib.Path.glob", autospec=True)
-    def test_accepts_patterns_with_absolute_paths(self, mock_glob) -> None:
+    def test_accepts_patterns_with_absolute_paths(self, mock_glob: mock.Mock) -> None:
         with misc.chdir(self.indir.name), mock.patch("builtins.open", mock.mock_open()):
             main([
                 "ignored",
