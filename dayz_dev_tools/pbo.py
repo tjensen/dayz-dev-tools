@@ -53,12 +53,14 @@ def main() -> None:
             " - https://dayz-dev-tools.readthedocs.io/en/stable/")
 
         for header in args.header:
+            logging.info(f"Adding header: `{header[0]}` = `{header[1]}`")
             writer.add_header(*header)
 
         for pattern in args.pattern:
             anchor = pathlib.Path(pattern).anchor
             rest = pathlib.Path(pattern).relative_to(anchor)
             for path in pathlib.Path(anchor).glob(rest):
+                logging.info(f"Adding file `{path}`")
                 writer.add_file(path)
 
         for file in args.files:
@@ -66,17 +68,21 @@ def main() -> None:
             if path.is_dir():
                 for subpath in path.glob("**/*"):
                     if not subpath.is_dir():
+                        logging.info(f"Adding file `{subpath}`")
                         writer.add_file(subpath)
             else:
+                logging.info(f"Adding file `{path}`")
                 writer.add_file(path)
 
         with open(args.pbofile, "wb") as output:
+            logging.info(f"Writing PBO file `{args.pbofile}`")
             writer.write(output)
 
         if args.sign is not None:
             if tools_dir is None:
                 raise Exception("Unable to find DayZ Tools directory!")
 
+            logging.info(f"Signing PBO file `{args.pbofile}` using private key `{args.sign}`")
             subprocess.run(
                 [
                     os.path.join(tools_dir, "bin", "DsUtils", "DSSignFile.exe"),
@@ -84,6 +90,8 @@ def main() -> None:
                     args.pbofile
                 ],
                 check=True)
+
+        logging.info("Done!")
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
