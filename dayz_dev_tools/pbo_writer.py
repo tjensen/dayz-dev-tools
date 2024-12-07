@@ -17,17 +17,36 @@ class _Entry:
 
 
 class PBOWriter:
+    """Interface for writing a PBO archive."""
     def __init__(self, *, cfgconvert: typing.Optional[str]) -> None:
+        """Create a new :class:`PBOWriter` instance.
+
+        :Parameters:
+          - `cfgconvert`: The location of the DayZ Tools ``CfgConvert.exe`` program, or ``None`` if
+            ``config.cpp`` files should not be binarized.
+        """
         self.cfgconvert = cfgconvert
         self.headers: list[tuple[bytes, bytes]] = []
         self.entries: list[_Entry] = []
 
     @typing.overload
     def add_header(self, name: bytes, value: bytes) -> None:
+        """Add a header to the PBO archive.
+
+        :Parameters:
+          - `name`: The name of the header.
+          - `value`: The value of the header.
+        """
         pass
 
     @typing.overload
     def add_header(self, name: str, value: str) -> None:
+        """Add a header to the PBO archive.
+
+        :Parameters:
+          - `name`: The name of the header.
+          - `value`: The value of the header.
+        """
         pass
 
     def add_header(self, name: typing.Union[str, bytes], value: typing.Union[str, bytes]) -> None:
@@ -37,6 +56,11 @@ class PBOWriter:
         ))
 
     def add_file(self, path: pathlib.Path) -> None:
+        """Add a file to the PBO archive.
+
+        :Parameters:
+          - `path`: A ``pathlib.Path`` instance containing the location of the file to be added.
+        """
         info = path.stat()
         size = info.st_size
 
@@ -59,6 +83,11 @@ class PBOWriter:
                 contents=contents))
 
     def write(self, output: typing.BinaryIO) -> None:
+        """Create the PBO archive.
+
+        :Parameters:
+          - `output`: A binary file-like object to receive the PBO archive contents.
+        """
         output.write(b"\x00")
         output.write(b"sreV\x00")
         output.write(b"\x00" * 15)

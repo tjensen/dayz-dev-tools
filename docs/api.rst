@@ -47,6 +47,12 @@ PBO Reader
 .. automodule:: dayz_dev_tools.pbo_reader
    :members:
 
+PBO Writer
+----------
+
+.. automodule:: dayz_dev_tools.pbo_writer
+   :members:
+
 Script Logs
 -----------
 
