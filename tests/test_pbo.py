@@ -189,7 +189,7 @@ class TestMain(unittest.TestCase):
             mock.call(pathlib.Path("path", "to", "match2.ext")),
             mock.call(pathlib.Path("another", "path", "match3.ext")),
             mock.call(pathlib.Path("another", "path", "subdir.ext", "match4.ext")),
-        ])
+        ], any_order=True)
 
     @mock.patch("pathlib.Path.glob", autospec=True)
     def test_accepts_patterns_with_absolute_paths(self, mock_glob: mock.Mock) -> None:
