@@ -105,7 +105,7 @@ class PBOWriter:
         for entry in entries:
             logging.debug("Writing file entry: %s", entry.stored_path)
             writer.write(entry.stored_path.encode("utf8") + b"\x00")
-            writer.write(struct.pack("IIIII", 0, entry.size, 0, int(entry.mtime), entry.size))
+            writer.write(struct.pack("<IIIII", 0, entry.size, 0, int(entry.mtime), entry.size))
 
         writer.write(b"\x00" * 21)
 
