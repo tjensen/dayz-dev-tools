@@ -18,7 +18,7 @@ class _WinReg:
         self,
         key: _Key,
         value_name: str
-    ) -> typing.Tuple[str, int]:
+    ) -> tuple[str, int]:
         ...
 
 

@@ -7,7 +7,7 @@ from dayz_dev_tools import expand
 from dayz_dev_tools import pbo_file_reader
 
 
-def normalize_filename(parts: typing.List[bytes]) -> str:
+def normalize_filename(parts: list[bytes]) -> str:
     return os.path.sep.encode().join(parts).decode(errors="replace")
 
 
@@ -62,7 +62,7 @@ class PBOFile:
         """
         return normalize_filename(self.split_filename())
 
-    def split_filename(self) -> typing.List[bytes]:
+    def split_filename(self) -> list[bytes]:
         """Get the file's name as a ``list``, where each element in the list represents a component
         of the file's path.
 

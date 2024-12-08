@@ -5,8 +5,8 @@ from dayz_dev_tools import pbo_file
 from dayz_dev_tools import pbo_file_reader
 
 
-def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.List[typing.Tuple[bytes, bytes]]:
-    headers: typing.List[typing.Tuple[bytes, bytes]] = []
+def _read_headers(reader: pbo_file_reader.PBOFileReader) -> list[tuple[bytes, bytes]]:
+    headers: list[tuple[bytes, bytes]] = []
     if len(reader.readz()) == 0:
         pos = reader.tell()
         key = reader.readz()
@@ -28,7 +28,7 @@ def _read_headers(reader: pbo_file_reader.PBOFileReader) -> typing.List[typing.T
     return headers
 
 
-def _prefix(headers: typing.List[typing.Tuple[bytes, bytes]]) -> typing.Optional[bytes]:
+def _prefix(headers: list[tuple[bytes, bytes]]) -> typing.Optional[bytes]:
     for key, value in headers:
         if key == b"prefix":
             return value
@@ -38,8 +38,8 @@ def _prefix(headers: typing.List[typing.Tuple[bytes, bytes]]) -> typing.Optional
 
 def _read_file_entries(
     reader: pbo_file_reader.PBOFileReader, prefix: typing.Optional[bytes]
-) -> typing.List[pbo_file.PBOFile]:
-    entries: typing.List[pbo_file.PBOFile] = []
+) -> list[pbo_file.PBOFile]:
+    entries: list[pbo_file.PBOFile] = []
 
     while True:
         filename = reader.readz()
@@ -84,7 +84,7 @@ class PBOReader():
         self._prefix = _prefix(self._headers)
         self._files = _read_file_entries(reader, self._prefix)
 
-    def files(self) -> typing.List[pbo_file.PBOFile]:
+    def files(self) -> list[pbo_file.PBOFile]:
         """Get the list of files contained in the PBO archive.
 
         :Returns:
@@ -116,7 +116,7 @@ class PBOReader():
 
         return None
 
-    def headers(self) -> typing.List[typing.Tuple[bytes, bytes]]:
+    def headers(self) -> list[tuple[bytes, bytes]]:
         """Get the PBO archive headers.
 
         :Returns:

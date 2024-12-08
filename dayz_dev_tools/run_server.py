@@ -30,12 +30,12 @@ def _resolve_mod(mod: str, workshop_directory: str) -> str:
     return mod_dir
 
 
-def _copy_keys(mod_dirs: typing.List[str], keys_dir: str) -> None:
+def _copy_keys(mod_dirs: list[str], keys_dir: str) -> None:
     for mod_dir in mod_dirs:
         keys.copy_keys(mod_dir, keys_dir)
 
 
-def _mod_parameter(option: str, mods: typing.List[str], workshop_directory: str) -> str:
+def _mod_parameter(option: str, mods: list[str], workshop_directory: str) -> str:
     mods = [_resolve_mod(mod, workshop_directory) for mod in mods]
 
     _copy_keys(mods, "keys")
