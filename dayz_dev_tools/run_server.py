@@ -67,7 +67,7 @@ def run_server(
 
     args.extend(settings.parameters())
 
-    logging.info(f"Running server with: {args}")
+    logging.info("Running server with: %s", args)
 
     if wait:
         profile = settings.profile_directory()
@@ -82,7 +82,7 @@ def run_server(
 
         with subprocess.Popen(args, stdout=subprocess.DEVNULL) as proc:
             try:
-                logging.info(f"Server started with PID {proc.pid}; waiting for new script log...")
+                logging.info("Server started with PID %s; waiting for new script log...", proc.pid)
                 while (new_log_name := script_logs.wait_for_new(
                         profile, previous_log_name, timeout=1)) is None:
                     logging.info("Still waiting for new script log...")
@@ -100,12 +100,12 @@ def run_server(
             finally:
                 status = proc.wait()
 
-                logging.info(f"Server finished with status {status}")
+                logging.info("Server finished with status %s", status)
 
     else:
         proc = subprocess.Popen(args, stdout=subprocess.DEVNULL)
 
-        logging.info(f"Server started with PID {proc.pid}")
+        logging.info("Server started with PID %s", proc.pid)
 
 
 def main() -> None:
@@ -140,7 +140,7 @@ def main() -> None:
 
     except Exception as error:
         logging.debug("Uncaught exception in main", exc_info=True)
-        logging.error(f"{type(error).__name__}: {error}")
+        logging.error("%s: %s", type(error).__name__, error)
         sys.exit(1)
 
 
