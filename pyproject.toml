@@ -63,9 +63,10 @@ docs = [
 ]
 
 [project.scripts]
-unpbo = "dayz_dev_tools.unpbo:main"
-run-server = "dayz_dev_tools.run_server:main"
 guid = "dayz_dev_tools.guid:main"
+pbo = "dayz_dev_tools.pbo:main"
+run-server = "dayz_dev_tools.run_server:main"
+unpbo = "dayz_dev_tools.unpbo:main"
 
 [build-system]
 requires = ["setuptools>=61"]
