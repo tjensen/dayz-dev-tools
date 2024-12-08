@@ -10,7 +10,7 @@ license = {file = "LICENSE"}
 requires-python = ">=3.9"
 dependencies = [
     "pydantic>=2.8.2",
-    "tomli>=2.0.0"
+    "tomli>=2.0.0; python_version<'3.11'"
 ]
 keywords = ["dayz", "tools", "pbo", "server"]
 classifiers = [
