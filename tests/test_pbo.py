@@ -57,9 +57,8 @@ class TestMain(unittest.TestCase):
         self.mock_pbo_writer_class.assert_called_once_with(cfgconvert=None)
 
         self.mock_pbo_writer.add_header.assert_called_once_with(
-            "product",
-            "DayZ Dev Tools v" + dayz_dev_tools.version
-            + " - https://dayz-dev-tools.readthedocs.io/"),
+            "dayz-dev-tools",
+            "v" + dayz_dev_tools.version + " - https://dayz-dev-tools.readthedocs.io/"),
 
         self.mock_pbo_writer.add_file.assert_not_called()
 
