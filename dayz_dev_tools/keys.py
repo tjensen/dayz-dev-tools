@@ -19,7 +19,7 @@ def copy_keys(source: str, destination: str) -> None:
     ))
 
     if len(keys) == 0:
-        logging.warning(f"No *.bikey files found in {source}")
+        logging.warning("No *.bikey files found in %s", source)
         return
 
     os.makedirs(destination, exist_ok=True)

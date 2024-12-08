@@ -49,7 +49,7 @@ class LaunchSettings:
             sys.modules[self._bundle_module.__name__] = self._bundle_module
             spec.loader.exec_module(self._bundle_module)
         except (AssertionError, FileNotFoundError) as error:
-            logging.debug(f"Unable to load bundles at {config.bundle_path}: {error}")
+            logging.debug("Unable to load bundles at %s: %s", config.bundle_path, error)
 
     def executable(self) -> str:
         """Get the DayZ Server executable filename, usually ``.\\DayZServer_x64.exe``.

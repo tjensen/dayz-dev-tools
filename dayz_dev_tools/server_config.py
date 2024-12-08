@@ -124,7 +124,7 @@ def load(filename: str) -> ServerConfig:
         msg = error.errors()[0]['msg']
         raise Exception(f"Configuration error at {loc}: {inp}: {msg}") from error
     except FileNotFoundError as error:
-        logging.debug(f"Unable to read config file ({filename}): {error}")
+        logging.debug("Unable to read config file (%s): %s", filename, error)
         config = _Config()
 
     return ServerConfig(
