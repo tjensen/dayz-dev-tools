@@ -16,11 +16,11 @@ class LaunchSettings:
     _profile: typing.Optional[str] = None
     _workshop_path: str
     _bundle_module: typing.Optional[types.ModuleType] = None
-    _mods: typing.List[str]
-    _server_mods: typing.List[str]
+    _mods: list[str]
+    _server_mods: list[str]
     _mission: typing.Optional[str]
-    _parameters: typing.List[str]
-    _bundles: typing.Dict[str, server_config.BundleConfig]
+    _parameters: list[str]
+    _bundles: dict[str, server_config.BundleConfig]
 
     def __init__(self, config: server_config.ServerConfig) -> None:
         """Create a :class:`LaunchSettings` from a
@@ -135,7 +135,7 @@ class LaunchSettings:
         """
         self._workshop_path = path
 
-    def mods(self) -> typing.List[str]:
+    def mods(self) -> list[str]:
         """Get the list of mods to load.
 
         :Returns:
@@ -154,7 +154,7 @@ class LaunchSettings:
         if name not in self._mods:
             self._mods.append(name)
 
-    def server_mods(self) -> typing.List[str]:
+    def server_mods(self) -> list[str]:
         """Get the list of *server* mods to load.
 
         :Returns:
@@ -192,7 +192,7 @@ class LaunchSettings:
         """
         self._mission = name
 
-    def parameters(self) -> typing.List[str]:
+    def parameters(self) -> list[str]:
         """Get extra command line parameters to pass to DayZ Server.
 
         :Returns:

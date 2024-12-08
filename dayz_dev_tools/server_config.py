@@ -24,7 +24,7 @@ class _ServerConfig(pydantic.BaseModel):
     directory: typing.Optional[str] = None
     profile_directory: typing.Optional[str] = None
     mission_directory: typing.Optional[str] = None
-    parameters: typing.List[str] = pydantic.Field(default_factory=list)
+    parameters: list[str] = pydantic.Field(default_factory=list)
     bundles: str = "bundles.py"
 
 
@@ -39,16 +39,16 @@ class _Bundle(pydantic.BaseModel):
     profile_directory: typing.Optional[str] = None
     workshop_directory: typing.Optional[str] = None
     mission_directory: typing.Optional[str] = None
-    mods: typing.Union[str, typing.List[str]] = pydantic.Field(default_factory=lambda: list())
-    server_mods: typing.Union[str, typing.List[str]] = pydantic.Field(
+    mods: typing.Union[str, list[str]] = pydantic.Field(default_factory=lambda: list())
+    server_mods: typing.Union[str, list[str]] = pydantic.Field(
         default_factory=lambda: list())
-    parameters: typing.List[str] = pydantic.Field(default_factory=list)
+    parameters: list[str] = pydantic.Field(default_factory=list)
 
 
 class _Config(pydantic.BaseModel):
     server: _ServerConfig = pydantic.Field(default_factory=_ServerConfig)
     workshop: _WorkshopConfig = pydantic.Field(default_factory=_WorkshopConfig)
-    bundle: typing.Dict[str, _Bundle] = pydantic.Field(default_factory=dict)
+    bundle: dict[str, _Bundle] = pydantic.Field(default_factory=dict)
 
 
 @dataclasses.dataclass
@@ -65,13 +65,13 @@ class BundleConfig:
     #: DayZ workshop directory name override (optional)
     workshop_directory: typing.Optional[str] = None
     #: DayZ mod list to add
-    mods: typing.List[str] = dataclasses.field(default_factory=list)
+    mods: list[str] = dataclasses.field(default_factory=list)
     #: DayZ server mod list to add
-    server_mods: typing.List[str] = dataclasses.field(default_factory=list)
+    server_mods: list[str] = dataclasses.field(default_factory=list)
     #: DayZ Server mission directory name override (optional)
     mission_directory: typing.Optional[str] = None
     #: Extra server command line parameters to add
-    parameters: typing.List[str] = dataclasses.field(default_factory=list)
+    parameters: list[str] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
@@ -86,7 +86,7 @@ class ServerConfig:
     #: DayZ workshop directory name
     workshop_directory: str
     #: Configuration file bundles, by name (see :class:`dayz_dev_tools.server_config.BundleConfig`)
-    bundles: typing.Dict[str, BundleConfig]
+    bundles: dict[str, BundleConfig]
     #: Directory to switch to before running DayZ Server (optional)
     directory: typing.Optional[str] = None
     #: DayZ Server profile directory name (optional)
@@ -94,10 +94,10 @@ class ServerConfig:
     #: DayZ Server mission directory name (optional)
     mission_directory: typing.Optional[str] = None
     #: Extra server command line parameters to add
-    parameters: typing.List[str] = dataclasses.field(default_factory=list)
+    parameters: list[str] = dataclasses.field(default_factory=list)
 
 
-def _parse_mods(mods: typing.Union[str, typing.List[str]]) -> typing.List[str]:
+def _parse_mods(mods: typing.Union[str, list[str]]) -> list[str]:
     if isinstance(mods, str):
         return mods.split(";")
 

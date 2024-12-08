@@ -1,3 +1,4 @@
+from collections import abc
 import os
 import re
 import time
@@ -67,7 +68,7 @@ def wait_for_new(
 
 
 def stream(
-    outfile: typing.TextIO, infile: typing.TextIO, keep_streaming: typing.Callable[[], bool]
+    outfile: typing.TextIO, infile: typing.TextIO, keep_streaming: abc.Callable[[], bool]
 ) -> None:
     """Stream the contents of a log file to another file.
 

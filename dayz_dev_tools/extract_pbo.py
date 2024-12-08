@@ -23,7 +23,7 @@ _deobfs_count = 0
 
 def _extract_file(
     reader: pbo_reader.PBOReader, pbofile: pbo_file.PBOFile, verbose: bool, deobfuscate: bool,
-    cfgconvert: typing.Optional[str], ignored: typing.List[bytes]
+    cfgconvert: typing.Optional[str], ignored: list[bytes]
 ) -> None:
     if deobfuscate and (
             (pbofile.filename in ignored)
@@ -106,7 +106,7 @@ def _extract_file(
 
 
 def extract_pbo(
-    reader: pbo_reader.PBOReader, files_to_extract: typing.List[str], *, verbose: bool,
+    reader: pbo_reader.PBOReader, files_to_extract: list[str], *, verbose: bool,
     deobfuscate: bool, cfgconvert: typing.Optional[str]
 ) -> None:
     """Extract one or more files contained in a PBO archive.
@@ -123,7 +123,7 @@ def extract_pbo(
     global _deobfs_count
     _deobfs_count = 0
 
-    ignored: typing.List[bytes] = []
+    ignored: list[bytes] = []
 
     if len(files_to_extract) == 0:
         for file in reader.files():
