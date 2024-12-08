@@ -55,7 +55,7 @@ def main() -> None:
             writer.add_header(
                 "product",
                 f"DayZ Dev Tools v{dayz_dev_tools.version}"
-                " - https://dayz-dev-tools.readthedocs.io/en/stable/")
+                " - https://dayz-dev-tools.readthedocs.io/")
 
             for header in args.header:
                 logging.info("Adding header: `%s` = `%s`", header[0], header[1])
