@@ -1,4 +1,6 @@
 name: Python Build and Test
+permissions:
+  contents: read
 
 on: [push]
 
