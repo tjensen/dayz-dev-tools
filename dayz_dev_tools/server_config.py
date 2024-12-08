@@ -2,10 +2,14 @@ import dataclasses
 import logging
 import os
 import platform
+import pydantic
+import sys
 import typing
 
-import pydantic
-import tomli
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 
 if platform.system() == "Windows":
@@ -115,8 +119,8 @@ def load(filename: str) -> ServerConfig:
     """
     try:
         with open(filename, "rb") as toml_file:
-            config = _Config.model_validate(tomli.load(toml_file))
-    except tomli.TOMLDecodeError as error:
+            config = _Config.model_validate(tomllib.load(toml_file))
+    except tomllib.TOMLDecodeError as error:
         raise Exception(f"Configuration error in {filename}: {error}") from error
     except pydantic.ValidationError as error:
         loc = ".".join(str(ll) for ll in error.errors()[0]['loc'])
