@@ -1,10 +1,7 @@
 from dayz_dev_tools import pbo_file_reader
-import dayz_dev_tools_ext  # type: ignore[import-not-found]
+import dayz_dev_tools_rust  # type: ignore[import-not-found]
 
 
 def expand(reader: pbo_file_reader.PBOFileReader, outsize: int) -> bytes:
     inbuffer = reader.read(reader.size)
-    outbuffer = bytearray(outsize)
-    dayz_dev_tools_ext.expand(outbuffer, inbuffer)
-
-    return bytes(outbuffer)
+    return dayz_dev_tools_rust.expand(inbuffer, outsize)

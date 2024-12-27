@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = [
+    "src/dayz_dev_tools_rust/"
+]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["Tim Jensen <tim.l.jensen@gmail.com>"]
+edition = "2021"
+publish = false
+rust-version = "1.65.0"
+
+[workspace.dependencies]
+pyo3 = { version = "0.23.3", features = ["extension-module"] }
+
+[profile.release]
+overflow-checks = true

@@ -48,6 +48,10 @@ plugins = "pydantic.mypy"
 strict = true
 show_error_codes = true
 
+[tool.maturin]
+python-packages = ["dayz_dev_tools"]
+manifest-path = "src/dayz_dev_tools_rust/Cargo.toml"
+
 [project.optional-dependencies]
 dev = [
     "build==1.2.2.post1",
@@ -68,5 +72,5 @@ run-server = "dayz_dev_tools.run_server:main"
 unpbo = "dayz_dev_tools.unpbo:main"
 
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1,<2"]
+build-backend = "maturin"
