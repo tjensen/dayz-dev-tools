@@ -46,7 +46,7 @@ strict = true
 show_error_codes = true
 
 [tool.maturin]
-python-packages = ["dayz_dev_tools"]
+python-packages = ["dayz_dev_tools", "dayz_dev_tools_rust-stubs"]
 manifest-path = "src/dayz_dev_tools_rust/Cargo.toml"
 
 [project.optional-dependencies]
