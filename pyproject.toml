@@ -34,9 +34,6 @@ Repository = "https://github.com/tjensen/dayz-dev-tools"
 Issues = "https://github.com/tjensen/dayz-dev-tools/issues"
 Changelog = "https://github.com/tjensen/dayz-dev-tools/releases"
 
-[tool.setuptools.packages.find]
-include = ["dayz_dev_tools"]
-
 [tool.pytest.ini_options]
 filterwarnings = [
     "error"
