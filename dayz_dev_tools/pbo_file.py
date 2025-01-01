@@ -3,8 +3,8 @@ import os
 import re
 import typing
 
-from dayz_dev_tools import expand
 from dayz_dev_tools import pbo_file_reader
+from dayz_dev_tools_rust import expand
 
 
 def normalize_filename(parts: list[bytes]) -> str:
@@ -35,12 +35,8 @@ class PBOFile:
         assert self.content_reader is not None
 
         if self.original_size != 0 and self.original_size != self.data_size:
-            self.content_reader.seek(self.data_size - 4)
+            expanded = expand(self.content_reader.read(self.data_size - 4), self.original_size)
             expected_checksum = self.content_reader.readuint()
-
-            expanded = expand.expand(
-                self.content_reader.subreader(0, self.data_size - 4), self.original_size)
-
             actual_checksum = sum(expanded)
 
             if actual_checksum != expected_checksum:

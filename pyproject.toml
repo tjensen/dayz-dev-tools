@@ -34,9 +34,6 @@ Repository = "https://github.com/tjensen/dayz-dev-tools"
 Issues = "https://github.com/tjensen/dayz-dev-tools/issues"
 Changelog = "https://github.com/tjensen/dayz-dev-tools/releases"
 
-[tool.setuptools.packages.find]
-include = ["dayz_dev_tools"]
-
 [tool.pytest.ini_options]
 filterwarnings = [
     "error"
@@ -47,6 +44,10 @@ files = "dayz_dev_tools,tests"
 plugins = "pydantic.mypy"
 strict = true
 show_error_codes = true
+
+[tool.maturin]
+python-packages = ["dayz_dev_tools", "dayz_dev_tools_rust-stubs"]
+manifest-path = "src/dayz_dev_tools_rust/Cargo.toml"
 
 [project.optional-dependencies]
 dev = [
@@ -68,5 +69,5 @@ run-server = "dayz_dev_tools.run_server:main"
 unpbo = "dayz_dev_tools.unpbo:main"
 
 [build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
+requires = ["maturin>=1,<2"]
+build-backend = "maturin"
