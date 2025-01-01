@@ -74,7 +74,7 @@ fn expand_impl(inbytes: &[u8], capacity: usize) -> Vec<u8> {
                     let rposi = ((ptr & 0xff) | ((ptr >> 4) & 0xf00)) as usize;
                     let rlen = (((ptr >> 8) & 0xf) + 3) as usize;
 
-                    if rposi < output.len() {
+                    if rposi <= output.len() {
                         let rpos = output.len() - rposi;
 
                         if rpos + rlen < output.len() {
@@ -82,11 +82,10 @@ fn expand_impl(inbytes: &[u8], capacity: usize) -> Vec<u8> {
                                 rpos..min(rpos + rlen, rpos + capacity - output.len()),
                             );
                         } else {
-                            while output.len() < rpos + rlen {
-                                output.extend_from_within(
-                                    rpos..(rpos
-                                        + min(output.len() - rpos, capacity - output.len())),
-                                );
+                            let newlen = output.len() + rlen;
+                            while output.len() < newlen {
+                                let rend = rpos + min(output.len() - rpos, newlen - output.len());
+                                output.extend_from_within(rpos..rend);
                             }
                         }
                     } else {
@@ -141,6 +140,11 @@ mod tests {
     #[test]
     fn test_expand_expands_previously_compressed_data() {
         assert_eq!(expand_impl(b"\xffABCDEFGH\0\x07\x01", 12), b"ABCDEFGHBCDE");
+    }
+
+    #[test]
+    fn test_expand_repeats_characters_from_beginning_of_output() {
+        assert_eq!(expand_impl(b"\xffABCDEFGH\0\x08\x01", 12), b"ABCDEFGHABCD");
     }
 
     #[test]
