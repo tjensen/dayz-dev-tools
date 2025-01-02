@@ -35,15 +35,7 @@ class PBOFile:
         assert self.content_reader is not None
 
         if self.original_size != 0 and self.original_size != self.data_size:
-            expanded = expand(self.content_reader.read(self.data_size - 4), self.original_size)
-            expected_checksum = self.content_reader.readuint()
-            actual_checksum = sum(expanded)
-
-            if actual_checksum != expected_checksum:
-                raise Exception(
-                    f"Checksum mismatch ({actual_checksum:#x} != {expected_checksum:#x})")
-
-            output_file.write(expanded)
+            output_file.write(expand(self.content_reader.read(self.data_size), self.original_size))
         else:
             output_file.write(self.content_reader.read(self.data_size))
 
