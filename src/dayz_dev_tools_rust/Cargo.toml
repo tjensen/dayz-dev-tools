@@ -7,6 +7,7 @@ publish.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+memchr = { version = "2.7.4", features = ["std"] }
 pyo3.workspace = true
 
 [lib]
