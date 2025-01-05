@@ -111,9 +111,10 @@ fn collapse_impl(input: &[u8]) -> Result<Vec<u8>> {
         for needle_len in std::ops::RangeInclusive::new(3, cmp::min(18, input.len() - offset)).rev()
         {
             let needle = &input[offset..offset + needle_len];
-            let haystack = &input[offset - cmp::min(0x1000, offset)..offset];
+            let haystack_start = offset - cmp::min(0xfff, offset);
+            let haystack = &input[haystack_start..offset];
             if let Some(index) = memmem::find(haystack, needle) {
-                let pos = (offset - index) as u16;
+                let pos = (offset - index - haystack_start) as u16;
                 packet.push_pointer(pos, needle_len as u16);
                 offset += needle_len;
                 continue 'outer;
@@ -359,5 +360,12 @@ mod tests {
             outbytes,
             b"\xffABCDEFGH\xffIJKLMNOP\x03QR\x12\x0f\x56\x0a\x00\x00"
         );
+    }
+
+    #[test]
+    fn test_collapse_looks_for_matching_pattern_in_previous_4kb() {
+        let outbytes = collapse_impl(&b"A".repeat(4128)).unwrap();
+
+        assert_eq!(&outbytes[492..], b"\xff\xff\xff\x20\x18\x04\x00");
     }
 }
