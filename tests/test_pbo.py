@@ -93,16 +93,44 @@ class TestMain(unittest.TestCase):
 
         assert 4 == self.mock_pbo_writer.add_file.call_count
         self.mock_pbo_writer.add_file.assert_has_calls([
-            mock.call(pathlib.Path("path", "to", "file1.ext")),
-            mock.call(pathlib.Path("another", "path", "file2.ext")),
-            mock.call(pathlib.Path("another", "path", "subdir", "file3.ext")),
-            mock.call(pathlib.Path("file4.ext"))
+            mock.call(pathlib.Path("path", "to", "file1.ext"), compress=False),
+            mock.call(pathlib.Path("another", "path", "file2.ext"), compress=False),
+            mock.call(pathlib.Path("another", "path", "subdir", "file3.ext"), compress=False),
+            mock.call(pathlib.Path("file4.ext"), compress=False)
         ])
 
         mock_open.assert_called_once_with("output.pbo", "wb")
 
         self.mock_pbo_writer.write.assert_called_once_with(
             mock_open.return_value.__enter__.return_value)
+
+    def test_compresses_added_files_when_compress_option_is_specified(self) -> None:
+        pathlib.Path(self.indir.name, "path", "to").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "path", "to", "file1.ext").touch()
+        pathlib.Path(self.indir.name, "another", "path").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "another", "path", "file2.ext").touch()
+        pathlib.Path(self.indir.name, "another", "path", "subdir").mkdir(parents=True)
+        pathlib.Path(self.indir.name, "another", "path", "subdir", "file3.ext").touch()
+        pathlib.Path(self.indir.name, "file4.ext").touch()
+
+        mock_open = mock.mock_open()
+
+        with misc.chdir(self.indir.name), mock.patch("builtins.open", mock_open):
+            main([
+                "ignored",
+                "--compress",
+                "output.pbo",
+                "path/to/file1.ext",
+                "another/path",
+                "file4.ext"
+            ])
+
+        self.mock_pbo_writer.add_file.assert_has_calls([
+            mock.call(pathlib.Path("path", "to", "file1.ext"), compress=True),
+            mock.call(pathlib.Path("another", "path", "file2.ext"), compress=True),
+            mock.call(pathlib.Path("another", "path", "subdir", "file3.ext"), compress=True),
+            mock.call(pathlib.Path("file4.ext"), compress=True)
+        ])
 
     def test_converts_config_cpp_files_when_tools_directory_is_not_none(self) -> None:
         self.mock_tools_directory.return_value = "TOOLS-DIR"
@@ -184,10 +212,10 @@ class TestMain(unittest.TestCase):
 
         assert 4 == self.mock_pbo_writer.add_file.call_count
         self.mock_pbo_writer.add_file.assert_has_calls([
-            mock.call(pathlib.Path("match1.ext")),
-            mock.call(pathlib.Path("path", "to", "match2.ext")),
-            mock.call(pathlib.Path("another", "path", "match3.ext")),
-            mock.call(pathlib.Path("another", "path", "subdir.ext", "match4.ext")),
+            mock.call(pathlib.Path("match1.ext"), compress=False),
+            mock.call(pathlib.Path("path", "to", "match2.ext"), compress=False),
+            mock.call(pathlib.Path("another", "path", "match3.ext"), compress=False),
+            mock.call(pathlib.Path("another", "path", "subdir.ext", "match4.ext"), compress=False),
         ], any_order=True)
 
     @mock.patch("pathlib.Path.glob", autospec=True)

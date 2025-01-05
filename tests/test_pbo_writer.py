@@ -91,6 +91,54 @@ class TestPBOWriter(unittest.TestCase):
         assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")
+    def test_add_file_compresses_file_contents_when_requested(self, mock_stat: mock.Mock) -> None:
+        output = io.BytesIO()
+        mock_open = mock.mock_open()
+        mock_open.return_value.__enter__.return_value.read.return_value = b"ABCDEFGH" * 4
+
+        mock_stat.return_value.st_size = 32
+        mock_stat.return_value.st_mtime = 305419896.567
+
+        path = pathlib.Path("PATH/TO/FILENAME")
+
+        with mock.patch("builtins.open", mock_open):
+            writer = pbo_writer.PBOWriter(cfgconvert="path/to/cfgconvert.exe")
+            writer.add_file(path, compress=True)
+            writer.write(output)
+
+        data = output.getvalue()
+
+        assert b"PATH\\TO\\FILENAME\x00srpC\x20\x00\x00\x00\x00\x00\x00\x00" \
+            b"\x78\x56\x34\x12\x12\x00\x00\x00" + (b"\x00" * 21) \
+            + b"\xffABCDEFGH\x00\x08\x05\x10\x0d\x90\x08\x00\x00" == data[22:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
+
+    @mock.patch.object(pathlib.Path, "stat")
+    def test_add_file_does_not_compress_file_if_it_cannot_be_compressed(
+        self,
+        mock_stat: mock.Mock
+    ) -> None:
+        output = io.BytesIO()
+        mock_open = mock.mock_open()
+        mock_open.return_value.__enter__.return_value.read.return_value = b"FILE-CONTENTS"
+
+        mock_stat.return_value.st_size = 13
+        mock_stat.return_value.st_mtime = 305419896.567
+
+        path = pathlib.Path("PATH/TO/FILENAME")
+
+        with mock.patch("builtins.open", mock_open):
+            writer = pbo_writer.PBOWriter(cfgconvert="path/to/cfgconvert.exe")
+            writer.add_file(path, compress=True)
+            writer.write(output)
+
+        data = output.getvalue()
+
+        assert b"PATH\\TO\\FILENAME\x00\x00\x00\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00" \
+            b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" == data[22:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
+
+    @mock.patch.object(pathlib.Path, "stat")
     @mock.patch("dayz_dev_tools.config_cpp.cpp_to_bin")
     def test_add_file_converts_config_cpp_to_config_bin(
         self,
@@ -148,6 +196,36 @@ class TestPBOWriter(unittest.TestCase):
 
         assert b"path\\to\\config.cpp\x00\x00\x00\x00\x00\x0d\x00\x00\x00\x00\x00\x00\x00" \
             b"\x78\x56\x34\x12\x0d\x00\x00\x00" + (b"\x00" * 21) + b"FILE-CONTENTS" == data[22:-21]
+        assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
+
+    @mock.patch.object(pathlib.Path, "stat")
+    @mock.patch("dayz_dev_tools.config_cpp.cpp_to_bin")
+    def test_add_file_compresses_converted_config_bin_when_requested(
+        self,
+        mock_cpp_to_bin: mock.Mock,
+        mock_stat: mock.Mock
+    ) -> None:
+        mock_cpp_to_bin.return_value = b"ABCDEFGH" * 4
+
+        output = io.BytesIO()
+        mock_open = mock.mock_open()
+        mock_open.return_value.__enter__.return_value.read.return_value = b"FILE-CONTENTS"
+
+        mock_stat.return_value.st_size = 13
+        mock_stat.return_value.st_mtime = 305419896.567
+
+        path = pathlib.Path("path/to/ConFig.cPp")
+
+        with mock.patch("builtins.open", mock_open):
+            writer = pbo_writer.PBOWriter(cfgconvert="path/to/cfgconvert.exe")
+            writer.add_file(path, compress=True)
+            writer.write(output)
+
+        data = output.getvalue()
+
+        assert b"path\\to\\ConFig.bin\x00srpC\x20\x00\x00\x00\x00\x00\x00\x00" \
+            b"\x78\x56\x34\x12\x12\x00\x00\x00" + (b"\x00" * 21) \
+            + b"\xffABCDEFGH\x00\x08\x05\x10\x0d\x90\x08\x00\x00" == data[22:-21]
         assert b"\x00" + hashlib.sha1(data[:-21]).digest() == data[-21:]
 
     @mock.patch.object(pathlib.Path, "stat")

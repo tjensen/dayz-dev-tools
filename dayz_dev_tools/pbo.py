@@ -24,6 +24,8 @@ def main() -> None:
         "-b", "--no-convert", action="store_true",
         help="Do not convert config.cpp files to config.bin files")
     parser.add_argument(
+        "-c", "--compress", action="store_true", help="Compress added file contents")
+    parser.add_argument(
         "-C", "--chdir", metavar="DIR", help="Change to directory DIR before creating PBO")
     parser.add_argument("-D", "--debug", action="store_true", help="Enable debug logs")
     parser.add_argument(
@@ -66,7 +68,7 @@ def main() -> None:
                 for path in anchor.glob(str(rest)):
                     if not path.is_dir():
                         logging.info("Adding file `%s`", path)
-                        writer.add_file(path)
+                        writer.add_file(path, compress=args.compress)
 
             for file in args.files:
                 path = pathlib.Path(file)
@@ -74,10 +76,10 @@ def main() -> None:
                     for subpath in path.glob("**/*"):
                         if not subpath.is_dir():
                             logging.info("Adding file `%s`", subpath)
-                            writer.add_file(subpath)
+                            writer.add_file(subpath, compress=args.compress)
                 else:
                     logging.info("Adding file `%s`", path)
-                    writer.add_file(path)
+                    writer.add_file(path, compress=args.compress)
 
             with open(args.pbofile, "wb") as output:
                 logging.info("Writing PBO file `%s`", args.pbofile)

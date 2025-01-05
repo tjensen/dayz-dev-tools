@@ -6,14 +6,17 @@ import struct
 import typing
 
 from dayz_dev_tools import config_cpp
+from dayz_dev_tools_rust import collapse
 
 
 @dataclasses.dataclass(eq=True, frozen=True)
 class _Entry:
     read_path: pathlib.Path
     stored_path: str
-    size: int
+    mime_type: int
+    original_size: int
     mtime: int
+    data_size: int
     contents: typing.Optional[bytes]
 
 
@@ -55,14 +58,15 @@ class PBOWriter:
             value.encode("utf8") if hasattr(value, "encode") else value
         ))
 
-    def add_file(self, path: pathlib.Path) -> None:
+    def add_file(self, path: pathlib.Path, *, compress: bool = False) -> None:
         """Add a file to the PBO archive.
 
         :Parameters:
           - `path`: A ``pathlib.Path`` instance containing the location of the file to be added.
         """
+        mime_type = 0
         info = path.stat()
-        size = info.st_size
+        data_size = original_size = info.st_size
 
         if self.cfgconvert is not None and path.name.lower() == "config.cpp":
             with open(path, "rb") as infile:
@@ -70,8 +74,27 @@ class PBOWriter:
                 contents = config_cpp.cpp_to_bin(infile.read(), self.cfgconvert)
 
             path = path.with_suffix(".bin")
-            size = len(contents)
+            data_size = original_size = len(contents)
 
+            if compress:
+                logging.debug("Compressing converted %s contents", path)
+                try:
+                    contents = collapse(contents)
+                    mime_type = 0x43707273
+                    data_size = len(contents)
+                except ValueError:
+                    logging.debug("Unable to compress %s contents", path)
+
+        elif compress:
+            with open(path, "rb") as infile:
+                logging.debug("Compressing %s contents", path)
+                try:
+                    contents = collapse(infile.read())
+                    mime_type = 0x43707273
+                    data_size = len(contents)
+                except ValueError:
+                    logging.debug("Unable to compress %s contents", path)
+                    contents = None
         else:
             contents = None
 
@@ -79,8 +102,10 @@ class PBOWriter:
             _Entry(
                 read_path=path,
                 stored_path="\\".join(path.relative_to(path.anchor).parts),
-                size=size,
+                mime_type=mime_type,
+                original_size=original_size,
                 mtime=int(info.st_mtime),
+                data_size=data_size,
                 contents=contents))
 
     def write(self, output: typing.BinaryIO) -> None:
@@ -105,7 +130,10 @@ class PBOWriter:
         for entry in entries:
             logging.debug("Writing file entry: %s", entry.stored_path)
             writer.write(entry.stored_path.encode("utf8") + b"\x00")
-            writer.write(struct.pack("<IIIII", 0, entry.size, 0, int(entry.mtime), entry.size))
+            writer.write(
+                struct.pack(
+                    "<IIIII", entry.mime_type, entry.original_size, 0, int(entry.mtime),
+                    entry.data_size))
 
         writer.write(b"\x00" * 21)
 
@@ -116,8 +144,8 @@ class PBOWriter:
             else:
                 contents = entry.contents
 
-            if len(contents) != entry.size:
-                raise Exception(f"File size mismatch {len(contents)} != {entry.size}")
+            if len(contents) != entry.data_size:
+                raise Exception(f"File size mismatch {len(contents)} != {entry.data_size}")
 
             logging.debug("Writing file content: %s", entry.stored_path)
             writer.write(contents)
