@@ -89,6 +89,10 @@ impl Packet {
 }
 
 fn collapse_impl(input: &[u8]) -> Result<Vec<u8>> {
+    if input.len() < 4 {
+        return Err(CollapseError);
+    }
+
     let mut output = Vec::<u8>::with_capacity(input.len());
     let max_outbytes = input.len() - 4; // reserve room for checksum
     let mut packet = Packet::new();
@@ -104,8 +108,7 @@ fn collapse_impl(input: &[u8]) -> Result<Vec<u8>> {
             packet = Packet::new();
         }
 
-        for needle_len in
-            std::ops::RangeInclusive::new(3, cmp::min(18, input.len() - offset)).rev()
+        for needle_len in std::ops::RangeInclusive::new(3, cmp::min(18, input.len() - offset)).rev()
         {
             let needle = &input[offset..offset + needle_len];
             let haystack = &input[offset - cmp::min(0x1000, offset)..offset];
@@ -319,6 +322,11 @@ mod tests {
         packet.push_byte(0x44);
         packet.push_pointer(0x888, 11);
         packet.push_byte(0x55);
+    }
+
+    #[test]
+    fn test_collapse_returns_error_if_input_is_smaller_than_four_bytes() {
+        assert!(collapse_impl(b"AAA").is_err());
     }
 
     #[test]
