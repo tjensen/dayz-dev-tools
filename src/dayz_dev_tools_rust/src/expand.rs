@@ -94,7 +94,7 @@ fn expand_impl(inbytes: &[u8], capacity: usize) -> Result<Vec<u8>> {
                     let rposi = ((ptr & 0xff) | ((ptr >> 4) & 0xf00)) as usize;
                     let rlen = (((ptr >> 8) & 0xf) + 3) as usize;
 
-                    if rposi <= output.len() {
+                    if rposi > 0 && rposi <= output.len() {
                         let rpos = output.len() - rposi;
 
                         if rpos + rlen < output.len() {
@@ -197,6 +197,14 @@ mod tests {
         assert_eq!(
             expand_impl(b"\xffABCDEFGH\0\x07\x01\xa9\x02\x00\x00", 10).unwrap(),
             b"ABCDEFGHBC"
+        );
+    }
+
+    #[test]
+    fn test_expand_inserts_spaces_when_compressed_data_references_zero_offset() {
+        assert_eq!(
+            expand_impl(b"\x0fABCD\x00\x0f\x4a\x03\x00\x00", 22).unwrap(),
+            b"ABCD                  "
         );
     }
 
