@@ -9,7 +9,7 @@ version = "0.1.0"
 authors = ["Tim Jensen <tim.l.jensen@gmail.com>"]
 edition = "2021"
 publish = false
-rust-version = "1.65.0"
+rust-version = "1.77.0"
 
 [workspace.dependencies]
 pyo3 = { version = "0.23.3", features = ["extension-module"] }
