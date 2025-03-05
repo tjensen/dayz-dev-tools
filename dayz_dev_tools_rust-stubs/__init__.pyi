@@ -1,2 +1,6 @@
+def collapse(inbuffer: bytes) -> bytes:
+    ...
+
+
 def expand(inbuffer: bytes, capacity: int) -> bytes:
     ...
