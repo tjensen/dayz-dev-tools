@@ -12,7 +12,7 @@ publish = false
 rust-version = "1.65.0"
 
 [workspace.dependencies]
-pyo3 = { version = "0.23.3", features = ["extension-module"] }
+pyo3 = { version = "0.24.1", features = ["extension-module"] }
 
 [profile.release]
 overflow-checks = true
