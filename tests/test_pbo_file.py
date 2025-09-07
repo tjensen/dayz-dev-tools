@@ -160,3 +160,96 @@ class TestPBOFile(unittest.TestCase):
         self.pbofile.mime_type = b"A\x01\x7fD"
 
         assert self.pbofile.type() == "A  D"
+
+    def test_invalid_returns_false_when_filename_is_valid(self) -> None:
+        assert self.pbofile.invalid() is False
+
+    def test_invalid_returns_true_when_filename_contains_asterisk(self) -> None:
+        self.pbofile.filename = b"FILE*NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_question_mark(self) -> None:
+        self.pbofile.filename = b"FILE?NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_pipe(self) -> None:
+        self.pbofile.filename = b"FILE|NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_double_quote(self) -> None:
+        self.pbofile.filename = b"FILE\"NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_colon(self) -> None:
+        self.pbofile.filename = b"FILE:NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_greater_than(self) -> None:
+        self.pbofile.filename = b"FILE>NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_less_than(self) -> None:
+        self.pbofile.filename = b"FILE<NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_tab(self) -> None:
+        self.pbofile.filename = b"FILE\tNAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_extended_characters(self) -> None:
+        self.pbofile.filename = b"FILE\x88NAME"
+
+        assert self.pbofile.invalid() is True
+
+    def test_invalid_returns_true_when_filename_contains_reserved_names(self) -> None:
+        bad_names = [
+            b"dir\\CON",
+            b"dir\\PRN.ext",
+            b"dir\\AUX\\def",
+            b"dir\\NUL.ext\\ghi",
+            b"dir\\COM5.whatever\\jkl",
+            b"dir\\LPT8.blargh\\mno"
+        ]
+
+        for name in bad_names:
+            self.pbofile.filename = name
+
+            assert self.pbofile.invalid() is True
+
+    def test_obfuscated_returns_false_when_filename_is_valid(self) -> None:
+        assert self.pbofile.obfuscated() is False
+
+    def test_obfuscated_returns_true_when_filename_is_invalid_and_has_c_extension(self) -> None:
+        self.pbofile.filename = b"FILE\x88NAME.c"
+
+        assert self.pbofile.obfuscated() is True
+
+    def test_obfuscated_returns_false_when_filename_does_not_have_c_extension(self) -> None:
+        self.pbofile.filename = b"FILE\x88NAME"
+
+        assert self.pbofile.obfuscated() is False
+
+    def test_deobfuscated_filename_returns_normalized_filename_when_not_obfuscated(self) -> None:
+        assert self.pbofile.deobfuscated_filename(42) == self.pbofile.normalized_filename()
+
+    def test_deobfuscated_filename_returns_deobfuscated_filename_when_obfuscated(self) -> None:
+        self.pbofile.filename = b"dir\\NUL.ext\\ghi.c"
+
+        assert self.pbofile.deobfuscated_filename(42) == "PREFIX\\dir\\deobfs00042.c"
+
+    def test_deobfuscated_split_returns_deobfuscated_filename_split_on_path_separators(
+        self
+    ) -> None:
+        self.pbofile.filename = b"dir\\subdir\\bad\x88name\\whatever.c"
+
+        assert self.pbofile.deobfuscated_split(42) == [
+            b"PREFIX", b"dir", b"subdir", b"deobfs00042.c"
+        ]

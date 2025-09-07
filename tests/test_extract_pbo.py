@@ -236,6 +236,21 @@ class TestExtractPbo(unittest.TestCase):
 
         self.mock_pboreader.file.assert_called_once_with(b"PREFIX\\not-obfuscated")
 
+    def test_makes_directories_based_on_deobfuscated_filenames_when_requested(self) -> None:
+        mock_open = mock.mock_open()
+        mock_files = [
+            self.create_mock_file(b"PREFIX", b"dir\\subdir\\AUX.nope\\something.c", b"contents")
+        ]
+        self.mock_pboreader.files.return_value = mock_files
+        self.mock_pboreader.file.side_effect = mock_files
+
+        with mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
+
+        self.mock_makedirs.assert_called_once_with(
+            os.path.join(b"PREFIX", b"dir", b"subdir"), exist_ok=True),
+
     def test_prints_skipped_files_when_deobfuscating(self) -> None:
         mock_open = mock.mock_open()
         mock_files = [
@@ -314,6 +329,7 @@ class TestExtractPbo(unittest.TestCase):
             self.create_mock_file(None, b"*.*", b""),
             self.create_mock_file(None, b"", b""),
             self.create_mock_file(None, b"\\\\\\", b""),
+            self.create_mock_file(b"PREFIX", b"\\\\\\", b""),
             self.create_mock_file(
                 None, b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
             self.create_mock_file(None, b"file?to-skip", b""),
@@ -330,6 +346,7 @@ class TestExtractPbo(unittest.TestCase):
 
         mock_print.assert_has_calls([
             mock.call("Skipping empty obfuscation filename"),
+            mock.call("Skipping empty obfuscation filename"),
             mock.call("Skipping empty obfuscation filename")
         ])
 
@@ -345,7 +362,8 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_pboreader.files.return_value = [
             self.create_mock_file(None, b"dir\\obfus\xcccated.c", b"contents1"),
             self.create_mock_file(None, b"dir\\trashy?file.c", b"contents2"),
-            self.create_mock_file(None, b"dir\\gar\tbage.c", b"contents3")
+            self.create_mock_file(None, b"dir\\gar\tbage.c", b"contents3"),
+            self.create_mock_file(None, b"dir\\LPT1.haha\\script.c", b"contents4")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -354,17 +372,19 @@ class TestExtractPbo(unittest.TestCase):
 
         mock_print.assert_not_called()
 
-        assert mock_open.call_count == 3
+        assert mock_open.call_count == 4
         mock_open.assert_has_calls([
             mock.call(os.path.join("dir", "deobfs00000.c"), "w+b"),
             mock.call(os.path.join("dir", "deobfs00001.c"), "w+b"),
-            mock.call(os.path.join("dir", "deobfs00002.c"), "w+b")
+            mock.call(os.path.join("dir", "deobfs00002.c"), "w+b"),
+            mock.call(os.path.join("dir", "deobfs00003.c"), "w+b")
         ], any_order=True)
 
         mock_open.return_value.__enter__.return_value.write.assert_has_calls([
             mock.call(b"contents1"),
             mock.call(b"contents2"),
-            mock.call(b"contents3")
+            mock.call(b"contents3"),
+            mock.call(b"contents4")
         ])
 
     def test_does_not_rename_obfuscated_filenames_when_not_deobfuscating(self) -> None:

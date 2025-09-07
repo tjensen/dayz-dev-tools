@@ -7,6 +7,11 @@ from dayz_dev_tools import pbo_file_reader
 from dayz_dev_tools_rust import expand
 
 
+INVALID_FILENAME_RE = re.compile(b"[\t?*<>:\"|\x80-\xff]")
+
+RESERVED_FILENAME_RE = re.compile(b"(CON|PRN|AUX|NUL|COM\\d|LPT\\d)\\.?")
+
+
 def normalize_filename(parts: list[bytes]) -> str:
     return os.path.sep.encode().join(parts).decode(errors="replace")
 
@@ -98,3 +103,30 @@ class PBOFile:
             c if ord(c) >= 32 and ord(c) < 127 else " "
             for c in f"{self.mime_type.decode('ascii', errors='replace'):<4}"
         ])
+
+    def invalid(self) -> bool:
+        if INVALID_FILENAME_RE.search(self.filename) is not None:
+            return True
+
+        for segment in self.split_filename():
+            if RESERVED_FILENAME_RE.match(segment) is not None:
+                return True
+
+        return False
+
+    def obfuscated(self) -> bool:
+        return self.invalid() and self.filename.endswith(b".c")
+
+    def deobfuscated_split(self, index: int) -> list[bytes]:
+        segments = []
+        for segment in self.split_filename():
+            if INVALID_FILENAME_RE.search(segment) \
+                    or RESERVED_FILENAME_RE.match(segment) is not None:
+                segments.append(f"deobfs{index:05}.c".encode())
+                break
+            segments.append(segment)
+
+        return segments
+
+    def deobfuscated_filename(self, index: int) -> str:
+        return normalize_filename(self.deobfuscated_split(index))

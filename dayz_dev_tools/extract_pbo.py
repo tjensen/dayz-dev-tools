@@ -8,14 +8,8 @@ from dayz_dev_tools import pbo_file
 from dayz_dev_tools import pbo_reader
 
 
-INVALID_FILENAME_RE = re.compile(b"[\t?*\x80-\xff]")
-
 OBFUSCATE_RE = re.compile(
     b'^(?:(?://[^\\r\\n]*|/\\*(?:\\*(?!\\/)|[^*])*\\*/)\\r\\n)?#include "([^"]+)"\\r\\n$')
-
-
-def _invalid_filename(filename: bytes) -> bool:
-    return INVALID_FILENAME_RE.search(filename) is not None
 
 
 _deobfs_count = 0
@@ -25,18 +19,20 @@ def _extract_file(
     reader: pbo_reader.PBOReader, pbofile: pbo_file.PBOFile, verbose: bool, deobfuscate: bool,
     cfgconvert: typing.Optional[str], ignored: list[bytes]
 ) -> None:
+    global _deobfs_count
+
     if deobfuscate and (
             (pbofile.filename in ignored)
-            or (_invalid_filename(pbofile.filename) and not pbofile.filename.endswith(b".c"))):
+            or (pbofile.invalid() and not pbofile.filename.endswith(b".c"))):
         if verbose:
             print(f"Skipping obfuscation file: {pbofile.normalized_filename()}")
         return
 
     prefix = reader.prefix()
 
-    parts = pbofile.split_filename()
+    parts = pbofile.deobfuscated_split(_deobfs_count) if deobfuscate else pbofile.split_filename()
 
-    if len(parts) == 0 or len(parts[-1]) == 0:
+    if len(parts) == 0 or len(parts[-1]) == 0 or parts == [pbofile.prefix]:
         print("Skipping empty obfuscation filename")
         return
 
@@ -63,12 +59,9 @@ def _extract_file(
     renamed_filename: typing.Optional[str] = None
     normalized = pbofile.normalized_filename()
 
-    if deobfuscate and _invalid_filename(parts[-1]) and parts[-1].endswith(b".c"):
-        global _deobfs_count
-        parts[-1] = f"deobfs{_deobfs_count:05}.c".encode()
+    if deobfuscate and pbofile.obfuscated():
+        normalized = renamed_filename = pbofile.deobfuscated_filename(_deobfs_count)
         _deobfs_count += 1
-
-        normalized = renamed_filename = pbo_file.normalize_filename(parts)
 
     with open(normalized, "w+b") as out_file:
         if verbose:
