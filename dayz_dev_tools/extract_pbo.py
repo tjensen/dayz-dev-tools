@@ -10,7 +10,7 @@ from dayz_dev_tools import pbo_reader
 
 
 OBFUSCATE_RE = re.compile(
-    b'^(?:(?://[^\\r\\n]*|/\\*(?:\\*(?!\\/)|[^*])*\\*/)\\r\\n)?#include "([^"]+)"\\r\\n$')
+    b'^(?:(?://[^\\r\\n]*|/\\*(?:\\*(?!\\/)|[^*])*\\*/)\\r\\n)?#include "([^"]+)"(?:\\r\\n)?$')
 
 
 _deobfs_count = 0
@@ -79,8 +79,8 @@ def _extract_file(
             if (match := OBFUSCATE_RE.match(content)) is not None:
                 target_filename = match.group(1)
 
-                if prefix is not None and not target_filename.startswith(prefix + b"\\"):
-                    target_filename = prefix + b"\\" + target_filename
+                if prefix is not None:
+                    target_filename = target_filename.removeprefix(prefix + b"\\")
 
                 unobfuscated = reader.file(target_filename)
 

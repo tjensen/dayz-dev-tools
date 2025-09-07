@@ -214,7 +214,7 @@ class TestExtractPbo(unittest.TestCase):
             self.create_mock_file(
                 None, b"obfuscated2",
                 b"/*\r\n#pragma \"whatever\"\r\n*/\r\n#include \"not-obfuscated2\"\r\n"),
-            self.create_mock_file(None, b"obfuscated3", b"#include \"not-obfuscated3\"\r\n"),
+            self.create_mock_file(None, b"obfuscated3", b"#include \"not-obfuscated3\""),
             self.create_mock_file(None, b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
             self.create_mock_file(None, b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2"),
             self.create_mock_file(None, b"not-obfuscated3", b"NOT OBFUSCATED CONTENT 3")
@@ -264,7 +264,7 @@ class TestExtractPbo(unittest.TestCase):
         mock_open.return_value.__enter__.return_value.write.assert_called_once_with(
             b"NOT OBFUSCATED CONTENT"),
 
-        self.mock_pboreader.file.assert_called_once_with(b"PREFIX\\not-obfuscated")
+        self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated")
 
     def test_makes_directories_based_on_deobfuscated_filenames_when_requested(self) -> None:
         mock_open = mock.mock_open()
