@@ -29,6 +29,10 @@ def main() -> None:
     parser.add_argument("files", nargs="*", help="Files to extract from the PBO archive")
     args = parser.parse_args()
 
+    # Obfuscated files sometimes use characters that are incompatible with the terminal's encoding
+    sys.stdout.reconfigure(errors="replace")  # type: ignore[union-attr]
+    sys.stderr.reconfigure(errors="replace")  # type: ignore[union-attr]
+
     logging_configuration.configure_logging(debug=args.debug)
 
     try:
