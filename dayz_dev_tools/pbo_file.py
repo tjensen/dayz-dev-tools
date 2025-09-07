@@ -15,6 +15,7 @@ def normalize_filename(parts: list[bytes]) -> str:
 class PBOFile:
     """Interface for accessing a file contained within a PBO archive. Instances should be obtained
     using :meth:`dayz_dev_tools.pbo_reader.PBOReader.file`."""
+    prefix: typing.Optional[bytes]
     #: The raw name of the file
     filename: bytes
     mime_type: bytes
@@ -66,6 +67,9 @@ class PBOFile:
           A list of path components.
         """
         result = list(filter(lambda c: len(c) > 0, re.split(b"[\\\\/]", self.filename)))
+
+        if self.prefix is not None:
+            result.insert(0, self.prefix)
 
         if len(result) == 0:
             return [b""]

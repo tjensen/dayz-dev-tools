@@ -21,11 +21,16 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_bin_to_cpp = bin_to_cpp_patcher.start()
         self.addCleanup(bin_to_cpp_patcher.stop)
 
-    def create_mock_file(self, filename: bytes, contents: bytes) -> pbo_file.PBOFile:
+    def create_mock_file(
+        self,
+        prefix: typing.Optional[bytes],
+        filename: bytes,
+        contents: bytes
+    ) -> pbo_file.PBOFile:
         def unpack(dest: typing.BinaryIO) -> None:
             dest.write(contents)
 
-        mock_file = pbo_file.PBOFile(filename, b"", 0, 0, 0, 0)
+        mock_file = pbo_file.PBOFile(prefix, filename, b"", 0, 0, 0, 0)
         mock.patch.object(mock_file, "unpack", side_effect=unpack).start()
 
         return mock_file
@@ -33,11 +38,11 @@ class TestExtractPbo(unittest.TestCase):
     def test_extracts_all_files_in_the_pbo(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\dir2\\filename.ext", b"1111"),
-            self.create_mock_file(b"dir1\\filename.ext", b"2222"),
-            self.create_mock_file(b"dir1\\dir2\\dir3\\filename.ext", b"3333"),
-            self.create_mock_file(b"filename.ext", b"4444"),
-            self.create_mock_file(b"other-filename.png", b"5555")
+            self.create_mock_file(None, b"dir1\\dir2\\filename.ext", b"1111"),
+            self.create_mock_file(None, b"dir1\\filename.ext", b"2222"),
+            self.create_mock_file(None, b"dir1\\dir2\\dir3\\filename.ext", b"3333"),
+            self.create_mock_file(None, b"filename.ext", b"4444"),
+            self.create_mock_file(None, b"other-filename.png", b"5555")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -75,8 +80,8 @@ class TestExtractPbo(unittest.TestCase):
     def test_extracts_specified_files_when_provided(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.file.side_effect = [
-            self.create_mock_file(b"filename.ext", b"4444"),
-            self.create_mock_file(b"dir1\\filename.ext", b"2222")
+            self.create_mock_file(None, b"filename.ext", b"4444"),
+            self.create_mock_file(None, b"dir1\\filename.ext", b"2222")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -129,11 +134,11 @@ class TestExtractPbo(unittest.TestCase):
     def test_prints_filenames_as_they_are_extracted_when_verbose_is_true(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\dir2\\filename.ext", b"1111"),
-            self.create_mock_file(b"dir1\\filename.ext", b"2222"),
-            self.create_mock_file(b"dir1\\dir2\\dir3\\filename.ext", b"3333"),
-            self.create_mock_file(b"filename.ext", b"4444"),
-            self.create_mock_file(b"other-filename.png", b"5555")
+            self.create_mock_file(None, b"dir1\\dir2\\filename.ext", b"1111"),
+            self.create_mock_file(None, b"dir1\\filename.ext", b"2222"),
+            self.create_mock_file(None, b"dir1\\dir2\\dir3\\filename.ext", b"3333"),
+            self.create_mock_file(None, b"filename.ext", b"4444"),
+            self.create_mock_file(None, b"other-filename.png", b"5555")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -152,8 +157,8 @@ class TestExtractPbo(unittest.TestCase):
     def test_prints_specified_filenames_as_they_are_extracted_when_verbose_is_true(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.file.side_effect = [
-            self.create_mock_file(b"filename.ext", b"4444"),
-            self.create_mock_file(b"dir1\\filename.ext", b"2222")
+            self.create_mock_file(None, b"filename.ext", b"4444"),
+            self.create_mock_file(None, b"dir1\\filename.ext", b"2222")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -174,14 +179,15 @@ class TestExtractPbo(unittest.TestCase):
     def test_deobfuscates_all_obfuscated_files_when_requested(self) -> None:
         mock_open = mock.mock_open()
         mock_files = [
-            self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
             self.create_mock_file(
-                b"obfuscated2",
+                None, b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
+            self.create_mock_file(
+                None, b"obfuscated2",
                 b"/*\r\n#pragma \"whatever\"\r\n*/\r\n#include \"not-obfuscated2\"\r\n"),
-            self.create_mock_file(b"obfuscated3", b"#include \"not-obfuscated3\"\r\n"),
-            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
-            self.create_mock_file(b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2"),
-            self.create_mock_file(b"not-obfuscated3", b"NOT OBFUSCATED CONTENT 3")
+            self.create_mock_file(None, b"obfuscated3", b"#include \"not-obfuscated3\"\r\n"),
+            self.create_mock_file(None, b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
+            self.create_mock_file(None, b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2"),
+            self.create_mock_file(None, b"not-obfuscated3", b"NOT OBFUSCATED CONTENT 3")
         ]
         self.mock_pboreader.files.return_value = mock_files
         self.mock_pboreader.file.side_effect = mock_files[3:]
@@ -215,10 +221,10 @@ class TestExtractPbo(unittest.TestCase):
     def test_deobfuscates_obfuscated_files_when_target_file_does_not_have_prefix(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"obfuscated", b"#include \"not-obfuscated\"\r\n"),
+            self.create_mock_file(None, b"obfuscated", b"#include \"not-obfuscated\"\r\n"),
         ]
         self.mock_pboreader.file.return_value = \
-            self.create_mock_file(b"PREFIX\\not-obfuscated", b"NOT OBFUSCATED CONTENT")
+            self.create_mock_file(b"PREFIX", b"not-obfuscated", b"NOT OBFUSCATED CONTENT")
         self.mock_pboreader.prefix.return_value = b"PREFIX"
 
         with mock.patch("builtins.open", mock_open):
@@ -233,17 +239,18 @@ class TestExtractPbo(unittest.TestCase):
     def test_prints_skipped_files_when_deobfuscating(self) -> None:
         mock_open = mock.mock_open()
         mock_files = [
-            self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
             self.create_mock_file(
-                b"obfuscated2",
+                None, b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
+            self.create_mock_file(
+                None, b"obfuscated2",
                 b"/*\r\n#pragma \"whatever\"\r\n*/\r\n#include \"not-obfuscated2\"\r\n"),
-            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
-            self.create_mock_file(b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2")
+            self.create_mock_file(None, b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
+            self.create_mock_file(None, b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2")
         ]
         self.mock_pboreader.files.return_value = mock_files
         self.mock_pboreader.file.side_effect = [
-            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
-            self.create_mock_file(b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2")
+            self.create_mock_file(None, b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1"),
+            self.create_mock_file(None, b"not-obfuscated2", b"NOT OBFUSCATED CONTENT 2")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -262,7 +269,7 @@ class TestExtractPbo(unittest.TestCase):
         mock_open = mock.mock_open()
         content = b"//***\r\n#include \"not-obfuscated1\"\r\n"
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"obfuscated1", content)
+            self.create_mock_file(None, b"obfuscated1", content)
         ]
         self.mock_pboreader.file.return_value = None
 
@@ -282,7 +289,7 @@ class TestExtractPbo(unittest.TestCase):
         mock_open = mock.mock_open()
         content = b"//***\r\n#include \"not-obfuscated1\"\r\n"
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"obfuscated1", content)
+            self.create_mock_file(None, b"obfuscated1", content)
         ]
         self.mock_pboreader.file.return_value = None
 
@@ -303,18 +310,19 @@ class TestExtractPbo(unittest.TestCase):
     def test_skips_invalid_obfuscation_files(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"\t\t", b""),
-            self.create_mock_file(b"*.*", b""),
-            self.create_mock_file(b"", b""),
-            self.create_mock_file(b"\\\\\\", b""),
-            self.create_mock_file(b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
-            self.create_mock_file(b"file?to-skip", b""),
-            self.create_mock_file(b"another-file-to*skip", b""),
-            self.create_mock_file(b"yet-another-file\tto-skip", b""),
-            self.create_mock_file(b"high-ascii-characters\xccare-also-skipped", b""),
+            self.create_mock_file(None, b"\t\t", b""),
+            self.create_mock_file(None, b"*.*", b""),
+            self.create_mock_file(None, b"", b""),
+            self.create_mock_file(None, b"\\\\\\", b""),
+            self.create_mock_file(
+                None, b"obfuscated1", b"//***\r\n#include \"not-obfuscated1\"\r\n"),
+            self.create_mock_file(None, b"file?to-skip", b""),
+            self.create_mock_file(None, b"another-file-to*skip", b""),
+            self.create_mock_file(None, b"yet-another-file\tto-skip", b""),
+            self.create_mock_file(None, b"high-ascii-characters\xccare-also-skipped", b""),
         ]
         self.mock_pboreader.file.return_value = \
-            self.create_mock_file(b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1")
+            self.create_mock_file(None, b"not-obfuscated1", b"NOT OBFUSCATED CONTENT 1")
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
             extract_pbo.extract_pbo(
@@ -335,9 +343,9 @@ class TestExtractPbo(unittest.TestCase):
     def test_renames_script_files_with_obfuscated_filenames_when_deobfuscating(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir\\obfus\xcccated.c", b"contents1"),
-            self.create_mock_file(b"dir\\trashy?file.c", b"contents2"),
-            self.create_mock_file(b"dir\\gar\tbage.c", b"contents3")
+            self.create_mock_file(None, b"dir\\obfus\xcccated.c", b"contents1"),
+            self.create_mock_file(None, b"dir\\trashy?file.c", b"contents2"),
+            self.create_mock_file(None, b"dir\\gar\tbage.c", b"contents3")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -362,9 +370,9 @@ class TestExtractPbo(unittest.TestCase):
     def test_does_not_rename_obfuscated_filenames_when_not_deobfuscating(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir\\obfus\xcccated.c", b"contents1"),
-            self.create_mock_file(b"dir\\trashy?file.c", b"contents2"),
-            self.create_mock_file(b"dir\\gar\tbage.c", b"contents3")
+            self.create_mock_file(None, b"dir\\obfus\xcccated.c", b"contents1"),
+            self.create_mock_file(None, b"dir\\trashy?file.c", b"contents2"),
+            self.create_mock_file(None, b"dir\\gar\tbage.c", b"contents3")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -383,9 +391,9 @@ class TestExtractPbo(unittest.TestCase):
     def test_prints_renamed_script_files_when_verbose_is_true(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir\\obfus\xcccated.c", b"contents1"),
-            self.create_mock_file(b"dir\\trashy?file.c", b"contents2"),
-            self.create_mock_file(b"dir\\gar\tbage.c", b"contents3")
+            self.create_mock_file(None, b"dir\\obfus\xcccated.c", b"contents1"),
+            self.create_mock_file(None, b"dir\\trashy?file.c", b"contents2"),
+            self.create_mock_file(None, b"dir\\gar\tbage.c", b"contents3")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -407,7 +415,7 @@ class TestExtractPbo(unittest.TestCase):
     def test_does_not_convert_config_bin_files_when_cfgconvert_is_none(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\config.bin", b"1111")
+            self.create_mock_file(None, b"dir1\\config.bin", b"1111")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -426,7 +434,7 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_bin_to_cpp.return_value = b"CPP-CONTENT"
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\config.bin", b"1111")
+            self.create_mock_file(None, b"dir1\\config.bin", b"1111")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -446,7 +454,7 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_bin_to_cpp.return_value = b"CPP-CONTENT"
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\Config.BIN", b"1111")
+            self.create_mock_file(None, b"dir1\\Config.BIN", b"1111")
         ]
 
         with mock.patch("builtins.open", mock_open):
@@ -462,7 +470,7 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_bin_to_cpp.side_effect = Exception("cfgconvert error")
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\config.bin", b"1111")
+            self.create_mock_file(None, b"dir1\\config.bin", b"1111")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
@@ -483,7 +491,7 @@ class TestExtractPbo(unittest.TestCase):
         self.mock_bin_to_cpp.return_value = b"CPP-CONTENT"
         mock_open = mock.mock_open()
         self.mock_pboreader.files.return_value = [
-            self.create_mock_file(b"dir1\\config.bin", b"1111")
+            self.create_mock_file(None, b"dir1\\config.bin", b"1111")
         ]
 
         with mock.patch("builtins.print") as mock_print, mock.patch("builtins.open", mock_open):
