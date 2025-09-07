@@ -16,6 +16,38 @@ OBFUSCATE_RE = re.compile(
 _deobfs_count = 0
 
 
+def _deobfuscate(
+    out_file: typing.BinaryIO,
+    pbofile: pbo_file.PBOFile,
+    reader: pbo_reader.PBOReader,
+    prefix: typing.Optional[bytes],
+    verbose: bool,
+    ignored: list[bytes]
+) -> bool:
+    buffer = io.BytesIO()
+    pbofile.unpack(buffer)
+    content = buffer.getvalue()
+
+    if (match := OBFUSCATE_RE.match(content)) is None:
+        out_file.write(content)
+        return True
+
+    target_filename = match.group(1)
+
+    if prefix is not None:
+        target_filename = target_filename.removeprefix(prefix + b"\\")
+
+    unobfuscated = reader.file(target_filename)
+
+    if unobfuscated is None:
+        out_file.write(content)
+        return False
+
+    ignored.append(unobfuscated.filename)
+
+    return _deobfuscate(out_file, unobfuscated, reader, prefix, verbose, ignored)
+
+
 def _extract_file(
     reader: pbo_reader.PBOReader, pbofile: pbo_file.PBOFile, verbose: bool, deobfuscate: bool,
     cfgconvert: typing.Optional[str], ignored: list[bytes]
@@ -72,28 +104,9 @@ def _extract_file(
                 print(f"Extracting {pbofile.normalized_filename()} -> {renamed_filename}")
 
         if deobfuscate:
-            buffer = io.BytesIO()
-            pbofile.unpack(buffer)
-            content = buffer.getvalue()
-
-            if (match := OBFUSCATE_RE.match(content)) is not None:
-                target_filename = match.group(1)
-
-                if prefix is not None:
-                    target_filename = target_filename.removeprefix(prefix + b"\\")
-
-                unobfuscated = reader.file(target_filename)
-
-                if unobfuscated is None:
-                    if verbose:
-                        print(f"Unable to deobfuscate {pbofile.normalized_filename()}")
-                    out_file.write(content)
-                else:
-                    ignored.append(unobfuscated.filename)
-
-                    unobfuscated.unpack(out_file)
-            else:
-                out_file.write(content)
+            if not _deobfuscate(out_file, pbofile, reader, prefix, verbose, ignored):
+                if verbose:
+                    print(f"Unable to deobfuscate {pbofile.normalized_filename()}")
 
         else:
             pbofile.unpack(out_file)

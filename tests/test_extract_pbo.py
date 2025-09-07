@@ -266,6 +266,33 @@ class TestExtractPbo(unittest.TestCase):
 
         self.mock_pboreader.file.assert_called_once_with(b"not-obfuscated")
 
+    def test_deobfuscates_recursive_includes(self) -> None:
+        mock_open = mock.mock_open()
+        mock_files = [
+            self.create_mock_file(None, b"obfuscated1", b"#include \"inner1\""),
+            self.create_mock_file(None, b"inner1", b"#include \"inner2\""),
+            self.create_mock_file(None, b"inner2", b"#include \"inner3\""),
+            self.create_mock_file(None, b"inner3", b"REAL-CONTENTS")
+        ]
+        self.mock_pboreader.files.return_value = mock_files
+        self.mock_pboreader.file.side_effect = mock_files[1:]
+
+        with mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
+
+        mock_open.assert_called_once_with("obfuscated1", "w+b")
+
+        mock_open.return_value.__enter__.return_value.write.assert_called_once_with(
+            b"REAL-CONTENTS")
+
+        assert self.mock_pboreader.file.call_count == 3
+        self.mock_pboreader.file.assert_has_calls([
+            mock.call(b"inner1"),
+            mock.call(b"inner2"),
+            mock.call(b"inner3")
+        ])
+
     def test_makes_directories_based_on_deobfuscated_filenames_when_requested(self) -> None:
         mock_open = mock.mock_open()
         mock_files = [
