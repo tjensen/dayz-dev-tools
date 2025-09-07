@@ -1,4 +1,5 @@
 import os
+import sys
 import unittest
 from unittest import mock
 
@@ -36,6 +37,16 @@ class TestMain(unittest.TestCase):
 
         self.mock_pboreader = self.mock_pboreader_class.return_value
 
+        self.original_stdout_errors = sys.stdout.errors
+        self.original_stderr_errors = sys.stderr.errors
+        sys.stdout.reconfigure(errors="strict")  # type: ignore[union-attr]
+        sys.stderr.reconfigure(errors="strict")  # type: ignore[union-attr]
+
+    def tearDown(self) -> None:
+        super().tearDown()
+        sys.stdout.reconfigure(errors=self.original_stdout_errors)  # type: ignore[union-attr]
+        sys.stderr.reconfigure(errors=self.original_stderr_errors)  # type: ignore[union-attr]
+
     def test_parses_args_and_extracts_pbo(self) -> None:
         mock_open = mock.mock_open()
         with mock.patch("builtins.open", mock_open):
@@ -43,6 +54,9 @@ class TestMain(unittest.TestCase):
                 "ignored",
                 "path/to/filename.ext"
             ])
+
+        assert "replace" == sys.stdout.errors
+        assert "replace" == sys.stderr.errors
 
         self.mock_configure_logging.assert_called_once_with(debug=False)
 
