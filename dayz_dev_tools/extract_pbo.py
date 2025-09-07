@@ -129,6 +129,10 @@ def extract_pbo(
       - `files_to_extract`: A list of fully-qualified paths of the files to be extracted.
       - `verbose`: When `True`, print the paths of the files being extracted to stdout.
       - `deobfuscate`: When `True`, **attempt** to deobfuscate obfuscated script files.
+      - `cfgconvert`: Location of the DayZ Tools CfgConvert.exe binary, or None if binarized
+        configs should not be converted.
+      - `pattern`: Only extract filenames matching this glob pattern, or None if all files should
+        be extracted.
 
     .. note:: Deobfuscation may not always work, as obfuscation techniques may evolve over time.
     """

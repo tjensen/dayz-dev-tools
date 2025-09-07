@@ -22,7 +22,7 @@ def main() -> None:
         help="Do not convert config.bin files to config.cpp files")
     parser.add_argument(
         "-d", "--deobfuscate", action="store_true", help="Attempt to deobfuscate extracted files")
-    parser.add_argument("-m", "--match", help="Extract files patching glob pattern")
+    parser.add_argument("-m", "--match", help="Extract files matching glob pattern")
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")
     parser.add_argument("-D", "--debug", action="store_true", help="Enable debug logs")
     parser.add_argument("-V", "--version", action="version", version=dayz_dev_tools.version)

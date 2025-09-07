@@ -105,6 +105,11 @@ class PBOFile:
         ])
 
     def invalid(self) -> bool:
+        """Returns True if filename is not a valid Windows filename.
+
+        :Returns:
+          True if filename is not a valid Windows filename, or False otherwise.
+        """
         if INVALID_FILENAME_RE.search(self.filename) is not None:
             return True
 
@@ -115,9 +120,23 @@ class PBOFile:
         return False
 
     def obfuscated(self) -> bool:
+        """Returns True if filename appears to be an obfuscated script file.
+
+        :Returns:
+          True if filename appears to be an obfuscated script, or False otherwise.
+        """
         return self.invalid() and self.filename.endswith(b".c")
 
     def deobfuscated_split(self, index: int) -> list[bytes]:
+        """Get the file's deobfuscated name as a ``list``, where each element in the list
+        represents a component of the file's path.
+
+        :Parameters:
+          - `index`: A number to uniquely identify the deobfuscated file.
+
+        :Returns:
+          A list of deobfuscated path components.
+        """
         segments = []
         for segment in self.split_filename():
             if INVALID_FILENAME_RE.search(segment) \
@@ -129,4 +148,12 @@ class PBOFile:
         return segments
 
     def deobfuscated_filename(self, index: int) -> str:
+        """Get the deobfuscated version of the file's name.
+
+        :Parameters:
+          - `index`: A number to uniquely identify the deobfuscated file.
+
+        :Returns:
+          A deobfuscated version of the file's name.
+        """
         return normalize_filename(self.deobfuscated_split(index))
