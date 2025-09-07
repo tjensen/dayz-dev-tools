@@ -253,3 +253,10 @@ class TestPBOFile(unittest.TestCase):
         assert self.pbofile.deobfuscated_split(42) == [
             b"PREFIX", b"dir", b"subdir", b"deobfs00042.c"
         ]
+
+    def test_deobfuscated_split_removes_trailing_spaces_from_path_segments(self) -> None:
+        self.pbofile.filename = b"dir\\subdir \\whatever.c"
+
+        assert self.pbofile.deobfuscated_split(42) == [
+            b"PREFIX", b"dir", b"subdir", b"whatever.c"
+        ]

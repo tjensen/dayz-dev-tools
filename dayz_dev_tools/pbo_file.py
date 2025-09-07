@@ -124,7 +124,7 @@ class PBOFile:
                     or RESERVED_FILENAME_RE.match(segment) is not None:
                 segments.append(f"deobfs{index:05}.c".encode())
                 break
-            segments.append(segment)
+            segments.append(segment.rstrip(b" "))
 
         return segments
 
