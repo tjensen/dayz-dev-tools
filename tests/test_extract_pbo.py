@@ -77,6 +77,36 @@ class TestExtractPbo(unittest.TestCase):
             mock.call(b"5555")
         ])
 
+    def test_extracts_only_files_matching_pattern_when_specified(self) -> None:
+        mock_open = mock.mock_open()
+        self.mock_pboreader.files.return_value = [
+            self.create_mock_file(None, b"dir1\\dir2\\matches.ext", b"1111"),
+            self.create_mock_file(None, b"dir1\\no-match.other", b"2222"),
+            self.create_mock_file(None, b"dir1\\also-matches.ext", b"3333"),
+            self.create_mock_file(b"PREFIX", b"skipped.thingy", b"4444"),
+            self.create_mock_file(b"PREFIX", b"include.ext", b"5555"),
+        ]
+
+        with mock.patch("builtins.open", mock_open):
+            extract_pbo.extract_pbo(
+                self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None,
+                pattern="**/*.ext")
+
+        self.mock_pboreader.files.assert_called_once_with()
+
+        assert mock_open.call_count == 3
+        mock_open.assert_has_calls([
+            mock.call(os.path.join("dir1", "dir2", "matches.ext"), "w+b"),
+            mock.call(os.path.join("dir1", "also-matches.ext"), "w+b"),
+            mock.call(os.path.join("PREFIX", "include.ext"), "w+b")
+        ], any_order=True)
+
+        mock_open.return_value.__enter__.return_value.write.assert_has_calls([
+            mock.call(b"1111"),
+            mock.call(b"3333"),
+            mock.call(b"5555")
+        ])
+
     def test_extracts_specified_files_when_provided(self) -> None:
         mock_open = mock.mock_open()
         self.mock_pboreader.file.side_effect = [

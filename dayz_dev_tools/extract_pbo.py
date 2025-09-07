@@ -1,5 +1,6 @@
 import io
 import os
+import pathlib
 import re
 import typing
 
@@ -99,8 +100,13 @@ def _extract_file(
 
 
 def extract_pbo(
-    reader: pbo_reader.PBOReader, files_to_extract: list[str], *, verbose: bool,
-    deobfuscate: bool, cfgconvert: typing.Optional[str]
+    reader: pbo_reader.PBOReader,
+    files_to_extract: list[str],
+    *,
+    verbose: bool,
+    deobfuscate: bool,
+    cfgconvert: typing.Optional[str],
+    pattern: typing.Optional[str] = None
 ) -> None:
     """Extract one or more files contained in a PBO archive.
 
@@ -120,6 +126,9 @@ def extract_pbo(
 
     if len(files_to_extract) == 0:
         for file in reader.files():
+            if pattern is not None and not pathlib.PureWindowsPath(
+                    file.normalized_filename()).full_match(pattern):
+                continue
             _extract_file(reader, file, verbose, deobfuscate, cfgconvert, ignored)
 
     else:
