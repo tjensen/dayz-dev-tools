@@ -29,7 +29,7 @@ def newest(directory: str) -> typing.Optional[str]:
 
     for log in logs:
         mtime = os.lstat(log).st_mtime
-        if newest is None or mtime > newest_mtime:
+        if newest_mtime is None or mtime > newest_mtime:
             newest = log
             newest_mtime = mtime
 
