@@ -1,4 +1,5 @@
 import io
+import fnmatch
 import os
 import pathlib
 import re
@@ -143,8 +144,8 @@ def extract_pbo(
 
     if len(files_to_extract) == 0:
         for file in reader.files():
-            if pattern is not None and not pathlib.PureWindowsPath(
-                    file.normalized_filename()).full_match(pattern):
+            if pattern is not None and not fnmatch.fnmatch(
+                    pathlib.PurePath(file.normalized_filename()).as_posix(), pattern):
                 continue
             _extract_file(reader, file, verbose, deobfuscate, cfgconvert, ignored)
 
