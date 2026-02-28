@@ -243,7 +243,8 @@ class TestPBOFile(unittest.TestCase):
     def test_deobfuscated_filename_returns_deobfuscated_filename_when_obfuscated(self) -> None:
         self.pbofile.filename = b"dir\\NUL.ext\\ghi.c"
 
-        assert self.pbofile.deobfuscated_filename(42) == "PREFIX\\dir\\deobfs00042.c"
+        assert self.pbofile.deobfuscated_filename(42) == os.path.join(
+            "PREFIX", "dir", "deobfs00042.c")
 
     def test_deobfuscated_split_returns_deobfuscated_filename_split_on_path_separators(
         self
