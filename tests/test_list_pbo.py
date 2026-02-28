@@ -1,5 +1,4 @@
 import datetime
-import os
 import typing
 import unittest
 from unittest import mock
@@ -19,25 +18,27 @@ class TestListPbo(unittest.TestCase):
             1617284725
         ]
 
-        self.mock_pboreader = mock.Mock()
-        self.mock_pboreader.files.return_value = [
-            pbo_file.PBOFile(b"dir1\\dir2\\filename.ext", b"", 10000, 0, self.timestamps[0], 9000),
-            pbo_file.PBOFile(b"dir1\\filename.ext", b"ABCD", 234, 0, self.timestamps[1], 200),
+        self.pbo_files = [
             pbo_file.PBOFile(
-                b"dir1\\dir2\\dir3\\filename.ext", b"1234", 54321, 0, self.timestamps[2], 50000),
-            pbo_file.PBOFile(b"filename.ext", b"\0\0\0\0", 0, 0, self.timestamps[3], 10),
+                None, b"dir1\\dir2\\filename.ext", b"", 10000, 0, self.timestamps[0], 9000),
             pbo_file.PBOFile(
-                b"other-filename.png", b"\x88\x99\xaa\xbb", 7777, 0, self.timestamps[4], 6000)
+                None, b"dir1\\filename.ext", b"ABCD", 234, 0, self.timestamps[1], 200),
+            pbo_file.PBOFile(
+                None, b"dir1\\dir2\\dir3\\filename.ext", b"1234", 54321, 0, self.timestamps[2],
+                50000),
+            pbo_file.PBOFile(None, b"filename.ext", b"\0\0\0\0", 0, 0, self.timestamps[3], 10),
+            pbo_file.PBOFile(
+                b"PREFIX", b"other-filename.png", b"\x88\x99\xaa\xbb", 7777, 0, self.timestamps[4],
+                6000)
         ]
+
+        self.mock_pboreader = mock.Mock()
+        self.mock_pboreader.files.return_value = self.pbo_files
         self.mock_pboreader.headers.return_value = [
             (b"foo", b"bar"),
             (b"other", b"header stuff"),
             (b"\x88\x99\xaa", b"\xbb\xcc\xdd")
         ]
-
-    def create_mock_file(
-            self, filename: bytes, original_size: int, data_size: int) -> pbo_file.PBOFile:
-        return pbo_file.PBOFile(filename, b"", original_size, 0, 0, data_size)
 
     def expected_call(self, size: int, timestamp: int, filename: str) -> typing.Any:
         date_time = datetime.datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M")
@@ -57,13 +58,11 @@ class TestListPbo(unittest.TestCase):
         mock_print.assert_has_calls([
             mock.call(" Original     Date    Time   Name"),
             mock.call("---------  ---------- -----  ----"),
-            self.expected_call(
-                10000, self.timestamps[0], os.path.join("dir1", "dir2", "filename.ext")),
-            self.expected_call(234, self.timestamps[1], os.path.join("dir1", "filename.ext")),
-            self.expected_call(
-                54321, self.timestamps[2], os.path.join("dir1", "dir2", "dir3", "filename.ext")),
-            self.expected_call(10, self.timestamps[3], "filename.ext"),
-            self.expected_call(7777, self.timestamps[4], "other-filename.png"),
+            self.expected_call(10000, self.timestamps[0], self.pbo_files[0].normalized_filename()),
+            self.expected_call(234, self.timestamps[1], self.pbo_files[1].normalized_filename()),
+            self.expected_call(54321, self.timestamps[2], self.pbo_files[2].normalized_filename()),
+            self.expected_call(10, self.timestamps[3], self.pbo_files[3].normalized_filename()),
+            self.expected_call(7777, self.timestamps[4], self.pbo_files[4].normalized_filename()),
             mock.call("---------                    ---------"),
             mock.call("    72342                    5 Files")
         ])
@@ -84,16 +83,15 @@ class TestListPbo(unittest.TestCase):
             mock.call(" Original  Type    Size        Date    Time   Name"),
             mock.call("---------  ----  ---------  ---------- -----  ----"),
             self.expected_verbose_call(
-                10000, "    ", 9000, self.timestamps[0],
-                os.path.join("dir1", "dir2", "filename.ext")),
+                10000, "    ", 9000, self.timestamps[0], self.pbo_files[0].normalized_filename()),
             self.expected_verbose_call(
-                234, "ABCD", 200, self.timestamps[1], os.path.join("dir1", "filename.ext")),
+                234, "ABCD", 200, self.timestamps[1], self.pbo_files[1].normalized_filename()),
             self.expected_verbose_call(
-                54321, "1234", 50000, self.timestamps[2],
-                os.path.join("dir1", "dir2", "dir3", "filename.ext")),
-            self.expected_verbose_call(10, "    ", 10, self.timestamps[3], "filename.ext"),
+                54321, "1234", 50000, self.timestamps[2], self.pbo_files[2].normalized_filename()),
             self.expected_verbose_call(
-                7777, "    ", 6000, self.timestamps[4], "other-filename.png"),
+                10, "    ", 10, self.timestamps[3], self.pbo_files[3].normalized_filename()),
+            self.expected_verbose_call(
+                7777, "    ", 6000, self.timestamps[4], self.pbo_files[4].normalized_filename()),
             mock.call("---------        ---------                    ---------"),
             mock.call("    72342            65210                    5 Files")
         ])

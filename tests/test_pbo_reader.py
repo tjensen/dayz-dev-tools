@@ -29,6 +29,7 @@ class TestPBOReader(unittest.TestCase):
 
         assert len(files) == 2
 
+        assert files[0].prefix is None
         assert files[0].filename == b"f1"
         assert files[0].mime_type == b"\x01\x02\x03\x04"
         assert files[0].original_size == 0x8070605
@@ -37,6 +38,7 @@ class TestPBOReader(unittest.TestCase):
         assert files[0].data_size == 12
         assert files[0].content_reader is not None
 
+        assert files[1].prefix is None
         assert files[1].filename == b"f2"
         assert files[1].mime_type == b"\x11\x12\x13\x14"
         assert files[1].original_size == 0x18171615
@@ -83,7 +85,7 @@ class TestPBOReader(unittest.TestCase):
 
         assert len(files) == 2
 
-    def test_inserts_prefix_into_filenames_when_prefix_header_is_set(self) -> None:
+    def test_sets_pbo_file_prefix_into_filenames_when_prefix_header_is_set(self) -> None:
         pbo_file = io.BytesIO(
             b"\0\x73\x72\x65\x56\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
             b"prefix\0PREFIX\0"
@@ -95,9 +97,9 @@ class TestPBOReader(unittest.TestCase):
             b"file2data")
         reader = pbo_reader.PBOReader(pbo_file)
 
-        filenames = [f.filename for f in reader.files()]
+        prefixes = [f.prefix for f in reader.files()]
 
-        assert filenames == [b"PREFIX\\f1", b"PREFIX\\f2"]
+        assert prefixes == [b"PREFIX", b"PREFIX"]
 
     def test_file_returns_none_if_filename_string_does_not_match_any_in_pbo(self) -> None:
         pbo_file = io.BytesIO(

@@ -7,6 +7,11 @@ from dayz_dev_tools import pbo_file_reader
 from dayz_dev_tools_rust import expand
 
 
+INVALID_FILENAME_RE = re.compile(b"[\t?*<>:\"|\x80-\xff]")
+
+RESERVED_FILENAME_RE = re.compile(b"(CON|PRN|AUX|NUL|COM\\d|LPT\\d)\\.?")
+
+
 def normalize_filename(parts: list[bytes]) -> str:
     return os.path.sep.encode().join(parts).decode(errors="replace")
 
@@ -15,6 +20,7 @@ def normalize_filename(parts: list[bytes]) -> str:
 class PBOFile:
     """Interface for accessing a file contained within a PBO archive. Instances should be obtained
     using :meth:`dayz_dev_tools.pbo_reader.PBOReader.file`."""
+    prefix: typing.Optional[bytes]
     #: The raw name of the file
     filename: bytes
     mime_type: bytes
@@ -67,6 +73,9 @@ class PBOFile:
         """
         result = list(filter(lambda c: len(c) > 0, re.split(b"[\\\\/]", self.filename)))
 
+        if self.prefix is not None:
+            result.insert(0, self.prefix)
+
         if len(result) == 0:
             return [b""]
 
@@ -94,3 +103,57 @@ class PBOFile:
             c if ord(c) >= 32 and ord(c) < 127 else " "
             for c in f"{self.mime_type.decode('ascii', errors='replace'):<4}"
         ])
+
+    def invalid(self) -> bool:
+        """Returns True if filename is not a valid Windows filename.
+
+        :Returns:
+          True if filename is not a valid Windows filename, or False otherwise.
+        """
+        if INVALID_FILENAME_RE.search(self.filename) is not None:
+            return True
+
+        for segment in self.split_filename():
+            if RESERVED_FILENAME_RE.match(segment) is not None:
+                return True
+
+        return False
+
+    def obfuscated(self) -> bool:
+        """Returns True if filename appears to be an obfuscated script file.
+
+        :Returns:
+          True if filename appears to be an obfuscated script, or False otherwise.
+        """
+        return self.invalid() and self.filename.endswith(b".c")
+
+    def deobfuscated_split(self, index: int) -> list[bytes]:
+        """Get the file's deobfuscated name as a ``list``, where each element in the list
+        represents a component of the file's path.
+
+        :Parameters:
+          - `index`: A number to uniquely identify the deobfuscated file.
+
+        :Returns:
+          A list of deobfuscated path components.
+        """
+        segments = []
+        for segment in self.split_filename():
+            if INVALID_FILENAME_RE.search(segment) \
+                    or RESERVED_FILENAME_RE.match(segment) is not None:
+                segments.append(f"deobfs{index:05}.c".encode())
+                break
+            segments.append(segment.rstrip(b" "))
+
+        return segments
+
+    def deobfuscated_filename(self, index: int) -> str:
+        """Get the deobfuscated version of the file's name.
+
+        :Parameters:
+          - `index`: A number to uniquely identify the deobfuscated file.
+
+        :Returns:
+          A deobfuscated version of the file's name.
+        """
+        return normalize_filename(self.deobfuscated_split(index))

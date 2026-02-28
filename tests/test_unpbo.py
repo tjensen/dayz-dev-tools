@@ -68,7 +68,8 @@ class TestMain(unittest.TestCase):
         self.mock_tools_directory.assert_called_once_with()
 
         self.mock_extract_pbo.assert_called_once_with(
-            self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None)
+            self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None,
+            pattern=None)
 
         self.mock_list_pbo.assert_not_called()
 
@@ -90,7 +91,22 @@ class TestMain(unittest.TestCase):
 
         self.mock_extract_pbo.assert_called_once_with(
             self.mock_pboreader, ["file/to/extract/1", "file/to/extract/2", "file/to/extract/3"],
-            verbose=False, deobfuscate=False, cfgconvert=None)
+            verbose=False, deobfuscate=False, cfgconvert=None, pattern=None)
+
+        self.mock_list_pbo.assert_not_called()
+
+    def test_extracts_files_with_pattern_when_specified_on_command_line(self) -> None:
+        mock_open = mock.mock_open()
+        with mock.patch("builtins.open", mock_open):
+            main([
+                "ignored",
+                "-m", "**/*.c",
+                "path/to/filename.ext"
+            ])
+
+        self.mock_extract_pbo.assert_called_once_with(
+            self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None,
+            pattern="**/*.c")
 
         self.mock_list_pbo.assert_not_called()
 
@@ -104,7 +120,7 @@ class TestMain(unittest.TestCase):
             ])
 
         self.mock_extract_pbo.assert_called_once_with(
-            self.mock_pboreader, [], verbose=True, deobfuscate=False, cfgconvert=None)
+            self.mock_pboreader, [], verbose=True, deobfuscate=False, cfgconvert=None, pattern=None)
 
         self.mock_list_pbo.assert_not_called()
 
@@ -118,7 +134,7 @@ class TestMain(unittest.TestCase):
             ])
 
         self.mock_extract_pbo.assert_called_once_with(
-            self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None)
+            self.mock_pboreader, [], verbose=False, deobfuscate=True, cfgconvert=None, pattern=None)
 
         self.mock_list_pbo.assert_not_called()
 
@@ -136,7 +152,8 @@ class TestMain(unittest.TestCase):
 
         self.mock_extract_pbo.assert_called_once_with(
             self.mock_pboreader, [], verbose=False, deobfuscate=False,
-            cfgconvert=os.path.join("TOOLS-DIR", "bin", "CfgConvert", "CfgConvert.exe"))
+            cfgconvert=os.path.join("TOOLS-DIR", "bin", "CfgConvert", "CfgConvert.exe"),
+            pattern=None)
 
     def test_does_not_convert_config_bin_files_when_no_convert_option_is_specified(self) -> None:
         self.mock_tools_directory.return_value = "TOOLS-DIR"
@@ -152,7 +169,8 @@ class TestMain(unittest.TestCase):
         self.mock_tools_directory.assert_not_called()
 
         self.mock_extract_pbo.assert_called_once_with(
-            self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None)
+            self.mock_pboreader, [], verbose=False, deobfuscate=False, cfgconvert=None,
+            pattern=None)
 
     def test_lists_the_pbo_contents_when_option_is_specified(self) -> None:
         mock_open = mock.mock_open()
