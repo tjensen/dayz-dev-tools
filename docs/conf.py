@@ -20,7 +20,7 @@ import dayz_dev_tools  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 project = 'dayz-dev-tools'
-copyright = '2021-2025, Tim Jensen'
+copyright = '2021-2026, Tim Jensen'
 author = 'Tim Jensen'
 version = dayz_dev_tools.version
 

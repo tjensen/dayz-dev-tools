@@ -47,9 +47,6 @@ def _read_file_entries(
         if len(filename) == 0:
             break
 
-        if prefix is not None:
-            filename = b"\\".join((prefix, filename))
-
         mime_type = reader.read(4)
         original_size = reader.readuint()
         reserved = reader.readuint()
@@ -57,7 +54,7 @@ def _read_file_entries(
         data_size = reader.readuint()
         entries.append(
             pbo_file.PBOFile(
-                filename, mime_type, original_size, reserved, time_stamp, data_size))
+                prefix, filename, mime_type, original_size, reserved, time_stamp, data_size))
 
     offset = reader.tell() + 20
     for entry in entries:

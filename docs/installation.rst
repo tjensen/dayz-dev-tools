@@ -16,5 +16,5 @@ manager.
 
    pip install dayz-dev-tools
 
-DayZ Dev Tools can be run on Windows or Linux but Python 3.9 or higher is
+DayZ Dev Tools can be run on Windows or Linux but Python 3.10 or higher is
 required.
