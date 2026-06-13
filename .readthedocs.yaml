@@ -4,7 +4,7 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.13"
-    rust: "1.82"
+    rust: "1.93"
 
 sphinx:
   builder: html
