@@ -3,13 +3,8 @@ import logging
 import os
 import platform
 import pydantic
-import sys
+import tomllib
 import typing
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 
 if platform.system() == "Windows":
