@@ -32,6 +32,15 @@ class PBOFile:
     data_size: int
     content_reader: typing.Optional[pbo_file_reader.PBOFileReader] = None
 
+    def is_compressed(self) -> bool:
+        """Returns True if the file in the PBO archive is compressed.
+
+        :Returns:
+          True if compressed, False otherwise.
+        """
+        return (self.original_size != 0 and self.original_size != self.data_size) \
+            or self.mime_type in (b"srpC", b"Cprs")
+
     def unpack(self, output_file: typing.BinaryIO) -> None:
         """Write the contents of the file.
 
@@ -40,7 +49,7 @@ class PBOFile:
         """
         assert self.content_reader is not None
 
-        if self.original_size != 0 and self.original_size != self.data_size:
+        if self.is_compressed():
             expanded = expand(self.content_reader.read(self.data_size - 4), self.original_size)
             expected_checksum = self.content_reader.readuint()
             actual_checksum = sum(expanded)

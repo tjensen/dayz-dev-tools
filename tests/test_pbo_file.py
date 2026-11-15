@@ -95,6 +95,37 @@ class TestPBOFile(unittest.TestCase):
 
         assert len(output.getvalue()) == 0
 
+    def test_is_compressed_returns_true_when_sizes_differ(self) -> None:
+        self.pbofile.original_size = 100
+        self.pbofile.data_size = 50
+        self.pbofile.mime_type = b"\0\0\0\0"
+
+        assert self.pbofile.is_compressed() is True
+
+    def test_is_compressed_returns_true_when_mime_type_is_cprs(self) -> None:
+        self.pbofile.original_size = 100
+        self.pbofile.data_size = 100
+        self.pbofile.mime_type = b"srpC"
+
+        assert self.pbofile.is_compressed() is True
+
+        self.pbofile.mime_type = b"Cprs"
+
+        assert self.pbofile.is_compressed() is True
+
+    def test_is_compressed_returns_false_when_uncompressed(self) -> None:
+        self.pbofile.original_size = 0
+        self.pbofile.data_size = 100
+        self.pbofile.mime_type = b"\0\0\0\0"
+
+        assert self.pbofile.is_compressed() is False
+
+        self.pbofile.original_size = 100
+        self.pbofile.data_size = 100
+        self.pbofile.mime_type = b"\0\0\0\0"
+
+        assert self.pbofile.is_compressed() is False
+
     def test_normalized_filename_returns_filenames_with_os_style_paths(self) -> None:
         self.pbofile.filename = b"xxx\\yyy\\zzz.www"
 
