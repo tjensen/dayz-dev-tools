@@ -4,7 +4,15 @@ import re
 import typing
 
 from dayz_dev_tools import pbo_file_reader
-from dayz_dev_tools_rust import expand
+from dayz_dev_tools_rust import compute_checksum, expand
+
+
+class DecompressionError(Exception):
+    """Base exception for decompression errors."""
+
+
+class ChecksumMismatchError(DecompressionError):
+    """Exception raised when decompressed checksum does not match expected checksum."""
 
 
 INVALID_FILENAME_RE = re.compile(b"[\t?*<>:\"|\x80-\xff]")
@@ -52,10 +60,10 @@ class PBOFile:
         if self.is_compressed():
             expanded = expand(self.content_reader.read(self.data_size - 4), self.original_size)
             expected_checksum = self.content_reader.readuint()
-            actual_checksum = sum(expanded)
+            actual_checksum = compute_checksum(expanded)
 
             if actual_checksum != expected_checksum:
-                raise Exception(
+                raise ChecksumMismatchError(
                     f"Checksum mismatch ({actual_checksum:#x} != {expected_checksum:#x})")
 
             output_file.write(expanded)

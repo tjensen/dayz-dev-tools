@@ -95,6 +95,16 @@ class TestPBOFile(unittest.TestCase):
 
         assert len(output.getvalue()) == 0
 
+    def test_unpack_raises_checksum_mismatch_error_if_checksum_does_not_match(self) -> None:
+        self.pbofile.original_size = 8
+        self.pbofile.data_size = 13
+        self.pbofile.content_reader = pbo_file_reader.PBOFileReader(
+            io.BytesIO(b"\xffABCDEFGH\x23\x02\0\0"), 0, 13)
+        output = io.BytesIO()
+
+        with self.assertRaises(pbo_file.ChecksumMismatchError):
+            self.pbofile.unpack(output)
+
     def test_is_compressed_returns_true_when_sizes_differ(self) -> None:
         self.pbofile.original_size = 100
         self.pbofile.data_size = 50
