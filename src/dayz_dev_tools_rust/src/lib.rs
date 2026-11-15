@@ -6,5 +6,7 @@ mod expand;
 
 #[pymodule]
 fn dayz_dev_tools_rust(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(expand::expand, m)?)
+    m.add_function(wrap_pyfunction!(expand::expand, m)?)?;
+    m.add_function(wrap_pyfunction!(expand::py_compute_checksum, m)?)?;
+    Ok(())
 }

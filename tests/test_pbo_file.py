@@ -95,6 +95,47 @@ class TestPBOFile(unittest.TestCase):
 
         assert len(output.getvalue()) == 0
 
+    def test_unpack_raises_checksum_mismatch_error_if_checksum_does_not_match(self) -> None:
+        self.pbofile.original_size = 8
+        self.pbofile.data_size = 13
+        self.pbofile.content_reader = pbo_file_reader.PBOFileReader(
+            io.BytesIO(b"\xffABCDEFGH\x23\x02\0\0"), 0, 13)
+        output = io.BytesIO()
+
+        with self.assertRaises(pbo_file.ChecksumMismatchError):
+            self.pbofile.unpack(output)
+
+    def test_is_compressed_returns_true_when_sizes_differ(self) -> None:
+        self.pbofile.original_size = 100
+        self.pbofile.data_size = 50
+        self.pbofile.mime_type = b"\0\0\0\0"
+
+        assert self.pbofile.is_compressed() is True
+
+    def test_is_compressed_returns_true_when_mime_type_is_cprs(self) -> None:
+        self.pbofile.original_size = 100
+        self.pbofile.data_size = 100
+        self.pbofile.mime_type = b"srpC"
+
+        assert self.pbofile.is_compressed() is True
+
+        self.pbofile.mime_type = b"Cprs"
+
+        assert self.pbofile.is_compressed() is True
+
+    def test_is_compressed_returns_false_when_uncompressed(self) -> None:
+        self.pbofile.original_size = 0
+        self.pbofile.data_size = 100
+        self.pbofile.mime_type = b"\0\0\0\0"
+
+        assert self.pbofile.is_compressed() is False
+
+        self.pbofile.original_size = 100
+        self.pbofile.data_size = 100
+        self.pbofile.mime_type = b"\0\0\0\0"
+
+        assert self.pbofile.is_compressed() is False
+
     def test_normalized_filename_returns_filenames_with_os_style_paths(self) -> None:
         self.pbofile.filename = b"xxx\\yyy\\zzz.www"
 

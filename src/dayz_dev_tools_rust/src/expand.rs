@@ -1,8 +1,20 @@
 use pyo3::prelude::{pyfunction, PyResult, Python};
-use pyo3::types::{PyBytes, PyBytesMethods};
+use pyo3::types::{PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods};
 use pyo3::Bound;
 use std::cmp::min;
 use std::iter;
+
+fn extract_bytes<'a>(obj: &'a Bound<'a, pyo3::PyAny>) -> PyResult<&'a [u8]> {
+    if let Ok(b) = obj.cast::<PyBytes>() {
+        Ok(b.as_bytes())
+    } else if let Ok(ba) = obj.cast::<PyByteArray>() {
+        Ok(unsafe { ba.as_bytes() })
+    } else {
+        Err(pyo3::exceptions::PyTypeError::new_err(
+            "Expected bytes or bytearray",
+        ))
+    }
+}
 
 struct FlagBits {
     flags: u8,
@@ -53,8 +65,17 @@ impl<'a> InBuffer<'a> {
     }
 
     fn readword(&mut self) -> Result<u16, &'static str> {
-        Ok(self.readbyte()? as u16 | ((self.readbyte()? as u16) << 8))
+        if self.i + 1 >= self.raw.len() {
+            return Err("end of input reached");
+        }
+        let result = u16::from_le_bytes([self.raw[self.i], self.raw[self.i + 1]]);
+        self.i += 2;
+        Ok(result)
     }
+}
+
+pub fn compute_checksum(data: &[u8]) -> u32 {
+    data.iter().fold(0u32, |acc, &b| acc.wrapping_add(b as u32))
 }
 
 fn expand_impl(inbytes: &[u8], capacity: usize) -> Vec<u8> {
@@ -74,22 +95,27 @@ fn expand_impl(inbytes: &[u8], capacity: usize) -> Vec<u8> {
                     let rposi = ((ptr & 0xff) | ((ptr >> 4) & 0xf00)) as usize;
                     let rlen = (((ptr >> 8) & 0xf) + 3) as usize;
 
+                    if rposi == 0 {
+                        // Offset of 0 is invalid in LZSS back-referencing and would cause an infinite loop
+                        break 'outer;
+                    }
+
+                    let count = min(rlen, capacity - output.len());
+
                     if rposi <= output.len() {
                         let rpos = output.len() - rposi;
 
-                        if rpos + rlen < output.len() {
-                            output.extend_from_within(
-                                rpos..min(rpos + rlen, rpos + capacity - output.len()),
-                            );
+                        if rpos + count <= output.len() {
+                            output.extend_from_within(rpos..rpos + count);
                         } else {
-                            let newlen = output.len() + rlen;
-                            while output.len() < newlen {
-                                let rend = rpos + min(output.len() - rpos, newlen - output.len());
-                                output.extend_from_within(rpos..rend);
+                            let target_len = output.len() + count;
+                            while output.len() < target_len {
+                                let chunk = min(output.len() - rpos, target_len - output.len());
+                                output.extend_from_within(rpos..rpos + chunk);
                             }
                         }
                     } else {
-                        output.extend(iter::repeat_n(32u8, min(rlen, capacity - output.len())));
+                        output.extend(iter::repeat_n(32u8, count));
                     }
                 } else {
                     break 'outer;
@@ -103,12 +129,20 @@ fn expand_impl(inbytes: &[u8], capacity: usize) -> Vec<u8> {
 }
 
 #[pyfunction]
+#[pyo3(name = "compute_checksum")]
+pub fn py_compute_checksum(input: &Bound<'_, pyo3::PyAny>) -> PyResult<u32> {
+    let bytes = extract_bytes(input)?;
+    Ok(compute_checksum(bytes))
+}
+
+#[pyfunction]
 pub fn expand<'p>(
     py: Python<'p>,
-    input: &'p Bound<'p, PyBytes>,
+    input: &Bound<'p, pyo3::PyAny>,
     capacity: usize,
 ) -> PyResult<Bound<'p, PyBytes>> {
-    let output = expand_impl(input.as_bytes(), capacity);
+    let bytes = extract_bytes(input)?;
+    let output = py.detach(|| expand_impl(bytes, capacity));
 
     Ok(PyBytes::new(py, &output))
 }
@@ -173,5 +207,30 @@ mod tests {
     #[test]
     fn test_expand_does_not_repeat_to_insert_more_than_requested_number_of_characters() {
         assert_eq!(expand_impl(b"\x0fABCD\x02\x08", 15), b"ABCDCDCDCDCDCDC");
+    }
+
+    #[test]
+    fn test_expand_does_not_overflow_capacity_on_overlapping_repeat() {
+        // b"\x0fABCD\x02\x07" would expand to 14 bytes (ABCDCDCDCDCDCD), but capacity is 7
+        let out = expand_impl(b"\x0fABCD\x02\x07", 7);
+        assert_eq!(out, b"ABCDCDC");
+        assert_eq!(out.len(), 7);
+    }
+
+    #[test]
+    fn test_expand_terminates_safely_when_pointer_has_zero_offset() {
+        // b"\x00\x00\x00" has flag 0 and ptr 0x0000 (rposi = 0), which must not infinite-loop
+        let out = expand_impl(b"\x00\x00\x00", 10);
+        assert_eq!(out, b"");
+    }
+
+    #[test]
+    fn test_compute_checksum() {
+        assert_eq!(compute_checksum(b"ABCDEFGH"), 0x224);
+        assert_eq!(compute_checksum(b""), 0);
+
+        // Verify wrapping addition (modulo 2^32)
+        let large_buffer = vec![0xff; 16 * 1024]; // 16384 * 255 = 4,177,920
+        assert_eq!(compute_checksum(&large_buffer), 16384 * 255);
     }
 }
