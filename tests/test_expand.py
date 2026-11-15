@@ -29,14 +29,7 @@ class TestExpand(unittest.TestCase):
         assert compute_checksum(bytearray(b"ABCDEFGH")) == 0x224
 
     def test_compute_checksum_wraps_at_32_bits(self) -> None:
-        # Sum of 20,000,000 bytes with value 255 is 5,100,000,000 > 2^32 - 1 (4,294,967,295)
-        # 5,100,000,000 % 2^32 = 805,032,704 (0x2ffcfb00)
-        chunk = b"\xff" * 100_000
-        # 43 iterations of 100,000 bytes = 4,300,000 bytes * 255 = 1,096,500,000
-        # Let's verify with 17,000,000 bytes: 17,000,000 * 255 = 4,335,000,000 = 0x102636b00
-        # Expected u32 wrapped: 0x02636b00 = 40,069,888
-        data = b"\xff" * 17_000_000
-        assert compute_checksum(data) == 40_032_704
+        assert 0x0262_d9c0 == compute_checksum(b"\xff" * 17_000_000)
 
     def test_expand_raises_type_error_for_invalid_input_type(self) -> None:
         with self.assertRaises(TypeError):
