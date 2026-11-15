@@ -9,10 +9,10 @@ version = "0.1.0"
 authors = ["Tim Jensen <tim.l.jensen@gmail.com>"]
 edition = "2021"
 publish = false
-rust-version = "1.65.0"
+rust-version = "1.99.1"
 
 [workspace.dependencies]
-pyo3 = { version = "0.29.0", features = ["extension-module"] }
+pyo3 = { version = "0.30.1", features = ["extension-module"] }
 
 [profile.release]
 overflow-checks = true
