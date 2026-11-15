@@ -51,9 +51,9 @@ manifest-path = "src/dayz_dev_tools_rust/Cargo.toml"
 [project.optional-dependencies]
 dev = [
     "build==1.6.1",
-    "flake8==7.3.0",
-    "mypy==1.17.1",
-    "pytest==8.4.2"
+    "flake8==7.5.0",
+    "mypy==2.4.1",
+    "pytest==9.2.0"
 ]
 docs = [
     "readthedocs-sphinx-search>=0.3.2",
