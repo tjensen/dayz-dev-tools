@@ -28,7 +28,7 @@ def normalize_filename(parts: list[bytes]) -> str:
 class PBOFile:
     """Interface for accessing a file contained within a PBO archive. Instances should be obtained
     using :meth:`dayz_dev_tools.pbo_reader.PBOReader.file`."""
-    prefix: typing.Optional[bytes]
+    prefix: bytes | None
     #: The raw name of the file
     filename: bytes
     mime_type: bytes
@@ -38,7 +38,7 @@ class PBOFile:
     time_stamp: int
     #: The size of the file in the PBO archive
     data_size: int
-    content_reader: typing.Optional[pbo_file_reader.PBOFileReader] = None
+    content_reader: pbo_file_reader.PBOFileReader | None = None
 
     def is_compressed(self) -> bool:
         """Returns True if the file in the PBO archive is compressed.

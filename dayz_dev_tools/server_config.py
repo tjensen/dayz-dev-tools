@@ -4,7 +4,6 @@ import os
 import platform
 import pydantic
 import tomllib
-import typing
 
 
 if platform.system() == "Windows":
@@ -20,9 +19,9 @@ else:
 class _ServerConfig(pydantic.BaseModel):
     executable: str = DEFAULT_EXECUTABLE
     config: str = "serverDZ.cfg"
-    directory: typing.Optional[str] = None
-    profile_directory: typing.Optional[str] = None
-    mission_directory: typing.Optional[str] = None
+    directory: str | None = None
+    profile_directory: str | None = None
+    mission_directory: str | None = None
     parameters: list[str] = pydantic.Field(default_factory=list)
     bundles: str = "bundles.py"
 
@@ -32,15 +31,14 @@ class _WorkshopConfig(pydantic.BaseModel):
 
 
 class _Bundle(pydantic.BaseModel):
-    executable: typing.Optional[str] = None
-    config: typing.Optional[str] = None
-    directory: typing.Optional[str] = None
-    profile_directory: typing.Optional[str] = None
-    workshop_directory: typing.Optional[str] = None
-    mission_directory: typing.Optional[str] = None
-    mods: typing.Union[str, list[str]] = pydantic.Field(default_factory=lambda: list())
-    server_mods: typing.Union[str, list[str]] = pydantic.Field(
-        default_factory=lambda: list())
+    executable: str | None = None
+    config: str | None = None
+    directory: str | None = None
+    profile_directory: str | None = None
+    workshop_directory: str | None = None
+    mission_directory: str | None = None
+    mods: str | list[str] = pydantic.Field(default_factory=lambda: list())
+    server_mods: str | list[str] = pydantic.Field(default_factory=lambda: list())
     parameters: list[str] = pydantic.Field(default_factory=list)
 
 
@@ -54,21 +52,21 @@ class _Config(pydantic.BaseModel):
 class BundleConfig:
     """Configuration file bundle settings."""
     #: DayZ Server executable filename override (optional)
-    executable: typing.Optional[str] = None
+    executable: str | None = None
     #: DayZ Server config filename override (optional)
-    config: typing.Optional[str] = None
+    config: str | None = None
     #: Directory to switch to before running DayZ Server (optional)
-    directory: typing.Optional[str] = None
+    directory: str | None = None
     #: DayZ Server profile directory name override (optional)
-    profile_directory: typing.Optional[str] = None
+    profile_directory: str | None = None
     #: DayZ workshop directory name override (optional)
-    workshop_directory: typing.Optional[str] = None
+    workshop_directory: str | None = None
     #: DayZ mod list to add
     mods: list[str] = dataclasses.field(default_factory=list)
     #: DayZ server mod list to add
     server_mods: list[str] = dataclasses.field(default_factory=list)
     #: DayZ Server mission directory name override (optional)
-    mission_directory: typing.Optional[str] = None
+    mission_directory: str | None = None
     #: Extra server command line parameters to add
     parameters: list[str] = dataclasses.field(default_factory=list)
 
@@ -87,16 +85,16 @@ class ServerConfig:
     #: Configuration file bundles, by name (see :class:`dayz_dev_tools.server_config.BundleConfig`)
     bundles: dict[str, BundleConfig]
     #: Directory to switch to before running DayZ Server (optional)
-    directory: typing.Optional[str] = None
+    directory: str | None = None
     #: DayZ Server profile directory name (optional)
-    profile_directory: typing.Optional[str] = None
+    profile_directory: str | None = None
     #: DayZ Server mission directory name (optional)
-    mission_directory: typing.Optional[str] = None
+    mission_directory: str | None = None
     #: Extra server command line parameters to add
     parameters: list[str] = dataclasses.field(default_factory=list)
 
 
-def _parse_mods(mods: typing.Union[str, list[str]]) -> list[str]:
+def _parse_mods(mods: str | list[str]) -> list[str]:
     if isinstance(mods, str):
         return mods.split(";")
 

@@ -1,6 +1,6 @@
-from typing import Union
+from typing import TypeAlias
 
-BufferType = Union[bytes, bytearray]
+BufferType: TypeAlias = bytes | bytearray
 
 
 def expand(input: BufferType, capacity: int) -> bytes:

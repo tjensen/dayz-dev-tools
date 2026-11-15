@@ -22,7 +22,7 @@ class _WinReg:
         ...
 
 
-def tools_directory() -> typing.Optional[str]:
+def tools_directory() -> str | None:
     try:
         winreg = typing.cast(_WinReg, importlib.import_module("winreg"))
     except ModuleNotFoundError:
