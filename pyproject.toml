@@ -9,8 +9,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 requires-python = ">=3.11"
 dependencies = [
-    "pydantic>=2.8.2",
-    "tomli>=2.0.0; python_version<'3.11'"
+    "pydantic>=2.8.2"
 ]
 keywords = ["dayz", "tools", "pbo", "server"]
 classifiers = [
