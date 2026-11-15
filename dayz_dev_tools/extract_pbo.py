@@ -21,7 +21,7 @@ def _deobfuscate(
     out_file: typing.BinaryIO,
     pbofile: pbo_file.PBOFile,
     reader: pbo_reader.PBOReader,
-    prefix: typing.Optional[bytes],
+    prefix: bytes | None,
     verbose: bool,
     ignored: list[bytes]
 ) -> bool:
@@ -51,7 +51,7 @@ def _deobfuscate(
 
 def _extract_file(
     reader: pbo_reader.PBOReader, pbofile: pbo_file.PBOFile, verbose: bool, deobfuscate: bool,
-    cfgconvert: typing.Optional[str], ignored: list[bytes]
+    cfgconvert: str | None, ignored: list[bytes]
 ) -> None:
     global _deobfs_count
 
@@ -90,7 +90,7 @@ def _extract_file(
         except Exception as error:
             print(f"Failed to convert {pbofile.normalized_filename()}: {error}")
 
-    renamed_filename: typing.Optional[str] = None
+    renamed_filename: str | None = None
     normalized = pbofile.normalized_filename()
 
     if deobfuscate and pbofile.obfuscated():
@@ -119,8 +119,8 @@ def extract_pbo(
     *,
     verbose: bool,
     deobfuscate: bool,
-    cfgconvert: typing.Optional[str],
-    pattern: typing.Optional[str] = None
+    cfgconvert: str | None,
+    pattern: str | None = None
 ) -> None:
     """Extract one or more files contained in a PBO archive.
 

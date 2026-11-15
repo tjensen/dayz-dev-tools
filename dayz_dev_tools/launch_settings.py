@@ -3,7 +3,6 @@ import importlib.util
 import logging
 import sys
 import types
-import typing
 
 from dayz_dev_tools import server_config
 
@@ -12,13 +11,13 @@ class LaunchSettings:
     """Settings that determine what command line parameters to pass when running DayZ Server."""
     _executable: str
     _config: str
-    _directory: typing.Optional[str] = None
-    _profile: typing.Optional[str] = None
+    _directory: str | None = None
+    _profile: str | None = None
     _workshop_path: str
-    _bundle_module: typing.Optional[types.ModuleType] = None
+    _bundle_module: types.ModuleType | None = None
     _mods: list[str]
     _server_mods: list[str]
-    _mission: typing.Optional[str]
+    _mission: str | None
     _parameters: list[str]
     _bundles: dict[str, server_config.BundleConfig]
 
@@ -83,7 +82,7 @@ class LaunchSettings:
         """
         self._config = path
 
-    def directory(self) -> typing.Optional[str]:
+    def directory(self) -> str | None:
         """Get the directory to switch to before running DayZ Server.
 
         :Returns:
@@ -99,7 +98,7 @@ class LaunchSettings:
         """
         self._directory = path
 
-    def profile_directory(self) -> typing.Optional[str]:
+    def profile_directory(self) -> str | None:
         """Get the DayZ Server profile directory name.
 
         :Returns:
@@ -173,7 +172,7 @@ class LaunchSettings:
         if name not in self._server_mods:
             self._server_mods.append(name)
 
-    def mission_directory(self) -> typing.Optional[str]:
+    def mission_directory(self) -> str | None:
         """Get the DayZ Server mission directory.
 
         :Returns:

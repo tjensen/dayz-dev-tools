@@ -4,7 +4,6 @@ import os
 import stat
 import subprocess
 import sys
-import typing
 
 import dayz_dev_tools
 from dayz_dev_tools import keys
@@ -44,7 +43,7 @@ def _mod_parameter(option: str, mods: list[str], workshop_directory: str) -> str
 
 
 def run_server(
-    settings: launch_settings.LaunchSettings, *, localappdata: typing.Optional[str], wait: bool
+    settings: launch_settings.LaunchSettings, *, localappdata: str | None, wait: bool
 ) -> None:
     args = [
         settings.executable(),

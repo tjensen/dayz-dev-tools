@@ -28,7 +28,7 @@ def _read_headers(reader: pbo_file_reader.PBOFileReader) -> list[tuple[bytes, by
     return headers
 
 
-def _prefix(headers: list[tuple[bytes, bytes]]) -> typing.Optional[bytes]:
+def _prefix(headers: list[tuple[bytes, bytes]]) -> bytes | None:
     for key, value in headers:
         if key == b"prefix":
             return value
@@ -37,7 +37,7 @@ def _prefix(headers: list[tuple[bytes, bytes]]) -> typing.Optional[bytes]:
 
 
 def _read_file_entries(
-    reader: pbo_file_reader.PBOFileReader, prefix: typing.Optional[bytes]
+    reader: pbo_file_reader.PBOFileReader, prefix: bytes | None
 ) -> list[pbo_file.PBOFile]:
     entries: list[pbo_file.PBOFile] = []
 
@@ -90,7 +90,7 @@ class PBOReader():
         """
         return self._files
 
-    def file(self, filename: typing.AnyStr) -> typing.Optional[pbo_file.PBOFile]:
+    def file(self, filename: typing.AnyStr) -> pbo_file.PBOFile | None:
         """Get a file contained in the PBO archive, by name.
 
         :Parameters:
@@ -121,7 +121,7 @@ class PBOReader():
         """
         return self._headers
 
-    def prefix(self) -> typing.Optional[bytes]:
+    def prefix(self) -> bytes | None:
         """Get the PBO archive prefix.
 
         :Returns:

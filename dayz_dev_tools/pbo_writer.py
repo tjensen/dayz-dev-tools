@@ -14,7 +14,7 @@ class _Entry:
     stored_path: str
     size: int
     mtime: int
-    contents: typing.Optional[bytes]
+    contents: bytes | None
 
 
 class _HashWriter:
@@ -32,7 +32,7 @@ class _HashWriter:
 
 class PBOWriter:
     """Interface for writing a PBO archive."""
-    def __init__(self, *, cfgconvert: typing.Optional[str]) -> None:
+    def __init__(self, *, cfgconvert: str | None) -> None:
         """Create a new :class:`PBOWriter` instance.
 
         :Parameters:
@@ -43,7 +43,7 @@ class PBOWriter:
         self.headers: list[tuple[bytes, bytes]] = []
         self.entries: list[_Entry] = []
 
-    def add_header(self, name: typing.Union[str, bytes], value: typing.Union[str, bytes]) -> None:
+    def add_header(self, name: str | bytes, value: str | bytes) -> None:
         """Add a header to the PBO archive.
 
         :Parameters:

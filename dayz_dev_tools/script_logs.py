@@ -8,7 +8,7 @@ import typing
 SCRIPT_LOG_RE = re.compile(r"script_.*\.log$", re.IGNORECASE)
 
 
-def newest(directory: str) -> typing.Optional[str]:
+def newest(directory: str) -> str | None:
     """Find the newest ``script_*.log`` file in a directory.
 
     :Parameters:
@@ -38,10 +38,10 @@ def newest(directory: str) -> typing.Optional[str]:
 
 def wait_for_new(
     directory: str,
-    previous_log_name: typing.Optional[str],
+    previous_log_name: str | None,
     *,
     timeout: int = 10
-) -> typing.Optional[str]:
+) -> str | None:
     """Wait for a script log that is newer than another script log to be created in a directory.
 
     :Parameters:

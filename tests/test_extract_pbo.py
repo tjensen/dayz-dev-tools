@@ -23,7 +23,7 @@ class TestExtractPbo(unittest.TestCase):
 
     def create_mock_file(
         self,
-        prefix: typing.Optional[bytes],
+        prefix: bytes | None,
         filename: bytes,
         contents: bytes
     ) -> pbo_file.PBOFile:
